@@ -7,8 +7,7 @@ from ctypes import c_bool
 import serial
 import rtmidi
 
-headsetSerialPort = serial.Serial('/dev/tty.usbmodem1411121', 115200, timeout=5)
-wristbandSerialPort = serial.Serial('/dev/tty.usbmodem1411111', 115200, timeout=5)
+
 
 chord = 0
 midiout = rtmidi.MidiOut()
@@ -38,7 +37,7 @@ class Calibrate():
 			self.maxValue = serialValue
 			
 class ChordStrummer():
-	# Outputs guitar chords as MIDI notes.
+	# Outputs guitar chords as MIDI notes. (to do!)
 	global midiout
 	def playChord(self, chordNumber):
 		if (chordNumber == 0):
@@ -145,9 +144,23 @@ class SendCharacterString(int):
 		
 	def transmit(self):
 		headsetSerialPort.write(self.newStringToTransmit.encode() + b'\x0a')
+		
+def is_float(value):
+  try:
+    float(value)
+    return True
+  except:
+    return False
 				
 def main():
-	# open a MIDI port. Currently hard-wired to IAC driver
+	# Connect to MIDI ports
+	headsetSerialPort = serial.Serial('/dev/tty.usbmodem141111', 57600, timeout=0.1)
+	wristbandSerialPort = serial.Serial('/dev/tty.usbmodem141121', 57600, timeout=0.1)
+	
+	# Pause to allow time for serial connection to be established.
+	time.sleep(1)
+	
+	# open a MIDI port. Currently hard-wired to IAC driver.
 	if available_ports:
 		print(available_ports)
 		midiout.open_port(1)
@@ -157,66 +170,166 @@ def main():
 	updateDisplay = SendCharacterString()
 	calibrationDeactivator = ReadKeyPress()
 	
-	# Intitialise segment position.
+	# Intitialise vairables.
+	headsetImuValueAsFloat = 0.0
+	wristbandImuValueAsFloat = 0.0
 	currentPositionAsSegmentNumber = 0
 	
-	# Wait for IMU values to settle 
+	# Wait for IMU values to settle.
 	for i in range (0, 20):
 		print("Initialisation finishing in ", 20 - i, " seconds")
 		time.sleep(1)
-	
-	# Read values from serial.
-	headsetImuValue = headsetSerialPort.readline().rstrip().decode()
-	
-	if(headsetImuValue != "" and headsetImuValue != "interrupt"):
-		serialValueAsFloat = float(headsetImuValue)
 		
-	calibration = Calibrate(serialValueAsFloat)
+	# Flush serial inputs and outputs.
+	headsetSerialPort.flushInput()
+	headsetSerialPort.flushOutput()
+	wristbandSerialPort.flushInput()
+	wristbandSerialPort.flushOutput()
+	
+	# Request data from headset and wristband.
+	requestString  = "r"
+	headsetSerialPort.write(requestString.encode() + b'x0a')
+	wristbandSerialPort.write(requestString.encode() + b'x0a')
+	
+	# Pause between requesting and reading data.
+	time.sleep(0.025)
+	
+	# Read data from headset and wristband.
+	headsetImuValue = headsetSerialPort.readline().rstrip().decode()
+	wristbandImuValue = wristbandSerialPort.readline().rstrip().decode()
+	
+	# Convert serial strings to float values.
+	if(is_float(headsetImuValue)):
+		headsetImuValueAsFloat = float(headsetImuValue)
+				
+	if(is_float(wristbandImuValue)):
+		wristbandImuValueAsFloat = float(wristbandImuValue)
+	
+	# Create an instance of calibration classes for IMU's.
+	headsetImuCalibration = Calibrate(headsetImuValueAsFloat)
+	wristbandImuCalibration = Calibrate(wristbandImuValueAsFloat)
+	
+	# Start a separate process to detect a spacebar press.
 	p1 = multiprocessing.Process(target = calibrationDeactivator.spacebar)
 	p1.start()
 	
+	# Prior to a spacebar press being detected set min and max values for each IMU
 	while(calibrationDeactivator.spacebarPressed.value == False):
+		# Flush serial inputs and outputs.
+		headsetSerialPort.flushInput()
+		headsetSerialPort.flushOutput()
+		wristbandSerialPort.flushInput()
+		wristbandSerialPort.flushOutput()
 		
-		serialValue = headsetSerialPort.readline().rstrip().decode()
-
-		if(serialValue != "" and serialValue != "interrupt"):
-			serialValueAsFloat = float(serialValue)
-			print(serialValueAsFloat)
+		# Request data from headset and wristband.
+		requestString  = "r"
+		headsetSerialPort.write(requestString.encode() + b'x0a')
+		wristbandSerialPort.write(requestString.encode() + b'x0a')
 		
-		calibration.detectMin(serialValueAsFloat);
-		calibration.detectMax(serialValueAsFloat);
+		# Pause between requesting and reading data.
+		time.sleep(0.025)
+	
+		# Read data from headset and wristband.
+		headsetImuValue = headsetSerialPort.readline().rstrip().decode()
+		wristbandImuValue = wristbandSerialPort.readline().rstrip().decode()
+		
+		# Convert serial strings to float values.
+		if(is_float(headsetImuValue)):
+			headsetImuValueAsFloat = float(headsetImuValue)
+				
+		if(is_float(wristbandImuValue)):
+			wristbandImuValueAsFloat = float(wristbandImuValue)
+		
+		print(headsetImuValueAsFloat, '\t', wristbandImuValueAsFloat)
+		
+		# Set headset IMU min and max values.
+		headsetImuCalibration.detectMin(headsetImuValueAsFloat);
+		headsetImuCalibration.detectMax(headsetImuValueAsFloat);
+		
+		# Set wristband IMU min and max values.
+		wristbandImuCalibration.detectMin(wristbandImuValueAsFloat);
+		wristbandImuCalibration.detectMax(wristbandImuValueAsFloat);
 		
 	print("Finished calibrating")
-	print("Max value = ", calibration.maxValue)
-	print("Min value = ", calibration.minValue)
+	
+	print("")
+	
+	# Print values to terminal for debugging purposes.
+	print("Headset IMU max value = ", headsetImuCalibration.maxValue)
+	print("Headset IMU min value = ", headsetImuCalibration.minValue)
+	print("Wristband IMU max value = ", wristbandImuCalibration.maxValue)
+	print("Wristband IMU min value = ", wristbandImuCalibration.minValue)
+	
+	print("")
+	
 	print("Entering Main Loop...")
 	
-	segmenter = Segmenter(calibration.minValue, calibration.maxValue)
-	segmenter.printSegmentSize()
-	segmenter.printBoundaries()
-
+	# Divide range of IMU's into segments.
+	headsetSegmenter = Segmenter(headsetImuCalibration.minValue, headsetImuCalibration.maxValue)
+	wristbandSegmenter = Segmenter(wristbandImuCalibration.minValue, wristbandImuCalibration.maxValue)
+	
+	print("Headset Values: ")
+	headsetSegmenter.printSegmentSize()
+	headsetSegmenter.printBoundaries()
+	print("")
+	
+	print("Wristband Values: ")
+	wristbandSegmenter.printSegmentSize()
+	wristbandSegmenter.printBoundaries()
+	print("")
+	
 	print("Press any key to continue")
 	key = getch.getch()
 	
+	print("Starting main loop...")
+	
 	while True:
-		print("Main Loop...")
 		
-		serialValue = headsetSerialPort.readline().rstrip().decode()
 		
-		if(serialValue != "" and serialValue != "interrupt"):
-			serialValueAsFloat = float(serialValue)
+		# Flush serial inputs and outputs.
+		headsetSerialPort.flushInput()
+		headsetSerialPort.flushOutput()
+		wristbandSerialPort.flushInput()
+		wristbandSerialPort.flushOutput()
+	
+		# Request data from headset and wristband.
+		requestString  = "r"
+		headsetSerialPort.write(requestString.encode() + b'x0a')
+		wristbandSerialPort.write(requestString.encode() + b'x0a')
+	
+		# Pause between requesting and reading data.
+		time.sleep(0.025)
+	
+		# Read data from headset and wristband.
+		headsetImuValue = headsetSerialPort.readline().rstrip().decode()
+		wristbandImuValue = wristbandSerialPort.readline().rstrip().decode()
+	
+		# Convert serial strings to float values.
+		if(is_float(headsetImuValue)):
+			headsetImuValueAsFloat = float(headsetImuValue)
+				
+		if(is_float(wristbandImuValue)):
+			wristbandImuValueAsFloat = float(wristbandImuValue)
 		
-		newPositionAsSegmentNumber = segmenter.determineSegment(serialValueAsFloat)
-		if (newPositionAsSegmentNumber != currentPositionAsSegmentNumber):
+		# Print values.
+		print(headsetImuValueAsFloat, "\t", wristbandImuValueAsFloat)
+		
+		# serialValue = headsetSerialPort.readline().rstrip().decode()
+		
+		# if(serialValue != "" and serialValue != "interrupt"):
+		#	serialValueAsFloat = float(serialValue)
+		
+		# newPositionAsSegmentNumber = segmenter.determineSegment(serialValueAsFloat)
+		# if (newPositionAsSegmentNumber != currentPositionAsSegmentNumber):
 			
-			t1 = threading.Thread(target=myChord.playChord, args=(newPositionAsSegmentNumber,))
-			t1.start()
+			# t1 = threading.Thread(target=myChord.playChord, args=(newPositionAsSegmentNumber,))
+			# t1.start()
 				
 			# myChord.playChord(newPositionAsSegmentNumber)
 			# update display
-			updateDisplay.setStringToTransmit(newPositionAsSegmentNumber)
-			updateDisplay.transmit()
-			currentPositionAsSegmentNumber = newPositionAsSegmentNumber
+			# updateDisplay.setStringToTransmit(newPositionAsSegmentNumber)
+			# updateDisplay.transmit()
+			# currentPositionAsSegmentNumber = newPositionAsSegmentNumber
 		
 if __name__ == '__main__':
 	main()	
