@@ -7,11 +7,13 @@ from ctypes import c_bool
 import serial
 import rtmidi
 
-
-
 chord = 0
 midiout = rtmidi.MidiOut()
 available_ports = midiout.get_ports()
+
+# Constants
+NUMBER_OF_HEADSET_SEGMENTS = 7
+NUMBER_OF_WRISTBAND_SEGMENTS = 6
 
 class ReadKeyPress():
 	spacebarPressed = multiprocessing.Value(c_bool, False)
@@ -64,60 +66,35 @@ class ChordStrummer():
 			note_off = [0x80, 62, 0]
 			midiout.send_message(note_off)
 		
-class Segmenter:
-	numberOfSegments = 7
-	
-	def __init__(self, minValue, maxValue):
+class Segmenter():
+	def __init__(self, minValue, maxValue, numberOfSegments):
+		self.minValue = minValue
+		self.maxValue = maxValue
+		self.numberOfSegments = numberOfSegments
 		self.range = maxValue - minValue
 		self.segmentSize = self.range / self.numberOfSegments
+		self.segmentBoundaries = []
 		
-		self.boundaryOne = minValue
-		self.boundaryTwo = minValue + self.segmentSize
-		self.boundaryThree = minValue + (self.segmentSize * 2)
-		self.boundaryFour = minValue + (self.segmentSize * 3)
-		self.boundaryFive = minValue + (self.segmentSize * 4)
-		self.boundarySix = minValue + (self.segmentSize * 5)
-		self.boundarySeven = minValue + (self.segmentSize * 6)
-		self.boundaryEight = maxValue
+		index = 0
+		while (index <= self.numberOfSegments):
+			self.segmentBoundaries.append(self.minValue + (self.segmentSize * (index)))
+			index += 1
 		
-	def testPrintFunction(self):
-		print("hello world")
-	
-	def printSegmentSize(self):
-		print("The segment size is: ", self.segmentSize)
+	def getSegmentSize(self):
+		return self.segmentSize
 		
-	def printBoundaries(self):
-		print("The boundary values are: ")
-		print(self.boundaryOne)
-		print(self.boundaryTwo)
-		print(self.boundaryThree)
-		print(self.boundaryFour)
-		print(self.boundaryFive)
-		print(self.boundarySix)
-		print(self.boundarySeven)
-		
+	def getBoundaries(self):
+		return self.segmentBoundaries
+				
 	def determineSegment(self, serialValue):
-		# could possibly just output strings from here.
-		if (serialValue >= self.boundaryOne and serialValue < self.boundaryTwo):
-			return 0
-			
-		elif (serialValue >= self.boundaryTwo and serialValue < self.boundaryThree):
-			return 1
-			
-		elif (serialValue >= self.boundaryThree and serialValue < self.boundaryFour):
-			return 2
+		for index, boundaryValue in enumerate(self.boundaries):
+			if (serialValue > boundaryValue):
+				# Update index and continue to iterate through boundary values
+				self.currentlySelectedSegment = index;
+			else:
+				break
 		
-		elif (serialValue >= self.boundaryFour and serialValue < self.boundaryFive):
-			return 3
-		
-		elif (serialValue >= self.boundaryFive and serialValue < self.boundarySix):
-			return 4
-		
-		elif (serialValue >= self.boundarySix and serialValue < self.boundarySeven):
-			return 5
-		
-		elif (serialValue >= self.boundarySeven and serialValue < self.boundaryEight):
-			return 6
+		return self.currentlySelectedSegment
 
 class SendCharacterString(int):
 	global headsetSerialPort
@@ -265,17 +242,23 @@ def main():
 	print("Entering Main Loop...")
 	
 	# Divide range of IMU's into segments.
-	headsetSegmenter = Segmenter(headsetImuCalibration.minValue, headsetImuCalibration.maxValue)
-	wristbandSegmenter = Segmenter(wristbandImuCalibration.minValue, wristbandImuCalibration.maxValue)
+	headsetSegmenter = Segmenter(headsetImuCalibration.minValue, headsetImuCalibration.maxValue, NUMBER_OF_HEADSET_SEGMENTS)
+	wristbandSegmenter = Segmenter(wristbandImuCalibration.minValue, wristbandImuCalibration.maxValue, NUMBER_OF_WRISTBAND_SEGMENTS)
 	
-	print("Headset Values: ")
-	headsetSegmenter.printSegmentSize()
-	headsetSegmenter.printBoundaries()
+	print("Headset Values")
+	print("--------------")
+	print("Segment Size: ", headsetSegmenter.getSegmentSize())
+	print("Boundary Values: ")
+	for boundaryValue in headsetSegmenter.getBoundaries():
+		print(boundaryValue)
 	print("")
 	
-	print("Wristband Values: ")
-	wristbandSegmenter.printSegmentSize()
-	wristbandSegmenter.printBoundaries()
+	print("Wristband Values")
+	print("----------------")
+	print("Segment Size: ", wristbandSegmenter.getSegmentSize())
+	print("Boundary Values: ")
+	for boundaryValue in wristbandSegmenter.getBoundaries():
+		print(boundaryValue)
 	print("")
 	
 	print("Press any key to continue")
@@ -284,7 +267,6 @@ def main():
 	print("Starting main loop...")
 	
 	while True:
-		
 		
 		# Flush serial inputs and outputs.
 		headsetSerialPort.flushInput()
@@ -313,6 +295,17 @@ def main():
 		
 		# Print values.
 		print(headsetImuValueAsFloat, "\t", wristbandImuValueAsFloat)
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		
 		# serialValue = headsetSerialPort.readline().rstrip().decode()
 		
