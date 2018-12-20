@@ -12,8 +12,8 @@ midiout = rtmidi.MidiOut()
 available_ports = midiout.get_ports()
 
 # Constants
-NUMBER_OF_HEADSET_SEGMENTS = 7
-NUMBER_OF_WRISTBAND_SEGMENTS = 6
+NUMBER_OF_CHORDS = 2
+NUMBER_OF_STRINGS = 6
 
 class ReadKeyPress():
 	spacebarPressed = multiprocessing.Value(c_bool, False)
@@ -39,42 +39,28 @@ class Calibrate():
 			self.maxValue = serialValue
 			
 class ChordStrummer():
-	# Outputs guitar chords as MIDI notes. (to do!)
 	global midiout
-	def playChord(self, chordNumber):
-		if (chordNumber == 0):
-					
-			note_on = [0x90, 55, 112]
+	cMajorChordMidiNoteValues = [[0, 48, 52, 55, 60, 64],[0, 0, 50, 57, 62, 65],[40, 47, 52, 55, 59, 64],[0, 0, 53, 55, 60, 65],[43, 47, 50, 55, 59, 65],[0, 45, 52, 57, 60, 64],[0, 47, 50, 55, 62, 0]]
+	
+	def playChord(self, chordNumber, stringNumber):
+		if (self.cMajorChordMidiNoteValues[chordNumber][stringNumber] != 0):
+			note_on = [0x90, self.cMajorChordMidiNoteValues[chordNumber][stringNumber], 112]
 			midiout.send_message(note_on)
-		
 			time.sleep(0.5)
-		
-			note_on = [0x90, 59, 112]
-			midiout.send_message(note_on)
-		
-			time.sleep(0.5)
-		
-			note_on = [0x90, 62, 112]
-			midiout.send_message(note_on)
-		
-			time.sleep(0.5)
-		
-			note_off = [0x80, 55, 0]
+			note_off = [0x80, self.cMajorChordMidiNoteValues[chordNumber][stringNumber], 0]
 			midiout.send_message(note_off)
-			note_off = [0x80, 59, 0]
-			midiout.send_message(note_off)
-			note_off = [0x80, 62, 0]
-			midiout.send_message(note_off)
-		
-class Segmenter():
-	def __init__(self, minValue, maxValue, numberOfSegments):
+
+
+class ChordSegmenter():
+	def __init__(self, minValue, maxValue, numberOfChords):
 		self.minValue = minValue
 		self.maxValue = maxValue
-		self.numberOfSegments = numberOfSegments
+		self.numberOfSegments = numberOfChords
 		self.range = maxValue - minValue
 		self.segmentSize = self.range / self.numberOfSegments
 		self.segmentBoundaries = []
-		
+		self.currentlySelectedSegment = 0
+				
 		index = 0
 		while (index <= self.numberOfSegments):
 			self.segmentBoundaries.append(self.minValue + (self.segmentSize * (index)))
@@ -87,7 +73,7 @@ class Segmenter():
 		return self.segmentBoundaries
 				
 	def determineSegment(self, serialValue):
-		for index, boundaryValue in enumerate(self.boundaries):
+		for index, boundaryValue in enumerate(self.segmentBoundaries):
 			if (serialValue > boundaryValue):
 				# Update index and continue to iterate through boundary values
 				self.currentlySelectedSegment = index;
@@ -95,6 +81,49 @@ class Segmenter():
 				break
 		
 		return self.currentlySelectedSegment
+
+class StringSegmenter():
+	def __init__(self, minValue, maxValue, numberOfStrings):
+		self.minValue = minValue
+		self.maxValue = maxValue
+		# The number of segments needs to be twice the number of strings (+ 1) to allow for dead space.
+		self.numberOfSegments = (numberOfStrings * 2) + 1
+		self.range = maxValue - minValue
+		self.segmentSize = self.range / self.numberOfSegments
+		self.segmentBoundaries = []
+		self.currentlySelectedSegment = 0
+				
+		index = 0
+		while (index <= self.numberOfSegments):
+			self.segmentBoundaries.append(self.minValue + (self.segmentSize * (index)))
+			index += 1
+		
+		
+	def getSegmentAsStringNumber(self, segment):
+		stringNumber = (segment / 2) - 0.5
+		return int(stringNumber)
+	
+	def getSegmentSize(self):
+		return self.segmentSize
+		
+	def getBoundaries(self):
+		return self.segmentBoundaries
+				
+	def determineSegment(self, serialValue):
+		for index, boundaryValue in enumerate(self.segmentBoundaries):
+			if (serialValue > boundaryValue):
+				# Update index and continue to iterate through boundary values
+				self.currentlySelectedSegment = index;
+			else:
+				break
+		
+		return self.currentlySelectedSegment
+		
+	def isSegmentAString(self, segment):
+		if segment <= 12 and segment >= 0 and segment % 2 > 0:
+			return True
+		else:
+			return False
 
 class SendCharacterString(int):
 	global headsetSerialPort
@@ -121,18 +150,18 @@ class SendCharacterString(int):
 		
 	def transmit(self):
 		headsetSerialPort.write(self.newStringToTransmit.encode() + b'\x0a')
-		
+		 
 def is_float(value):
   try:
-    float(value)
+    float(value)  
     return True
   except:
     return False
 				
 def main():
-	# Connect to MIDI ports
-	headsetSerialPort = serial.Serial('/dev/tty.usbmodem141111', 57600, timeout=0.1)
-	wristbandSerialPort = serial.Serial('/dev/tty.usbmodem141121', 57600, timeout=0.1)
+	# Connect to serial ports
+	headsetSerialPort = serial.Serial('/dev/tty.usbmodem143141', 115200, timeout=0.1)
+	wristbandSerialPort = serial.Serial('/dev/tty.usbmodem143131', 115200, timeout=0.1)
 	
 	# Pause to allow time for serial connection to be established.
 	time.sleep(1)
@@ -147,10 +176,13 @@ def main():
 	updateDisplay = SendCharacterString()
 	calibrationDeactivator = ReadKeyPress()
 	
-	# Intitialise vairables.
+	# Intitialise variables.
 	headsetImuValueAsFloat = 0.0
 	wristbandImuValueAsFloat = 0.0
-	currentPositionAsSegmentNumber = 0
+	newHeadsetPositionAsSegmentNumber = 0
+	currentHeadsetPositionAsSegmentNumber = 0
+	newWristbandPositionAsSegmentNumber = 0
+	currentWristbandPositionAsSegmentNumber = 0
 	
 	# Wait for IMU values to settle.
 	for i in range (0, 20):
@@ -242,8 +274,8 @@ def main():
 	print("Entering Main Loop...")
 	
 	# Divide range of IMU's into segments.
-	headsetSegmenter = Segmenter(headsetImuCalibration.minValue, headsetImuCalibration.maxValue, NUMBER_OF_HEADSET_SEGMENTS)
-	wristbandSegmenter = Segmenter(wristbandImuCalibration.minValue, wristbandImuCalibration.maxValue, NUMBER_OF_WRISTBAND_SEGMENTS)
+	headsetSegmenter = ChordSegmenter(headsetImuCalibration.minValue, headsetImuCalibration.maxValue, NUMBER_OF_CHORDS)
+	wristbandSegmenter = StringSegmenter(wristbandImuCalibration.minValue, wristbandImuCalibration.maxValue, NUMBER_OF_STRINGS)
 	
 	print("Headset Values")
 	print("--------------")
@@ -266,8 +298,13 @@ def main():
 	
 	print("Starting main loop...")
 	
+	# Set initial LED state.
+	newHeadsetPositionAsSegmentNumber = headsetSegmenter.determineSegment(headsetImuValueAsFloat)
+	characterToDisplay = str(newHeadsetPositionAsSegmentNumber + 1)
+	headsetSerialPort.write(characterToDisplay.encode() + b'x0a')
+	currentHeadsetPositionAsSegmentNumber = newHeadsetPositionAsSegmentNumber 
+	
 	while True:
-		
 		# Flush serial inputs and outputs.
 		headsetSerialPort.flushInput()
 		headsetSerialPort.flushOutput()
@@ -293,37 +330,28 @@ def main():
 		if(is_float(wristbandImuValue)):
 			wristbandImuValueAsFloat = float(wristbandImuValue)
 		
-		# Print values.
-		print(headsetImuValueAsFloat, "\t", wristbandImuValueAsFloat)
+		newHeadsetPositionAsSegmentNumber = headsetSegmenter.determineSegment(headsetImuValueAsFloat)
 		
+		if (newHeadsetPositionAsSegmentNumber != currentHeadsetPositionAsSegmentNumber):	
+			characterToDisplay = str(newHeadsetPositionAsSegmentNumber + 1)
+			headsetSerialPort.write(characterToDisplay.encode() + b'x0a')
+			currentHeadsetPositionAsSegmentNumber = newHeadsetPositionAsSegmentNumber 
 		
+		# this will be the code for parsing the wristband.
+		newWristbandPositionAsSegmentNumber = wristbandSegmenter.determineSegment(wristbandImuValueAsFloat)
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		# serialValue = headsetSerialPort.readline().rstrip().decode()
-		
-		# if(serialValue != "" and serialValue != "interrupt"):
-		#	serialValueAsFloat = float(serialValue)
-		
-		# newPositionAsSegmentNumber = segmenter.determineSegment(serialValueAsFloat)
-		# if (newPositionAsSegmentNumber != currentPositionAsSegmentNumber):
+		if (newWristbandPositionAsSegmentNumber != currentWristbandPositionAsSegmentNumber):
+			if (wristbandSegmenter.isSegmentAString(newWristbandPositionAsSegmentNumber)):
+				print("playing notes")
+				t1 = threading.Thread(target=myChord.playChord, args=(currentHeadsetPositionAsSegmentNumber, wristbandSegmenter.getSegmentAsStringNumber(newWristbandPositionAsSegmentNumber)))
+				t1.start()
 			
-			# t1 = threading.Thread(target=myChord.playChord, args=(newPositionAsSegmentNumber,))
-			# t1.start()
-				
-			# myChord.playChord(newPositionAsSegmentNumber)
-			# update display
-			# updateDisplay.setStringToTransmit(newPositionAsSegmentNumber)
-			# updateDisplay.transmit()
-			# currentPositionAsSegmentNumber = newPositionAsSegmentNumber
+			currentWristbandPositionAsSegmentNumber = newWristbandPositionAsSegmentNumber
 		
+		print(headsetImuValueAsFloat, '\t', wristbandImuValueAsFloat)
+		print(currentHeadsetPositionAsSegmentNumber, "\t", currentWristbandPositionAsSegmentNumber)	
+		
+
 if __name__ == '__main__':
 	main()	
 
