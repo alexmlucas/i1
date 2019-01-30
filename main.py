@@ -1,7 +1,6 @@
 # sip/puff variant
 # -*- coding: utf-8 -*-
 import struct
-import getch
 import threading
 import multiprocessing
 import time
@@ -31,69 +30,62 @@ available_ports = midiout.get_ports()
 NUMBER_OF_CHORDS = 2
 NUMBER_OF_STRINGS = 6
 
-class ReadKeyPress():
-	spacebarPressed = multiprocessing.Value(c_bool, False)
 
-	def spacebar(self):
-		while (self.spacebarPressed.value == False):
-			key = getch.getch()
-			if(key == ' '):
-				self.spacebarPressed.value = True
-				print("spacebar press detected")
-
-class ChordStrummer():
+class ChordStrummer:
 	global midiout
-	cMajorChordMidiNoteValues = [[0, 48, 52, 55, 60, 64],[0, 0, 50, 57, 62, 65],[40, 47, 52, 55, 59, 64],[0, 0, 53, 55, 60, 65],[43, 47, 50, 55, 59, 65],[0, 45, 52, 57, 60, 64],[0, 47, 50, 55, 62, 0]]
+	c_major_chord_notes = [[0, 48, 52, 55, 60, 64],[0, 0, 50, 57, 62, 65],[40, 47, 52, 55, 59, 64],[0, 0, 53, 55, 60, 65],[43, 47, 50, 55, 59, 65],[0, 45, 52, 57, 60, 64],[0, 47, 50, 55, 62, 0]]
 
-	def playChord(self, chordNumber, stringNumber):
-		if (self.cMajorChordMidiNoteValues[chordNumber][stringNumber] != 0):
-			note_on = [0x90, self.cMajorChordMidiNoteValues[chordNumber][stringNumber], 112]
+	def play_chord(self, chord_number, string_number):
+		if self.c_major_chord_notes[chord_number][string_number] != 0:
+			note_on = [0x90, self.c_major_chord_notes[chord_number][string_number], 112]
 			midiout.send_message(note_on)
 			time.sleep(0.5)
-			note_off = [0x80, self.cMajorChordMidiNoteValues[chordNumber][stringNumber], 0]
+			note_off = [0x80, self.c_major_chord_notes[chord_number][string_number], 0]
 			midiout.send_message(note_off)
 
-class StringSegmenter():
-	def __init__(self, minValue, maxValue, numberOfStrings):
-		self.minValue = minValue
-		self.maxValue = maxValue
+
+class StringSegmenter:
+	def __init__(self, min_value, max_value, number_of_strings):
+		self.min_value = min_value
+		self.max_value = max_value
 		# The number of segments needs to be twice the number of strings (+ 1) to allow for dead space.
-		self.numberOfSegments = (numberOfStrings * 2) + 1
-		self.range = maxValue - minValue
-		self.segmentSize = self.range / self.numberOfSegments
-		self.segmentBoundaries = []
-		self.currentlySelectedSegment = 0
+		self.number_of_segments = (number_of_strings * 2) + 1
+		self.range = max_value - min_value
+		self.segment_size = self.range / self.number_of_segments
+		self.segment_boundaries = []
+		self.currently_selected_segment = 0
 
 		index = 0
-		while (index <= self.numberOfSegments):
-			self.segmentBoundaries.append(self.minValue + (self.segmentSize * (index)))
+		while index <= self.number_of_segments:
+			self.segment_boundaries.append(self.min_value + (self.segment_size * (index)))
 			index += 1
 
-	def getSegmentAsStringNumber(self, segment):
-		stringNumber = (segment / 2) - 0.5
-		return int(stringNumber)
+	def get_segment_as_string_number(self, segment):
+		string_number = (segment / 2) - 0.5
+		return int(string_number)
 
-	def getSegmentSize(self):
-		return self.segmentSize
+	def get_segment_size(self):
+		return self.segment_size
 
-	def getBoundaries(self):
-		return self.segmentBoundaries
+	def get_boundaries(self):
+		return self.segment_boundaries
 
-	def determineSegment(self, serialValue):
-		for index, boundaryValue in enumerate(self.segmentBoundaries):
-			if (serialValue > boundaryValue):
-				# Update index and continue to iterate through boundary values
-				self.currentlySelectedSegment = index;
+	def determine_segment(self, serial_value):
+		for index, boundary_value in enumerate(self.segment_boundaries):
+			if serial_value > boundary_value:
+				# Update index and continue to iterate through boundary values
+				self.currently_selected_segment = index
 			else:
 				break
 
-		return self.currentlySelectedSegment
+		return self.currently_selected_segment
 
-	def isSegmentAString(self, segment):
+	def is_segment_a_string(self, segment):
 		if segment <= 12 and segment >= 0 and segment % 2 > 0:
 			return True
 		else:
 			return False
+
 
 def main():
 	# BT Initialisation and connection
@@ -118,7 +110,7 @@ def main():
 		# Search for the first BNO device found (will time out after 60 seconds
 		# but you can specify an optional timeout_sec parameter to change it).
 		device = ble.find_device(name='BNO')
-		#device = ble.find_device(name='Adafruit Bluefruit LE')
+		# device = ble.find_device(name='Adafruit Bluefruit LE')
 		if device is None:
 			raise RuntimeError('Failed to find BNO device!')
 	finally:
@@ -131,11 +123,11 @@ def main():
 	# to change the timeout.
 
 	# Connect to serial port
-	sipPuffSerialPort = serial.Serial('/dev/tty.usbmodem141111', 115200, timeout=0.1)
+	sip_puff_serial_port = serial.Serial('/dev/tty.usbmodem141111', 115200, timeout=0.1)
 	# Pause to allow time for serial connection to be established.
 	time.sleep(1)
 
-	# open a MIDI port. Currently hard-wired to IAC driver.
+	# open a MIDI port. Currently hard-wired to IAC driver.
 	if available_ports:
 		print(available_ports)
 		midiout.open_port(1)
@@ -143,36 +135,36 @@ def main():
 		# create class instances.
 		myChord = ChordStrummer()
 
-		# Intitialise variables.
-		wristbandImuValueAsFloat = 0.0
-		newWristbandPositionAsSegmentNumber = 0
-		currentWristbandPositionAsSegmentNumber = 0
+		# Intitialise variables.
+		wristband_imu_value_as_float = 0.0
+		new_wristband_position_as_segment_number = 0
+		current_wristband_position_as_segment_number = 0
 
 		# Flush serial inputs and outputs.
-		sipPuffSerialPort.flushInput()
-		sipPuffSerialPort.flushOutput()
+		sip_puff_serial_port.flushInput()
+		sip_puff_serial_port.flushOutput()
 
 		# Divide range of IMU into segments.
-		wristbandSegmenter = StringSegmenter(-61, 0, NUMBER_OF_STRINGS)
+		wristband_segmenter = StringSegmenter(-61, 0, NUMBER_OF_STRINGS)
 
 		# flush sip puff sensor
-		sipPuffSerialPort.flushInput()
-		sipPuffSerialPort.flushOutput()
+		sip_puff_serial_port.flushInput()
+		sip_puff_serial_port.flushOutput()
 
-		# Request data from sip puff sensor.
-		requestString  = 'r'
+		# Request data from sip puff sensor.
+		request_string  = 'r'
 		newline = '\n'
-		sipPuffSerialPort.write(requestString.encode() + newline.encode())
+		sip_puff_serial_port.write(request_string.encode() + newline.encode())
 
 		# Pause between requesting and reading data.
 		time.sleep(0.025)
 
 		#######################################
 		# Read data from sip/puff switch.
-		newSelectedChord = sipPuffSerialPort.readline().rstrip().decode()
-		currentSelectedChord = newSelectedChord
-		chordToDisplay = str(currentSelectedChord)
-		sipPuffSerialPort.write(chordToDisplay.encode() + b'x0a')
+		new_selected_chord = sip_puff_serial_port.readline().rstrip().decode()
+		current_selected_chord = new_selected_chord
+		chord_to_display = str(current_selected_chord)
+		sip_puff_serial_port.write(chord_to_display.encode() + b'x0a')
 
 		try:
 			# Wait for service discovery to complete for at least the specified
@@ -188,51 +180,52 @@ def main():
 
 			while True:
 				# Flush serial inputs and outputs.
-				sipPuffSerialPort.flushInput()
-				sipPuffSerialPort.flushOutput()
+				sip_puff_serial_port.flushInput()
+				sip_puff_serial_port.flushOutput()
 
-				# Request data from sip/puff sensor.
-				requestString  = "r"
-				sipPuffSerialPort.write(requestString.encode() + b'x0a')
+				# Request data from sip/puff sensor.
+				request_string  = "r"
+				sip_puff_serial_port.write(request_string.encode() + b'x0a')
 
 				# Pause between requesting and reading data.
 				time.sleep(0.025)
 
 				# Read data from sip puff sensor.
-				newSelectedChord = sipPuffSerialPort.readline().rstrip().decode()
+				new_selected_chord = sip_puff_serial_port.readline().rstrip().decode()
 
 				# Read data from wristband
-				wristbandImuValueAsFloat = float(yaw.read_value())
+				wristband_imu_value_as_float = float(yaw.read_value())
 
-				# Convert serial strings to float values.
-				#if(is_float(wristbandImuValue)):
-				#wristbandImuValueAsFloat = float(wristbandImuValue)
+				# Convert serial strings to float values.
+				# if(is_float(wristbandImuValue)):
+				# wristband_imu_value_as_float = float(wristbandImuValue)
 
-				if (newSelectedChord != currentSelectedChord):
-					chordToDisplay = str(newSelectedChord)
-					sipPuffSerialPort.write(chordToDisplay.encode() + b'x0a')
-					currentSelectedChord = newSelectedChord
+				if new_selected_chord != current_selected_chord:
+					chord_to_display = str(new_selected_chord)
+					sip_puff_serial_port.write(chord_to_display.encode() + b'x0a')
+					current_selected_chord = new_selected_chord
 
-				# this will be the code for parsing the wristband.
-				newWristbandPositionAsSegmentNumber = wristbandSegmenter.determineSegment(wristbandImuValueAsFloat)
+				# this will be the code for parsing the wristband.
+				new_wristband_position_as_segment_number = wristband_segmenter.determine_segment(wristband_imu_value_as_float)
 
-				if (newWristbandPositionAsSegmentNumber != currentWristbandPositionAsSegmentNumber):
-					if (wristbandSegmenter.isSegmentAString(newWristbandPositionAsSegmentNumber)):
+				if new_wristband_position_as_segment_number != current_wristband_position_as_segment_number:
+					if wristband_segmenter.is_segment_a_string(new_wristband_position_as_segment_number):
 						print("playing notes")
 
 						# Request that the motor be switched on here.
-						motor.write_value(b'0x32\r')
+						# motor.write_value(b'0x32\r')
 
-						t1 = threading.Thread(target=myChord.playChord, args=(int(currentSelectedChord), wristbandSegmenter.getSegmentAsStringNumber(newWristbandPositionAsSegmentNumber)))
+						t1 = threading.Thread(target=myChord.play_chord, args=(int(current_selected_chord), wristband_segmenter.get_segment_as_string_number(new_wristband_position_as_segment_number)))
 						t1.start()
 
-					currentWristbandPositionAsSegmentNumber = newWristbandPositionAsSegmentNumber
+					current_wristband_position_as_segment_number = new_wristband_position_as_segment_number
 
-				print(wristbandImuValueAsFloat)
-				print(currentSelectedChord)
+				print(wristband_imu_value_as_float)
+				print(current_selected_chord)
 		finally:
 			# Make sure device is disconnected on exit.
 			device.disconnect()
+
 
 # Initialize the BLE system.  MUST be called before other BLE calls!
 ble.initialize()
