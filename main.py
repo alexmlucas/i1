@@ -16,8 +16,8 @@ import Adafruit_BluefruitLE
 
 # Define service and characteristic UUIDs used by the BNO service.
 BNO_SERVICE_UUID = uuid.UUID('369B19D1-A340-497E-A8CE-DAFA92D76793')
-YAW_CHAR_UUID      = uuid.UUID('9434C16F-B011-4590-8BE3-2F97D63CC549')
-MOTOR_CHAR_UUID      = uuid.UUID('14EC9994-4932-4BDA-997A-B3D052CD7421')
+YAW_CHAR_UUID = uuid.UUID('9434C16F-B011-4590-8BE3-2F97D63CC549')
+MOTOR_CHAR_UUID = uuid.UUID('14EC9994-4932-4BDA-997A-B3D052CD7421')
 
 # Get the BLE provider for the current platform.
 ble = Adafruit_BluefruitLE.get_provider()
