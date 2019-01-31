@@ -13,11 +13,7 @@ import logging
 import time
 import uuid
 import Adafruit_BluefruitLE
-
-# Define service and characteristic UUIDs used by the BNO service.
-BNO_SERVICE_UUID = uuid.UUID('369B19D1-A340-497E-A8CE-DAFA92D76793')
-YAW_CHAR_UUID = uuid.UUID('9434C16F-B011-4590-8BE3-2F97D63CC549')
-MOTOR_CHAR_UUID = uuid.UUID('14EC9994-4932-4BDA-997A-B3D052CD7421')
+from Adafruit_BluefruitLE.services import UART
 
 # Get the BLE provider for the current platform.
 ble = Adafruit_BluefruitLE.get_provider()
@@ -87,6 +83,14 @@ class StringSegmenter:
 			return False
 
 
+def is_float(value):
+	try:
+		float(value)
+		return True
+	except ValueError:
+		return False
+
+
 def main():
 	# BT Initialisation and connection
 	# Clear any cached data because both bluez and CoreBluetooth have issues with
@@ -100,8 +104,8 @@ def main():
 
 	# Disconnect any currently connected BNO devices.  Good for cleaning up and
 	# starting from a fresh state.
-	print('Disconnecting any connected BNO devices...')
-	ble.disconnect_devices([BNO_SERVICE_UUID])
+	print('Disconnecting any connected UART devices...')
+	UART.disconnect_devices()
 
 	# Scan for BNO devices.
 	print('Searching for BNO device...')
@@ -109,10 +113,10 @@ def main():
 		adapter.start_scan()
 		# Search for the first BNO device found (will time out after 60 seconds
 		# but you can specify an optional timeout_sec parameter to change it).
-		device = ble.find_device(name='BNO')
-		# device = ble.find_device(name='Adafruit Bluefruit LE')
+		device = ble.find_device(name='motionwristband')
+
 		if device is None:
-			raise RuntimeError('Failed to find BNO device!')
+			raise RuntimeError('Failed to find motionwristband device!')
 	finally:
 		# Make sure scanning is stopped before exiting.
 		adapter.stop_scan()
@@ -123,7 +127,7 @@ def main():
 	# to change the timeout.
 
 	# Connect to serial port
-	sip_puff_serial_port = serial.Serial('/dev/tty.usbmodem141111', 115200, timeout=0.1)
+	sip_puff_serial_port = serial.Serial('/dev/tty.usbmodem1411111', 115200, timeout=0.1)
 	# Pause to allow time for serial connection to be established.
 	time.sleep(1)
 
@@ -171,12 +175,10 @@ def main():
 			# service and characteristic UUID lists.  Will time out after 60 seconds
 			# (specify timeout_sec parameter to override).
 			print('Discovering services...')
-			device.discover([BNO_SERVICE_UUID], [YAW_CHAR_UUID, MOTOR_CHAR_UUID])
+			UART.discover(device)
 
-			# Find the BNO service and its characteristics.
-			bno = device.find_service(BNO_SERVICE_UUID)
-			yaw = bno.find_characteristic(YAW_CHAR_UUID)
-			motor = bno.find_characteristic(MOTOR_CHAR_UUID)
+			# Find the UART service and its characteristics.
+			uart = UART(device)
 
 			while True:
 				# Flush serial inputs and outputs.
@@ -194,7 +196,20 @@ def main():
 				new_selected_chord = sip_puff_serial_port.readline().rstrip().decode()
 
 				# Read data from wristband
-				wristband_imu_value_as_float = float(yaw.read_value())
+				# yaw_request_string = "y"
+				uart.write(b'y\n')
+
+				received = uart.read(timeout_sec=60)
+				if received is not None:
+				# Received data, print it out.
+					print('Received: {0}'.format(received))
+					if is_float(received):
+						wristband_imu_value_as_float = float(received)
+					print(wristband_imu_value_as_float)
+				else:
+					# Timeout waiting for data, None is returned.
+					print('Received no data!')
+
 
 				# Convert serial strings to float values.
 				# if(is_float(wristbandImuValue)):
@@ -219,9 +234,6 @@ def main():
 						t1.start()
 
 					current_wristband_position_as_segment_number = new_wristband_position_as_segment_number
-
-				print(wristband_imu_value_as_float)
-				print(current_selected_chord)
 		finally:
 			# Make sure device is disconnected on exit.
 			device.disconnect()
