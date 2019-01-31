@@ -13,7 +13,11 @@ import logging
 import time
 import uuid
 import Adafruit_BluefruitLE
-from Adafruit_BluefruitLE.services import UART
+
+# Define service and characteristic UUIDs used by the BNO service.
+BNO_SERVICE_UUID = uuid.UUID('369B19D1-A340-497E-A8CE-DAFA92D76793')
+YAW_CHAR_UUID      = uuid.UUID('9434C16F-B011-4590-8BE3-2F97D63CC549')
+MOTOR_CHAR_UUID      = uuid.UUID('14EC9994-4932-4BDA-997A-B3D052CD7421')
 
 # Get the BLE provider for the current platform.
 ble = Adafruit_BluefruitLE.get_provider()
@@ -32,6 +36,7 @@ class ChordStrummer:
 	c_major_chord_notes = [[0, 48, 52, 55, 60, 64],[0, 0, 50, 57, 62, 65],[40, 47, 52, 55, 59, 64],[0, 0, 53, 55, 60, 65],[43, 47, 50, 55, 59, 65],[0, 45, 52, 57, 60, 64],[0, 47, 50, 55, 62, 0]]
 
 	def play_chord(self, chord_number, string_number):
+		# print(f"chord #: {chord_number}, string_number {string_number} ")
 		if self.c_major_chord_notes[chord_number][string_number] != 0:
 			note_on = [0x90, self.c_major_chord_notes[chord_number][string_number], 112]
 			midiout.send_message(note_on)
@@ -83,15 +88,33 @@ class StringSegmenter:
 			return False
 
 
-def is_float(value):
-	try:
-		float(value)
-		return True
-	except ValueError:
-		return False
-
 
 def main():
+
+	my_chord = ChordStrummer()
+	loom = []
+
+	def trigger_thread(guitar_string_number):
+		t1 = threading.Thread(target=my_chord.play_chord, args=(int(current_selected_chord), guitar_string_number))
+		loom.append(t1)
+		t1.start()
+
+	def is_float(value):
+		try:
+			float(value)
+			return True
+		except ValueError:
+			return False
+
+	def received(data):
+		if is_float(data):
+			float_data = float(data)
+			int_data = int(float_data)
+			if int_data is not -1:
+				trigger_thread(int(float_data))
+
+	current_selected_chord = 1
+
 	# BT Initialisation and connection
 	# Clear any cached data because both bluez and CoreBluetooth have issues with
 	# caching data and it going stale.
@@ -104,8 +127,8 @@ def main():
 
 	# Disconnect any currently connected BNO devices.  Good for cleaning up and
 	# starting from a fresh state.
-	print('Disconnecting any connected UART devices...')
-	UART.disconnect_devices()
+	print('Disconnecting any connected BNO devices...')
+	ble.disconnect_devices([BNO_SERVICE_UUID])
 
 	# Scan for BNO devices.
 	print('Searching for BNO device...')
@@ -113,10 +136,10 @@ def main():
 		adapter.start_scan()
 		# Search for the first BNO device found (will time out after 60 seconds
 		# but you can specify an optional timeout_sec parameter to change it).
-		device = ble.find_device(name='motionwristband')
-
+		device = ble.find_device(name='BNO')
+		# device = ble.find_device(name='Adafruit Bluefruit LE')
 		if device is None:
-			raise RuntimeError('Failed to find motionwristband device!')
+			raise RuntimeError('Failed to find BNO device!')
 	finally:
 		# Make sure scanning is stopped before exiting.
 		adapter.stop_scan()
@@ -135,9 +158,6 @@ def main():
 	if available_ports:
 		print(available_ports)
 		midiout.open_port(1)
-
-		# create class instances.
-		myChord = ChordStrummer()
 
 		# Intitialise variables.
 		wristband_imu_value_as_float = 0.0
@@ -177,12 +197,16 @@ def main():
 			# service and characteristic UUID lists.  Will time out after 60 seconds
 			# (specify timeout_sec parameter to override).
 			print('Discovering services...')
-			UART.discover(device)
+			device.discover([BNO_SERVICE_UUID], [YAW_CHAR_UUID, MOTOR_CHAR_UUID])
 
-			# Find the UART service and its characteristics.
-			uart = UART(device)
+			# Find the BNO service and its characteristics.
+			bno = device.find_service(BNO_SERVICE_UUID)
+			yaw = bno.find_characteristic(YAW_CHAR_UUID)
+			motor = bno.find_characteristic(MOTOR_CHAR_UUID)
 
-			loom = []
+			# subscribe to yaw value change notifications
+			yaw.start_notify(received)
+			print("staring main loop...")
 
 			while True:
 				# Flush serial inputs and outputs.
@@ -190,51 +214,26 @@ def main():
 				sip_puff_serial_port.flushOutput()
 
 				# Request data from sip/puff sensor.
-				request_string  = "r"
+				request_string = "r"
 				sip_puff_serial_port.write(request_string.encode() + b'x0a')
+
+				# Pause between requesting and reading data.
+				# time.sleep(0.025)
 
 				# Read data from sip puff sensor.
 				new_selected_chord = sip_puff_serial_port.readline().rstrip().decode()
-
-				# Read data from wristband
-				# yaw_request_string = "y"
-				uart.write(b'y\n')
-
-				received = uart.read() #(timeout_sec=60)
-				if received is not None:
-					# Received data, print it out.
-					if is_float(received):
-						wristband_imu_value_as_float = float(received)
-					else:
-						# Timeout waiting for data, None is returned.
-						print('Received no data!')
 
 				if new_selected_chord != current_selected_chord:
 					chord_to_display = str(new_selected_chord)
 					sip_puff_serial_port.write(chord_to_display.encode() + b'x0a')
 					current_selected_chord = new_selected_chord
 
-				# this will be the code for parsing the wristband.
-				new_wristband_position_as_segment_number = wristband_segmenter.determine_segment(wristband_imu_value_as_float)
-
-				if new_wristband_position_as_segment_number != current_wristband_position_as_segment_number:
-					if wristband_segmenter.is_segment_a_string(new_wristband_position_as_segment_number):
-						print("playing note")
-
-						# Request that the motor be switched on here.
-						uart.write(b'm\n')
-
-						t1 = threading.Thread(target=myChord.play_chord,
-											  args=(int(current_selected_chord), wristband_segmenter.get_segment_as_string_number(new_wristband_position_as_segment_number)))
-						loom.append(t1)
-						t1.start()
-
-				current_wristband_position_as_segment_number = new_wristband_position_as_segment_number
 				last_pluck_time = pluck_time
 				pluck_time = time.time()
 				if last_pluck_time is not None:
 					print(f"Delay: {pluck_time - last_pluck_time}")
-				print(f"Wristband: {wristband_imu_value_as_float}, Chord: {current_selected_chord}")#, N Threads: {len(loom)}")
+				#print(
+				#	f" N Threads: {len(loom)}")
 		finally:
 			# Make sure device is disconnected on exit.
 			device.disconnect()
