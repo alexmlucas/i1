@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="aca7b1e7-82ef-4aec-9b1c-5c3a130a03ee" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-    </list>
+    <list default="true" id="aca7b1e7-82ef-4aec-9b1c-5c3a130a03ee" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -15,8 +13,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="150">
-              <caret line="210" lean-forward="true" selection-start-line="210" selection-end-line="210" />
+            <state relative-caret-position="180">
+              <caret line="202" column="56" lean-forward="true" selection-start-line="202" selection-start-column="56" selection-end-line="202" selection-end-column="56" />
               <folding>
                 <element signature="e#43#56#0" expanded="true" />
               </folding>
@@ -175,11 +173,19 @@
       <option name="project" value="LOCAL" />
       <updated>1548940916270</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Display how long each loop takes to execute.">
+      <created>1548945364069</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1548945364069</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="840" height="1027" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.14379086" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -243,7 +249,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Refactored code based on suggestions from PyCharm" />
     <MESSAGE value="Now communicating with wristband via Bluetooth UART." />
-    <option name="LAST_COMMIT_MESSAGE" value="Now communicating with wristband via Bluetooth UART." />
+    <MESSAGE value="Display how long each loop takes to execute." />
+    <option name="LAST_COMMIT_MESSAGE" value="Display how long each loop takes to execute." />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/headsetSensor.ino">
@@ -302,8 +309,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="210" lean-forward="true" selection-start-line="210" selection-end-line="210" />
+        <state relative-caret-position="180">
+          <caret line="202" column="56" lean-forward="true" selection-start-line="202" selection-start-column="56" selection-end-line="202" selection-end-column="56" />
           <folding>
             <element signature="e#43#56#0" expanded="true" />
           </folding>
