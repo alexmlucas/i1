@@ -225,7 +225,7 @@ void check_for_incoming_wireless_serial_data()
       {
         // request to trigger motor received
         digitalWrite(motor_pin, HIGH);
-        delay(100);
+        delay(10);
         digitalWrite(motor_pin, LOW);
       }
      }

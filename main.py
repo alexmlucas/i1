@@ -170,6 +170,8 @@ def main():
 		chord_to_display = str(current_selected_chord)
 		sip_puff_serial_port.write(chord_to_display.encode() + b'x0a')
 
+		pluck_time = None
+
 		try:
 			# Wait for service discovery to complete for at least the specified
 			# service and characteristic UUID lists.  Will time out after 60 seconds
@@ -180,6 +182,8 @@ def main():
 			# Find the UART service and its characteristics.
 			uart = UART(device)
 
+			loom = []
+
 			while True:
 				# Flush serial inputs and outputs.
 				sip_puff_serial_port.flushInput()
@@ -189,9 +193,6 @@ def main():
 				request_string  = "r"
 				sip_puff_serial_port.write(request_string.encode() + b'x0a')
 
-				# Pause between requesting and reading data.
-				time.sleep(0.025)
-
 				# Read data from sip puff sensor.
 				new_selected_chord = sip_puff_serial_port.readline().rstrip().decode()
 
@@ -199,21 +200,14 @@ def main():
 				# yaw_request_string = "y"
 				uart.write(b'y\n')
 
-				received = uart.read(timeout_sec=60)
+				received = uart.read() #(timeout_sec=60)
 				if received is not None:
-				# Received data, print it out.
-					print('Received: {0}'.format(received))
+					# Received data, print it out.
 					if is_float(received):
 						wristband_imu_value_as_float = float(received)
-					print(wristband_imu_value_as_float)
-				else:
-					# Timeout waiting for data, None is returned.
-					print('Received no data!')
-
-
-				# Convert serial strings to float values.
-				# if(is_float(wristbandImuValue)):
-				# wristband_imu_value_as_float = float(wristbandImuValue)
+					else:
+						# Timeout waiting for data, None is returned.
+						print('Received no data!')
 
 				if new_selected_chord != current_selected_chord:
 					chord_to_display = str(new_selected_chord)
@@ -225,15 +219,22 @@ def main():
 
 				if new_wristband_position_as_segment_number != current_wristband_position_as_segment_number:
 					if wristband_segmenter.is_segment_a_string(new_wristband_position_as_segment_number):
-						print("playing notes")
+						print("playing note")
 
 						# Request that the motor be switched on here.
 						uart.write(b'm\n')
 
-						t1 = threading.Thread(target=myChord.play_chord, args=(int(current_selected_chord), wristband_segmenter.get_segment_as_string_number(new_wristband_position_as_segment_number)))
+						t1 = threading.Thread(target=myChord.play_chord,
+											  args=(int(current_selected_chord), wristband_segmenter.get_segment_as_string_number(new_wristband_position_as_segment_number)))
+						loom.append(t1)
 						t1.start()
 
-					current_wristband_position_as_segment_number = new_wristband_position_as_segment_number
+				current_wristband_position_as_segment_number = new_wristband_position_as_segment_number
+				last_pluck_time = pluck_time
+				pluck_time = time.time()
+				if last_pluck_time is not None:
+					print(f"Delay: {pluck_time - last_pluck_time}")
+				print(f"Wristband: {wristband_imu_value_as_float}, Chord: {current_selected_chord}")#, N Threads: {len(loom)}")
 		finally:
 			# Make sure device is disconnected on exit.
 			device.disconnect()
