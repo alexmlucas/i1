@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="aca7b1e7-82ef-4aec-9b1c-5c3a130a03ee" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/writstbandSensor/writstbandSensor.ino" beforeDir="false" afterPath="$PROJECT_DIR$/writstbandSensor/writstbandSensor.ino" afterDir="false" />
-    </list>
+    <list default="true" id="aca7b1e7-82ef-4aec-9b1c-5c3a130a03ee" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -17,8 +13,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="52">
-              <caret line="217" column="43" selection-start-line="217" selection-start-column="43" selection-end-line="217" selection-end-column="43" />
+            <state relative-caret-position="389">
+              <caret line="222" column="16" selection-start-line="222" selection-start-column="16" selection-end-line="222" selection-end-column="16" />
               <folding>
                 <element signature="e#43#56#0" expanded="true" />
               </folding>
@@ -185,7 +181,14 @@
       <option name="project" value="LOCAL" />
       <updated>1548945364069</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Reverted to using Bluetooth characteristics for comms">
+      <created>1548954027159</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1548954027159</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -197,7 +200,7 @@
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.4995005" visible="true" weight="0.2863388" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4995005" weight="0.2863388" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -255,7 +258,8 @@
     <MESSAGE value="Refactored code based on suggestions from PyCharm" />
     <MESSAGE value="Now communicating with wristband via Bluetooth UART." />
     <MESSAGE value="Display how long each loop takes to execute." />
-    <option name="LAST_COMMIT_MESSAGE" value="Display how long each loop takes to execute." />
+    <MESSAGE value="Reverted to using Bluetooth characteristics for comms" />
+    <option name="LAST_COMMIT_MESSAGE" value="Reverted to using Bluetooth characteristics for comms" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/headsetSensor.ino">
@@ -314,8 +318,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="52">
-          <caret line="217" column="43" selection-start-line="217" selection-start-column="43" selection-end-line="217" selection-end-column="43" />
+        <state relative-caret-position="389">
+          <caret line="222" column="16" selection-start-line="222" selection-start-column="16" selection-end-line="222" selection-end-column="16" />
           <folding>
             <element signature="e#43#56#0" expanded="true" />
           </folding>
