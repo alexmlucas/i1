@@ -78,11 +78,11 @@ void loop() {
     pressureSensorPreviousState = 1;
   }
 
-  if(pressureSensorCurrentState == 2 && pressureSensorPreviousState == NO_ACTIVITY){
+  /*if(pressureSensorCurrentState == 2 && pressureSensorPreviousState == NO_ACTIVITY){
     // puff detected
     incrementChordSelector();
     pressureSensorPreviousState = 2;
-  }
+  }*/
 
   if(pressureSensorCurrentState == 0 && pressureSensorPreviousState != NO_ACTIVITY){
     pressureSensorPreviousState = 0;
