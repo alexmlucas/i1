@@ -228,7 +228,7 @@ def main():
 						print("playing notes")
 
 						# Request that the motor be switched on here.
-						# motor.write_value(b'0x32\r')
+						uart.write(b'm\n')
 
 						t1 = threading.Thread(target=myChord.play_chord, args=(int(current_selected_chord), wristband_segmenter.get_segment_as_string_number(new_wristband_position_as_segment_number)))
 						t1.start()

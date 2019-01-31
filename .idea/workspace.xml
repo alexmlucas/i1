@@ -2,10 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="aca7b1e7-82ef-4aec-9b1c-5c3a130a03ee" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wristbandSensor/BluefruitConfig.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/wristbandSensor/writstbandSensor.ino" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -18,8 +15,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="147">
-              <caret line="223" column="97" lean-forward="true" selection-start-line="223" selection-start-column="97" selection-end-line="223" selection-end-column="97" />
+            <state relative-caret-position="150">
+              <caret line="210" lean-forward="true" selection-start-line="210" selection-end-line="210" />
               <folding>
                 <element signature="e#43#56#0" expanded="true" />
               </folding>
@@ -171,12 +168,18 @@
       <option name="project" value="LOCAL" />
       <updated>1548862152222</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Now communicating with wristband via Bluetooth UART.">
+      <created>1548940916270</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1548940916270</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="840" height="1027" extended-state="0" />
-    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.14379086" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -239,7 +242,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Refactored code based on suggestions from PyCharm" />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactored code based on suggestions from PyCharm" />
+    <MESSAGE value="Now communicating with wristband via Bluetooth UART." />
+    <option name="LAST_COMMIT_MESSAGE" value="Now communicating with wristband via Bluetooth UART." />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/headsetSensor.ino">
@@ -298,8 +302,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="147">
-          <caret line="223" column="97" lean-forward="true" selection-start-line="223" selection-start-column="97" selection-end-line="223" selection-end-column="97" />
+        <state relative-caret-position="150">
+          <caret line="210" lean-forward="true" selection-start-line="210" selection-end-line="210" />
           <folding>
             <element signature="e#43#56#0" expanded="true" />
           </folding>
