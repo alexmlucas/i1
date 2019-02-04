@@ -150,7 +150,7 @@ def main():
 	# to change the timeout.
 
 	# Connect to serial port
-	sip_puff_serial_port = serial.Serial('/dev/tty.usbmodem1411111', 115200, timeout=0.1)
+	sip_puff_serial_port = serial.Serial('/dev/tty.usbmodem141131', 115200, timeout=0.1)
 	# Pause to allow time for serial connection to be established.
 	time.sleep(1)
 
