@@ -94,29 +94,55 @@ font = ImageFont.truetype('BodgeR.ttf', 12)
 SELECTION_STRING = '> '
 SPACE_STRING = '  '
 
-menu_top = ('Global', 'Instrument', 'Effect', 'Chords')
-menu_global = ('Wristband',)
-menu_wristband = ('Reconnect',)
-menu_reconnect = ('Searching', 'please wait...')
-menu_connection_successful = ('Connection successful!', 'Returning to main menu...')
-menu_instrument = ('Stratocaster', 'Telecaster', 'Les Paul', 'Acoustic')
-menu_effect = ('Slot 1', 'Slot 2')
-menu_effect_slot = ('Type', 'Parameter 1', 'Parameter 2')
-menu_effect_type = ('Off', 'Disortion', 'Flanger', 'Chorus')
-menu_parameter_value = ('Parameter Name', 'Value 0-127')
-menu_chord = ('Red', 'Green', 'Blue', 'Yellow')
-menu_chord_configuration = ('Root Note', 'Type')
+class Menu_Item:
+	def __init__(self, text, menu_type, back_button_disabled=False, enter_button_disabled=False):
+		self.text = text
+		self.menu_type = menu_type
+		self.back_button_disabled = back_button_disabled
+		self.enter_button_disabled = enter_button_disabled
+
+top_text = ('Global', 'Instrument', 'Effect', 'Chords')
+global_text = ('Wristband',)
+wristband_text = ('Reconnect',)
+reconnect_text = ('Searching', 'please wait...')
+connection_success_text = ('Connection successful!', 'Returning to main menu...')
+instrument_text = ('Stratocaster', 'Telecaster', 'Les Paul', 'Acoustic')
+effect_text = ('Slot 1', 'Slot 2')
+effect_slot_text = ('Type', 'Parameter 1', 'Parameter 2')
+effect_type_text = ('Off', 'Disortion', 'Flanger', 'Chorus')
+parameter_value_text = ('Parameter Name', 'Value 0-127')
+chords_text = ('Red', 'Green', 'Blue', 'Yellow')
+chord_configuration_text = ('Root Note', 'Type')
+root_note_text = ('Root Note:', 'A')
+chord_type_text = ('Chord Type:', 'Major', )
+
+top = Menu_Item(top_text,'list', back_button_disabled=True)
+_global = Menu_Item(global_text, 'list')
+wristband = Menu_Item(wristband_text, 'list')
+reconnect = Menu_Item(reconnect_text, 'splash', enter_button_disabled=True)
+connection_success = Menu_Item(reconnect_text, 'splash', enter_button_disabled=True)
+instrument = Menu_Item(instrument_text, 'list', enter_button_disabled=True)
+effect = Menu_Item(effect_text, 'list')
+effect_slot = Menu_Item(effect_slot_text, 'list')
+effect_type = Menu_Item(effect_type_text, 'list', enter_button_disabled=True)
+effect_parameter = Menu_Item(parameter_value_text, 'value', enter_button_disabled=True)
+chords = Menu_Item(chords_text, 'list')
+chord_config = Menu_Item(chord_configuration_text, 'list')
+root_note = Menu_Item(root_note_text, 'value', enter_button_disabled=True)
+chord_type = Menu_Item(chord_type_text, 'value', enter_button_disabled=True)
+
 
 # assign a location value to each menu
-menu = {'0':menu_top, '00':menu_global, '000': menu_wristband, '0000': menu_reconnect}
-# keep track of the menu's where the cursor is disabled
-menus_with_cursor_disabled = (menu_reconnect)
-# keep track of the end points of each menu
-menu_ends = (menu_reconnect)
+menu = {'':top, '0':_global,'00':wristband, '000':reconnect, '0000':connection_success,
+		'1':instrument, '2':effect, '20':effect_slot, '21': effect_slot, '210':effect_type,
+		'210':effect_type, '211':effect_parameter, '212':effect_parameter, '3':chords, '30':chord_config, 
+		'31':chord_config, '32':chord_config, '300':root_note, '310':root_note, 
+		'320':root_note, '301':chord_type,'311':chord_type,'321':chord_type}
 
 # keep track of the cursor position and menu location
 current_cursor_position = 0
-current_menu_location = '0'
+current_menu_location = ''
+current_menu = menu.get(current_menu_location)
 
 # a flag to disable back button when at top tier of the menu.
 at_menu_start = True
@@ -167,7 +193,8 @@ def increment_cursor_position():
 	global current_cursor_position
 	
 	# get the number of items in the currently selected menu but zero indexed
-	number_of_menu_items = len(menu.get(current_menu_location)) - 1
+	menu_now = menu.get(current_menu_location)
+	number_of_menu_items = len(menu_now.text) - 1
 	
 	# wrap around if last menu item is reached.
 	if current_cursor_position < number_of_menu_items:
@@ -180,10 +207,11 @@ def decrement_cursor_position():
 	global current_cursor_position
 	
 	# get the number of items in the currently selected menu but zero indexed
-	number_of_menu_items = len(menu.get(current_menu_location)) - 1
+	menu_now = menu.get(current_menu_location)
+	number_of_menu_items = len(menu_now.text) - 1
 	
 	# wrap around if first menu item is reached.
-	if current_cursor_position > number_of_menu_items:
+	if current_cursor_position > 0:
 		current_cursor_position -= 1
 	else:
 		current_cursor_position = number_of_menu_items
@@ -195,24 +223,12 @@ def reset_cursor_position():
 
 def move_menu_location_forwards():
 	global current_menu_location
-	
-	# enable back button if we're moving past the first tier of the menu
-	if current_menu_location == '0':
-		global at_menu_start
-		at_menu_start = False
-	
+
 	# append the current cursor position to show that we have progressed deeper into the menu at a certain point
 	current_menu_location += str(current_cursor_position)
 
 	# reset the cursor position
 	reset_cursor_position()
-	
-	# disable the enter button if we're at the end of the menu
-	for end in menu_ends:
-		if end == menu.get(current_menu_location):
-			at_menu_end = True
-	
-	print(current_menu_location)
 	
 def move_menu_location_backwards():
 	# remove the last item from the current_menu_location string
@@ -233,7 +249,8 @@ def move_menu_location_backwards():
 while True:
 	# redraw the display if required.
 	if redraw_display_flag == True:
-		draw_display(menu.get(current_menu_location))
+		current_menu = menu.get(current_menu_location)
+		draw_display(current_menu.text)
 	
 	# process the buttons
 	if up_button.process() == 1:
@@ -250,14 +267,14 @@ while True:
 	
 	if back_button.process() == 1:
 		# only on back button event if we're not at the top tier of the menu.
-		if at_menu_start != True:
+		if current_menu.back_button_disabled != True:
 			move_menu_location_backwards()
 			# redraw the display on next iteration
 			redraw_display_flag = True
 			print("Back button pressed")
 	
 	if enter_button.process() == 1:
-		if at_menu_end != True:
+		if current_menu.enter_button_disabled != True:
 			move_menu_location_forwards()
 			redraw_display_flag = True
 			print("Enter button pressed")
