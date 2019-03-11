@@ -94,12 +94,13 @@ font = ImageFont.truetype('BodgeR.ttf', 12)
 SELECTION_STRING = '> '
 SPACE_STRING = '  '
 
-class Menu_Item:
-	def __init__(self, text, menu_type, back_button_disabled=False, enter_button_disabled=False):
+class Menu_Page:
+	def __init__(self, text, menu_type, back_button_disabled=False, enter_button_disabled=False, cursor_disabled=False):
 		self.text = text
 		self.menu_type = menu_type
 		self.back_button_disabled = back_button_disabled
 		self.enter_button_disabled = enter_button_disabled
+		self.cursor_disabled = cursor_disabled
 
 top_text = ('Global', 'Instrument', 'Effect', 'Chords')
 global_text = ('Wristband',)
@@ -116,28 +117,82 @@ chord_configuration_text = ('Root Note', 'Type')
 root_note_text = ('Root Note:', 'A')
 chord_type_text = ('Chord Type:', 'Major', )
 
-top = Menu_Item(top_text,'list', back_button_disabled=True)
-_global = Menu_Item(global_text, 'list')
-wristband = Menu_Item(wristband_text, 'list')
-reconnect = Menu_Item(reconnect_text, 'splash', enter_button_disabled=True)
-connection_success = Menu_Item(reconnect_text, 'splash', enter_button_disabled=True)
-instrument = Menu_Item(instrument_text, 'list', enter_button_disabled=True)
-effect = Menu_Item(effect_text, 'list')
-effect_slot = Menu_Item(effect_slot_text, 'list')
-effect_type = Menu_Item(effect_type_text, 'list', enter_button_disabled=True)
-effect_parameter = Menu_Item(parameter_value_text, 'value', enter_button_disabled=True)
-chords = Menu_Item(chords_text, 'list')
-chord_config = Menu_Item(chord_configuration_text, 'list')
-root_note = Menu_Item(root_note_text, 'value', enter_button_disabled=True)
-chord_type = Menu_Item(chord_type_text, 'value', enter_button_disabled=True)
+top = Menu_Page(top_text,'list', back_button_disabled=True)
+_global = Menu_Page(global_text, 'list')
+wristband = Menu_Page(wristband_text, 'list')
+reconnect = Menu_Page(reconnect_text, 'splash', enter_button_disabled=True)
+connection_success = Menu_Page(reconnect_text, 'splash', enter_button_disabled=True)
+instrument = Menu_Page(instrument_text, 'list', enter_button_disabled=True)
+effect = Menu_Page(effect_text, 'list')
+effect_slot = Menu_Page(effect_slot_text, 'list')
+effect_type = Menu_Page(effect_type_text, 'list', enter_button_disabled=True)
+effect_parameter = Menu_Page(parameter_value_text, 'value', enter_button_disabled=True)
+chords = Menu_Page(chords_text, 'list')
+chord_config = Menu_Page(chord_configuration_text, 'list')
+root_note = Menu_Page(root_note_text, 'value', enter_button_disabled=True)
+chord_type = Menu_Page(chord_type_text, 'value', enter_button_disabled=True)
 
+### Construct the Menu ###
+# dictionary keys are used to determine location
+# the number of characters in the dicationary key indicates the tier of the menu
+# menu items listed on each page are numbered using zero-indexing
 
-# assign a location value to each menu
-menu = {'':top, '0':_global,'00':wristband, '000':reconnect, '0000':connection_success,
-		'1':instrument, '2':effect, '20':effect_slot, '21': effect_slot, '210':effect_type,
-		'210':effect_type, '211':effect_parameter, '212':effect_parameter, '3':chords, '30':chord_config, 
-		'31':chord_config, '32':chord_config, '300':root_note, '310':root_note, 
-		'320':root_note, '301':chord_type,'311':chord_type,'321':chord_type}
+## Tier 0 ##
+# add the top Menu_Page to the menu dictionary
+menu = {'':top,}
+
+## Tier 1 ##
+# add Menu_Page for each item listed in the top Menu_Page 
+menu['0'] = _global
+menu['1'] = instrument
+menu['2'] = effect
+menu['3'] = chords
+
+## Tier 2 ##
+# add a Menu_Page for each item listed in the _global Menu_Page
+menu['00'] = wristband
+
+# add a Menu_Page for each item listed in the effect Menu_Page
+menu['20'] = effect_slot # Effect Slot 1
+menu['21'] = effect_slot # Effect Slot 2
+
+# add a Menu_Page for each item listed in the chords Menu_Page
+menu['30'] = chord_config # Red chord
+menu['31'] = chord_config # Green chord
+menu['32'] = chord_config # Blue chord 
+menu['33'] = chord_config # Yellow chord 
+
+## Tier 3 ##
+# add a Menu_Page for each item listed in the wristband Menu_Page
+menu['000'] = reconnect 
+
+# add a Menu_Page for each item listed in the effect_slot Menu_Page(s)
+# Effect Slot 1
+menu['200'] = effect_type
+menu['201'] = effect_parameter # Parameter 1
+menu['202'] = effect_parameter # Parameter 2
+# Effect Slot 2
+menu['210'] = effect_type
+menu['211'] = effect_parameter # Parameter 1
+menu['212'] = effect_parameter # Parameter 2
+
+# add a Menu page for each item listed in the chord_config Menu_Page(s)
+# Red chord
+menu['300'] = root_note
+menu['301'] = chord_type
+# Green chord
+menu['310'] = root_note
+menu['311'] = chord_type
+# Blue chord
+menu['310'] = root_note
+menu['311'] = chord_type
+# Yellow chord
+menu['320'] = root_note
+menu['321'] = chord_type
+
+## Tier 4 ##
+# add a Menu page for each item listed in the reconnect Menu_Page
+menu['0000'] = connection_success
 
 # keep track of the cursor position and menu location
 current_cursor_position = 0
