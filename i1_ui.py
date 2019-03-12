@@ -94,14 +94,146 @@ font = ImageFont.truetype('BodgeR.ttf', 12)
 SELECTION_STRING = '> '
 SPACE_STRING = '  '
 
+class Menu_Controller:
+	# keep track of the cursor position
+	current_cursor_position = 0
+	current_menu_location = ''
+	structure = {None: None,}
+	redraw_display_flag = True
+	
+	# current_menu = menu.get(current_menu_location)
+	
+	def __init__(self):
+		print('I\'m alive')
+		
+	def increment_cursor_position(self):	
+		# get the number of items in the currently selected menu but zero indexed
+		menu_now = Menu_Controller.structure.get(Menu_Controller.current_menu_location)
+		number_of_menu_items = len(menu_now.menu_items) - 1
+		
+		# wrap around if last menu item is reached.
+		if Menu_Controller.current_cursor_position < number_of_menu_items:
+			Menu_Controller.current_cursor_position += 1
+		else:
+			Menu_Controller.current_cursor_position = 0
+
+	def decrement_cursor_position(self):
+		# get the number of items in the currently selected menu but zero indexed
+		menu_now = Menu_Controller.structure.get(Menu_Controller.current_menu_location)
+		number_of_menu_items = len(menu_now.menu_items) - 1
+		
+		# wrap around if first menu item is reached.
+		if Menu_Controller.current_cursor_position > 0:
+			Menu_Controller.current_cursor_position -= 1
+		else:
+			Menu_Controller.current_cursor_position = number_of_menu_items
+			
+	def reset_cursor_position(self):
+		# simply reset the position of the cursor to zero. 
+		Menu_Controller.current_cursor_position = 0
+
+	def move_menu_location_forwards(self):
+		# append the current cursor position to show that we have progressed deeper into the menu at a certain point
+		Menu_Controller.current_menu_location += str(Menu_Controller.current_cursor_position)
+
+		# reset the cursor position
+		self.reset_cursor_position()
+		
+	def move_menu_location_backwards(self):
+		# remove the last item from the current_menu_location string
+		# this shows that we have retreated by one menu level
+		Menu_Controller.current_menu_location = Menu_Controller.current_menu_location[:-1]
+		
+		# reset the cursor position
+		self.reset_cursor_position()
+		
+	def get_current_menu(self):
+		# return the currently selected menu
+		return Menu_Controller.structure[Menu_Controller.current_menu_location]
+		
+
 class Menu_Page:
-	def __init__(self, text, menu_type, back_button_disabled=False, enter_button_disabled=False, cursor_disabled=False):
-		self.text = text
+	def __init__(self, text, menu_type, back_button_disabled=False):
+		self.menu_items = text
+		self.menu_functions = {None:None,}
 		self.menu_type = menu_type
 		self.back_button_disabled = back_button_disabled
-		self.enter_button_disabled = enter_button_disabled
-		self.cursor_disabled = cursor_disabled
+		self.enter_button_disabled = False
+		self.cursor_disabled = False
+		
+		# disable the cursor and enter button if Menu_Page type is 'Splash'
+		if menu_type == 'splash':
+			self.cursor_disabled = True
+			self.enter_disabled = True
+		
+		# disable the cursor if Menu_Page type is 'Value'
+		if menu_type == 'value':
+			self.cursor_disabled = True
+			
+	def get_image(self, current_cursor_position):
+		# create a new blank image
+		local_image = Image.new('1', (width, height))
 
+		# Get drawing object to draw on image.
+		local_draw = ImageDraw.Draw(local_image)
+	
+		# a new list to add formatted menu string to.
+		formatted_menu_strings = []
+	
+		# if the cursor is not disabled...
+		if self.cursor_disabled != True:
+			# ...create a new list to add formatted menu strings to and...
+			formatted_menu_strings = []
+			# ...format each string in the menu
+			for index, menu_item in enumerate(self.menu_items):
+				formatted_menu_strings.append(self.menu_string_generator(index, menu_item, current_cursor_position))
+
+			# draw each item onto the image in the correct position
+			for index, menu_string in enumerate(formatted_menu_strings):
+				local_draw.text((PADDING,PADDING * (index + 1) + (MENU_ITEM_HEIGHT * index)), menu_string, font=font, fill=255)
+		# else just	draw the unformatted strings to the display 	
+		else:
+			for index, menu_string in enumerate(self.menu_items):
+				local_draw.text((PADDING,PADDING * (index + 1) + (MENU_ITEM_HEIGHT * index)), menu_string, font=font, fill=255)
+				
+		return local_image
+		
+	# generate formatted strings which include selection marker and whitespace
+	def menu_string_generator(self, menu_item_number, text_to_display, current_cursor_position):
+		if menu_item_number == current_cursor_position:
+			return SELECTION_STRING + text_to_display
+		else:
+			return SPACE_STRING + text_to_display
+			
+	def on_enter_button(self, menu_controller):
+		# make sure that the Menu_Page is of type 'list'
+		if self.menu_type == 'list':
+			# if a function has been assigned to the menu_item...
+			if self.menu_functions.get(menu_controller.current_cursor_position) != None:
+				#... execute that function
+				self.menu_functions(menu_controller.current_cursor_position)
+			else:
+				# progress deeper into the menu
+				menu_controller.move_menu_location_forwards()
+				# indicate that the display needs to be redrawn
+				menu_controller.redraw_display_flag = True
+				
+	def on_back_button(self, menu_controller):
+		if self.back_button_disabled != True:
+			menu_controller.move_menu_location_backwards()
+			menu_controller.redraw_display_flag = True
+			
+	def on_down_button(self, menu_controller):
+		if self.menu_type == 'list':
+			menu_controller.increment_cursor_position()
+			menu_controller.redraw_display_flag = True
+			
+	def on_up_button(self, menu_controller):
+		if self.menu_type == 'list':
+			menu_controller.decrement_cursor_position()
+			menu_controller.redraw_display_flag = True
+		
+		
 top_text = ('Global', 'Instrument', 'Effect', 'Chords')
 global_text = ('Wristband',)
 wristband_text = ('Reconnect',)
@@ -117,222 +249,119 @@ chord_configuration_text = ('Root Note', 'Type')
 root_note_text = ('Root Note:', 'A')
 chord_type_text = ('Chord Type:', 'Major', )
 
-top = Menu_Page(top_text,'list', back_button_disabled=True)
+top = Menu_Page(top_text, 'list', back_button_disabled=True)
 _global = Menu_Page(global_text, 'list')
 wristband = Menu_Page(wristband_text, 'list')
-reconnect = Menu_Page(reconnect_text, 'splash', enter_button_disabled=True)
-connection_success = Menu_Page(reconnect_text, 'splash', enter_button_disabled=True)
-instrument = Menu_Page(instrument_text, 'list', enter_button_disabled=True)
+reconnect = Menu_Page(reconnect_text, 'splash')
+connection_success = Menu_Page(reconnect_text, 'splash')
+instrument = Menu_Page(instrument_text, 'list')
 effect = Menu_Page(effect_text, 'list')
 effect_slot = Menu_Page(effect_slot_text, 'list')
-effect_type = Menu_Page(effect_type_text, 'list', enter_button_disabled=True)
-effect_parameter = Menu_Page(parameter_value_text, 'value', enter_button_disabled=True)
+effect_type = Menu_Page(effect_type_text, 'list')
+effect_parameter = Menu_Page(parameter_value_text, 'value')
 chords = Menu_Page(chords_text, 'list')
 chord_config = Menu_Page(chord_configuration_text, 'list')
-root_note = Menu_Page(root_note_text, 'value', enter_button_disabled=True)
-chord_type = Menu_Page(chord_type_text, 'value', enter_button_disabled=True)
+root_note = Menu_Page(root_note_text, 'value')
+chord_type = Menu_Page(chord_type_text, 'value')
 
 ### Construct the Menu ###
+
+menu_controller = Menu_Controller()
+
 # dictionary keys are used to determine location
 # the number of characters in the dicationary key indicates the tier of the menu
 # menu items listed on each page are numbered using zero-indexing
 
 ## Tier 0 ##
 # add the top Menu_Page to the menu dictionary
-menu = {'':top,}
+menu_controller.structure[''] = top
 
 ## Tier 1 ##
 # add Menu_Page for each item listed in the top Menu_Page 
-menu['0'] = _global
-menu['1'] = instrument
-menu['2'] = effect
-menu['3'] = chords
+menu_controller.structure['0'] = _global
+menu_controller.structure['1'] = instrument
+menu_controller.structure['2'] = effect
+menu_controller.structure['3'] = chords
 
 ## Tier 2 ##
 # add a Menu_Page for each item listed in the _global Menu_Page
-menu['00'] = wristband
+menu_controller.structure['00'] = wristband
 
 # add a Menu_Page for each item listed in the effect Menu_Page
-menu['20'] = effect_slot # Effect Slot 1
-menu['21'] = effect_slot # Effect Slot 2
+menu_controller.structure['20'] = effect_slot # Effect Slot 1
+menu_controller.structure['21'] = effect_slot # Effect Slot 2
 
 # add a Menu_Page for each item listed in the chords Menu_Page
-menu['30'] = chord_config # Red chord
-menu['31'] = chord_config # Green chord
-menu['32'] = chord_config # Blue chord 
-menu['33'] = chord_config # Yellow chord 
+menu_controller.structure['30'] = chord_config # Red chord
+menu_controller.structure['31'] = chord_config # Green chord
+menu_controller.structure['32'] = chord_config # Blue chord 
+menu_controller.structure['33'] = chord_config # Yellow chord 
 
 ## Tier 3 ##
 # add a Menu_Page for each item listed in the wristband Menu_Page
-menu['000'] = reconnect 
+menu_controller.structure['000'] = reconnect 
 
 # add a Menu_Page for each item listed in the effect_slot Menu_Page(s)
 # Effect Slot 1
-menu['200'] = effect_type
-menu['201'] = effect_parameter # Parameter 1
-menu['202'] = effect_parameter # Parameter 2
+menu_controller.structure['200'] = effect_type
+menu_controller.structure['201'] = effect_parameter # Parameter 1
+menu_controller.structure['202'] = effect_parameter # Parameter 2
 # Effect Slot 2
-menu['210'] = effect_type
-menu['211'] = effect_parameter # Parameter 1
-menu['212'] = effect_parameter # Parameter 2
+menu_controller.structure['210'] = effect_type
+menu_controller.structure['211'] = effect_parameter # Parameter 1
+menu_controller.structure['212'] = effect_parameter # Parameter 2
 
 # add a Menu page for each item listed in the chord_config Menu_Page(s)
 # Red chord
-menu['300'] = root_note
-menu['301'] = chord_type
+menu_controller.structure['300'] = root_note
+menu_controller.structure['301'] = chord_type
 # Green chord
-menu['310'] = root_note
-menu['311'] = chord_type
+menu_controller.structure['310'] = root_note
+menu_controller.structure['311'] = chord_type
 # Blue chord
-menu['310'] = root_note
-menu['311'] = chord_type
+menu_controller.structure['310'] = root_note
+menu_controller.structure['311'] = chord_type
 # Yellow chord
-menu['320'] = root_note
-menu['321'] = chord_type
+menu_controller.structure['320'] = root_note
+menu_controller.structure['321'] = chord_type
 
 ## Tier 4 ##
 # add a Menu page for each item listed in the reconnect Menu_Page
-menu['0000'] = connection_success
-
-# keep track of the cursor position and menu location
-current_cursor_position = 0
-current_menu_location = ''
-current_menu = menu.get(current_menu_location)
-
-# a flag to disable back button when at top tier of the menu.
-at_menu_start = True
-# a flag to disable enter button when at the bottom tier of the menu.
-at_menu_end = True
-
-# generate formatted strings which include selection marker and whitespace
-def menu_string_generator(menu_item_number, text_to_display):
-	if menu_item_number == current_cursor_position:
-		return SELECTION_STRING + text_to_display
-	else:
-		return SPACE_STRING + text_to_display
+menu_controller.structure['0000'] = connection_success
 
 # set redraw_display_flag to True so display is drawn on first iteration of main loop
 redraw_display_flag = True
 
-def draw_display(incoming_menu):
-	# create a new blank image
-	local_image = Image.new('1', (width, height))
-
-	# Get drawing object to draw on image.
-	local_draw = ImageDraw.Draw(local_image)
-	
-	# a new list to add formatted menu string to.
-	formatted_menu_strings = []
-	
-	# format each string in the menu
-	for index, menu_item in enumerate(incoming_menu):
-		formatted_menu_strings.append(menu_string_generator(index, menu_item)) 
-
-	# draw each item onto the image in the correct position
-	for index, menu_string in enumerate(formatted_menu_strings):
-		local_draw.text((PADDING,PADDING * (index + 1) + (MENU_ITEM_HEIGHT * index)), menu_string, font=font, fill=255)
-	
+def draw_display(incoming_image):
 	# clear the display
 	disp.clear()
 	# add the image
-	disp.image(local_image)
+	disp.image(incoming_image)
 	# refresh the display
 	disp.display()
 	
 	# reset the display flag
 	global redraw_display_flag 
-	redraw_display_flag = False
-	
-def increment_cursor_position():
-	# create a global reference to allow a new value to be assigned to currently_selection_menu_item
-	global current_cursor_position
-	
-	# get the number of items in the currently selected menu but zero indexed
-	menu_now = menu.get(current_menu_location)
-	number_of_menu_items = len(menu_now.text) - 1
-	
-	# wrap around if last menu item is reached.
-	if current_cursor_position < number_of_menu_items:
-		current_cursor_position += 1
-	else:
-		current_cursor_position = 0
-
-def decrement_cursor_position():
-	# create a global reference to allow a new value to be assigned to currently_selection_menu_item
-	global current_cursor_position
-	
-	# get the number of items in the currently selected menu but zero indexed
-	menu_now = menu.get(current_menu_location)
-	number_of_menu_items = len(menu_now.text) - 1
-	
-	# wrap around if first menu item is reached.
-	if current_cursor_position > 0:
-		current_cursor_position -= 1
-	else:
-		current_cursor_position = number_of_menu_items
-		
-def reset_cursor_position():
-	# simply reset the position of the cursor to zero.
-	global current_cursor_position 
-	current_cursor_position = 0
-
-def move_menu_location_forwards():
-	global current_menu_location
-
-	# append the current cursor position to show that we have progressed deeper into the menu at a certain point
-	current_menu_location += str(current_cursor_position)
-
-	# reset the cursor position
-	reset_cursor_position()
-	
-def move_menu_location_backwards():
-	# remove the last item from the current_menu_location string
-	# this shows that we have retreated by one menu level
-	global current_menu_location
-	current_menu_location = current_menu_location[:-1]
-	
-	# reset the cursor position
-	reset_cursor_position()
-	
-	# disable back button if at top tier of the menu
-	if current_menu_location == '0':
-		global at_menu_start
-		at_menu_start = True
-	
-	print(current_menu_location)
+	menu_controller.redraw_display_flag = False
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
 while True:
 	# redraw the display if required.
-	if redraw_display_flag == True:
-		current_menu = menu.get(current_menu_location)
-		draw_display(current_menu.text)
+	if menu_controller.redraw_display_flag == True:
+		current_menu = menu_controller.get_current_menu()
+		draw_display(current_menu.get_image(menu_controller.current_cursor_position))
 	
 	# process the buttons
 	if up_button.process() == 1:
-		decrement_cursor_position()
-		# redraw the display on next iteration
-		redraw_display_flag = True
-		print("Up button pressed")
+		current_menu.on_up_button(menu_controller)
 		
 	if down_button.process() == 1:
-		increment_cursor_position()
-		# redraw the display on next iteration
-		redraw_display_flag = True	
-		print("Down button pressed")
+		current_menu.on_down_button(menu_controller)
 	
 	if back_button.process() == 1:
-		# only on back button event if we're not at the top tier of the menu.
-		if current_menu.back_button_disabled != True:
-			move_menu_location_backwards()
-			# redraw the display on next iteration
-			redraw_display_flag = True
-			print("Back button pressed")
+		current_menu.on_back_button(menu_controller)
 	
 	if enter_button.process() == 1:
-		if current_menu.enter_button_disabled != True:
-			move_menu_location_forwards()
-			redraw_display_flag = True
-			print("Enter button pressed")
+		current_menu.on_enter_button(menu_controller)
 			
 	if preset_one_button.process() == 1:
 		print("Preset-one button pressed")
