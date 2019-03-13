@@ -7,6 +7,9 @@ import board
 import busio
 import adafruit_mprls
 
+# inspect function attributes
+from inspect import signature
+
 # GPIO imports
 import RPi.GPIO as GPIO
 
@@ -43,6 +46,10 @@ MENU_ENCODER_CHANNEL_B_PIN = 11
 VOLUME_ENCODER_CHANNEL_A_PIN = 14 
 VOLUME_ENCODER_CHANNEL_B_PIN = 15
 
+# encoder rotation constants
+CLOCKWISE = 0
+ANTI_CLOCKWISE = 1
+
 # debounce time in seconds
 DEBOUNCE_TIME = 0.05                                       
 
@@ -64,6 +71,12 @@ power_button = Debounce(DEBOUNCE_TIME, POWER_BUTTON_PIN)
 chord_change_button = Debounce(DEBOUNCE_TIME, CHORD_CHANGE_BUTTON_PIN)
 menu_encoder = Encoder(DEBOUNCE_TIME, MENU_ENCODER_CHANNEL_A_PIN, MENU_ENCODER_CHANNEL_B_PIN)
 volume_encoder = Encoder(DEBOUNCE_TIME, VOLUME_ENCODER_CHANNEL_A_PIN, VOLUME_ENCODER_CHANNEL_B_PIN)
+
+# effect parameters
+effect_1_parameter_1 = 0
+effect_1_parameter_2 = 0
+effect_2_parameter_1 = 0
+effect_2_parameter_2 = 0
 
 # display initialisation
 # 128x64 display with hardware I2C:
@@ -100,11 +113,6 @@ class Menu_Controller:
 	current_menu_location = ''
 	structure = {None: None,}
 	redraw_display_flag = True
-	
-	# current_menu = menu.get(current_menu_location)
-	
-	def __init__(self):
-		print('I\'m alive')
 		
 	def increment_cursor_position(self):	
 		# get the number of items in the currently selected menu but zero indexed
@@ -147,10 +155,9 @@ class Menu_Controller:
 		# reset the cursor position
 		self.reset_cursor_position()
 		
-	def get_current_menu(self):
+	def get_current_page(self):
 		# return the currently selected menu
-		return Menu_Controller.structure[Menu_Controller.current_menu_location]
-		
+		return Menu_Controller.structure[Menu_Controller.current_menu_location]		
 
 class Menu_Page:
 	def __init__(self, text, menu_type, back_button_disabled=False):
@@ -160,6 +167,9 @@ class Menu_Page:
 		self.back_button_disabled = back_button_disabled
 		self.enter_button_disabled = False
 		self.cursor_disabled = False
+		self.encoder_clockwise_function = None
+		self.encoder_anti_clockwise_function = None
+		self.parameter_to_display = '31'
 		
 		# disable the cursor and enter button if Menu_Page type is 'Splash'
 		if menu_type == 'splash':
@@ -191,12 +201,18 @@ class Menu_Page:
 			# draw each item onto the image in the correct position
 			for index, menu_string in enumerate(formatted_menu_strings):
 				local_draw.text((PADDING,PADDING * (index + 1) + (MENU_ITEM_HEIGHT * index)), menu_string, font=font, fill=255)
-		# else just	draw the unformatted strings to the display 	
+		# else just	draw the unformatted strings to the display
 		else:
 			for index, menu_string in enumerate(self.menu_items):
+				# check to see if a value needs to be displayed
+				if menu_string == 'Value:':
+					menu_string + ' ' + self.parameter_to_display
 				local_draw.text((PADDING,PADDING * (index + 1) + (MENU_ITEM_HEIGHT * index)), menu_string, font=font, fill=255)
 				
 		return local_image
+		
+	def set_parameter_to_display(self, parameter):
+		self.parameter_to_display = parameter
 		
 	# generate formatted strings which include selection marker and whitespace
 	def menu_string_generator(self, menu_item_number, text_to_display, current_cursor_position):
@@ -208,10 +224,25 @@ class Menu_Page:
 	def on_enter_button(self, menu_controller):
 		# make sure that the Menu_Page is of type 'list'
 		if self.menu_type == 'list':
+			# get the text string at the current cursor position
+			text_string = self.menu_items[menu_controller.current_cursor_position]
+			
 			# if a function has been assigned to the menu_item...
-			if self.menu_functions.get(menu_controller.current_cursor_position) != None:
-				#... execute that function
-				self.menu_functions(menu_controller.current_cursor_position)
+			if self.menu_functions.get(text_string) != None:
+				#... get the function
+				function_to_call = self.menu_functions.get(text_string)
+				
+				# get the siganture of the function
+				function_signature = signature(function_to_call)
+				# get the function parameters
+				function_parameters = function_signature.parameters
+				
+				# count the number of parameters. if == 1 a location identifier is required
+				if len(function_parameters) == 1:
+					location_identifier = menu_controller.current_menu_location + str(menu_controller.current_cursor_position)
+					function_to_call(location_identifier)
+				else:
+					function_to_call()
 			else:
 				# progress deeper into the menu
 				menu_controller.move_menu_location_forwards()
@@ -232,9 +263,27 @@ class Menu_Page:
 		if self.menu_type == 'list':
 			menu_controller.decrement_cursor_position()
 			menu_controller.redraw_display_flag = True
+			
+	def on_encoder_clockwise(self, menu_controller):
+		self.encoder_clockwise_function(menu_controller.current_menu_location)
+		menu_controller.redraw_display_flag = True
 		
+	def on_encoder_anti_clockwise(self, menu_controller):
+		self.encoder_anti_clockwise_function(menu_controller.current_menu_location)
+		menu_controller.redraw_display_flag = True
 		
-top_text = ('Global', 'Instrument', 'Effect', 'Chords')
+	def assign_enter_function(self, menu_item, function):
+		# assign the incoming function to the menu item.
+		self.menu_functions[menu_item] = function
+		
+	def assign_encoder_clockwise_function(self, function):
+		self.encoder_clockwise_function = function
+		
+	def assign_encoder_anti_clockwise_function(self, function):
+		self.encoder_anti_clockwise_function = function
+		
+# create text strings for each menu page
+main_text = ('Global', 'Instrument', 'Effect', 'Chords')
 global_text = ('Wristband',)
 wristband_text = ('Reconnect',)
 reconnect_text = ('Searching', 'please wait...')
@@ -242,14 +291,15 @@ connection_success_text = ('Connection successful!', 'Returning to main menu...'
 instrument_text = ('Stratocaster', 'Telecaster', 'Les Paul', 'Acoustic')
 effect_text = ('Slot 1', 'Slot 2')
 effect_slot_text = ('Type', 'Parameter 1', 'Parameter 2')
-effect_type_text = ('Off', 'Disortion', 'Flanger', 'Chorus')
-parameter_value_text = ('Parameter Name', 'Value 0-127')
+effect_type_text = ('Off', 'Distortion', 'Flanger', 'Chorus')
+parameter_value_text = ('Parameter Name', 'Value:')
 chords_text = ('Red', 'Green', 'Blue', 'Yellow')
-chord_configuration_text = ('Root Note', 'Type')
+chord_config_text = ('Root Note', 'Type')
 root_note_text = ('Root Note:', 'A')
 chord_type_text = ('Chord Type:', 'Major', )
 
-top = Menu_Page(top_text, 'list', back_button_disabled=True)
+# create instances of each Menu_Page
+main = Menu_Page(main_text, 'list', back_button_disabled=True)
 _global = Menu_Page(global_text, 'list')
 wristband = Menu_Page(wristband_text, 'list')
 reconnect = Menu_Page(reconnect_text, 'splash')
@@ -260,12 +310,125 @@ effect_slot = Menu_Page(effect_slot_text, 'list')
 effect_type = Menu_Page(effect_type_text, 'list')
 effect_parameter = Menu_Page(parameter_value_text, 'value')
 chords = Menu_Page(chords_text, 'list')
-chord_config = Menu_Page(chord_configuration_text, 'list')
+chord_config = Menu_Page(chord_config_text, 'list')
 root_note = Menu_Page(root_note_text, 'value')
 chord_type = Menu_Page(chord_type_text, 'value')
 
-### Construct the Menu ###
+# assign functions to Menu_Items
 
+# dummy handler functions
+def reconnect_bluetooth_handler():
+	print('reconnecting to bluetooth')
+	
+def instrument_selection_handler(location_identifier):
+	if location_identifier == '10':
+		print('Loading Stratocaster')
+	elif location_identifier == '11':
+		print('Loading Telecaster')
+	elif location_identifier == '12':
+		print('Loading Les Paul')
+	elif location_identifier == '13':
+		print('Loading Acoustic')
+	
+def effect_selection_handler(location_identifier):
+	if location_identifier == '2000':
+		print('Switching off the effect in Slot 1')
+	if location_identifier == '2001':
+		print('Loading Distorion in Slot 1')
+	if location_identifier == '2002':
+		print('Loading Flanger in Slot 1')
+	if location_identifier == '2003':
+		print('Loading Chorus in Slot 1')
+	if location_identifier == '2100':
+		print('Switching off the effect in Slot 2')
+	if location_identifier == '2101':
+		print('Loading Distorion in Slot 2')
+	if location_identifier == '2102':
+		print('Loading Flanger in Slot 2')
+	if location_identifier == '2103':
+		print('Loading Chorus in Slot 2')
+		
+def root_note_selection_handler(location_identifier):
+	if location_identifier == '10':
+		print('Loading Stratocaster')
+	elif location_identifier == '11':
+		print('Loading Telecaster')
+	elif location_identifier == '12':
+		print('Loading Les Paul')
+	elif location_identifier == '13':
+		print('Loading Acoustic')
+
+# reconnect to bluetooth
+wristband.assign_enter_function('Reconnect', reconnect_bluetooth_handler)
+# load an instrument 
+instrument.assign_enter_function('Stratocaster', instrument_selection_handler)
+instrument.assign_enter_function('Telecaster', instrument_selection_handler)
+instrument.assign_enter_function('Les Paul', instrument_selection_handler)
+instrument.assign_enter_function('Acoustic', instrument_selection_handler)
+# switch off effect
+effect_type.assign_enter_function('Off', effect_selection_handler)
+effect_type.assign_enter_function('Distortion', effect_selection_handler)
+effect_type.assign_enter_function('Flanger', effect_selection_handler)
+effect_type.assign_enter_function('Chorus', effect_selection_handler)
+
+# dummy encoder functions 
+def increment_parameter_value(location_identifier):
+	global effect_1_parameter_1
+	global effect_1_parameter_2
+	global effect_2_parameter_1
+	global effect_2_parameter_2
+	
+	# Effect 1, Parameter 1 value
+	if location_identifier == '201':
+		if effect_1_parameter_1 < 127:
+			effect_1_parameter_1 += 1
+	
+	# Effect 1, Parameter 2 value		
+	if location_identifier == '202':
+		if effect_1_parameter_2 < 127:
+			effect_1_parameter_2 += 1
+				
+	# Effect 2, Parameter 1 value
+	if location_identifier == '211':
+		if effect_2_parameter_1 < 127:
+			effect_2_parameter_1 += 1
+			
+	# Effect 2, Parameter 2 value		
+	if location_identifier == '212':
+		if effect_2_parameter_2 < 127:
+			effect_2_parameter_2 += 1
+
+def decrement_parameter_value(location_identifier):
+	global effect_1_parameter_1
+	global effect_1_parameter_2
+	global effect_2_parameter_1
+	global effect_2_parameter_2
+	
+	# Effect 1, Parameter 1 value
+	if location_identifier == '201':
+		if effect_1_parameter_1 > 0:
+			effect_1_parameter_1 -= 1
+	
+	# Effect 1, Parameter 2 value
+	if location_identifier == '202':
+		if effect_1_parameter_2 > 0:
+			effect_1_parameter_2 -= 1
+	
+	# Effect 2, Parameter 1 value
+	if location_identifier == '211':
+		if effect_2_parameter_1 > 0:
+			effect_2_parameter_1 -= 1
+	
+	# Effect 2, Parameter 2 value
+	if location_identifier == '212':
+		if effect_2_parameter_2 > 0:
+			effect_2_parameter_2 -= 1
+
+effect_parameter.assign_encoder_clockwise_function(increment_parameter_value)
+effect_parameter.assign_encoder_anti_clockwise_function(decrement_parameter_value)
+
+
+### Construct the Menu ###
 menu_controller = Menu_Controller()
 
 # dictionary keys are used to determine location
@@ -274,7 +437,7 @@ menu_controller = Menu_Controller()
 
 ## Tier 0 ##
 # add the top Menu_Page to the menu dictionary
-menu_controller.structure[''] = top
+menu_controller.structure[''] = main
 
 ## Tier 1 ##
 # add Menu_Page for each item listed in the top Menu_Page 
@@ -345,10 +508,12 @@ def draw_display(incoming_image):
 	menu_controller.redraw_display_flag = False
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
 while True:
+
 	# redraw the display if required.
 	if menu_controller.redraw_display_flag == True:
-		current_menu = menu_controller.get_current_menu()
+		current_menu = menu_controller.get_current_page()
 		draw_display(current_menu.get_image(menu_controller.current_cursor_position))
+		print(effect_1_parameter_1)
 	
 	# process the buttons
 	if up_button.process() == 1:
@@ -387,19 +552,25 @@ while True:
 	# process the menu encoder
 	menu_encoder_scan = menu_encoder.process()
 
+	# check if any activity has taken place. if it has...
 	if menu_encoder_scan != None:
-		if menu_encoder_scan == False:
-			print('menu encoder turned clockwise')
-		elif menu_encoder_scan == True:
-			print('menu encoder turned anti-clockwise')
-	
+		#... check to see if a 'value' Menu_Page is selected.
+		if current_menu.menu_type == 'value':
+			# call the appropriate function 
+			if menu_encoder_scan == CLOCKWISE:
+				current_menu.on_encoder_clockwise(menu_controller)
+			elif menu_encoder_scan == 1:
+				current_menu.on_encoder_anti_clockwise(menu_controller)
+				
 	# process the volume encoder
 	volume_encoder_scan = volume_encoder.process()
-
+	
+	# check if any activity has taken place. if it has...
 	if volume_encoder_scan != None:
-		if volume_encoder_scan == False:
+		#... check the direction the encoder has been rotated
+		if volume_encoder_scan == 0:
 			print('volume encoder turned clockwise')
-		elif volume_encoder_scan == True:
+		elif volume_encoder_scan == 1:
 			print('volume encoder turned anti-clockwise')
 			
 	#print(mpr.pressure)
