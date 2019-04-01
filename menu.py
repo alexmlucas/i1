@@ -75,7 +75,6 @@ class Menu_Controller:
 class Menu_Page(object):
 	def __init__(self, text, menu_type, back_button_disabled=False):
 		self.menu_items = text
-		self.menu_functions = {None:None,}
 		self.menu_type = menu_type
 		self.back_button_disabled = back_button_disabled
 		self.enter_button_disabled = False
@@ -114,14 +113,14 @@ class Menu_Page(object):
 
 			# draw each item onto the image in the correct position
 			for index, menu_string in enumerate(formatted_menu_strings):
-				local_draw.text((PADDING,PADDING * (index + 1) + (MENU_ITEM_HEIGHT * index)), menu_string, font=font, fill=255)
+				local_draw.text((PADDING,PADDING * (index + 1) + (MENU_ITEM_HEIGHT * index)), menu_string, font=font, fill=1)
 		# else just	draw the unformatted strings to the display
 		else:
 			for index, menu_string in enumerate(self.menu_items):
 				# check to see if a value needs to be displayed
 				if menu_string == 'Value:':
 					menu_string + ' ' + self.parameter_to_display
-				local_draw.text((PADDING,PADDING * (index + 1) + (MENU_ITEM_HEIGHT * index)), menu_string, font=font, fill=255)
+				local_draw.text((PADDING,PADDING * (index + 1) + (MENU_ITEM_HEIGHT * index)), menu_string, font=font, fill=1)
 				
 		return local_image
 		
@@ -162,12 +161,12 @@ class Menu_Page(object):
 			menu_controller.redraw_display_flag = True
 			
 	def on_down_button(self, menu_controller):
-		if self.menu_type == 'list':
+		if self.menu_type == 'list' or self.menu_type == 'selection':
 			menu_controller.increment_cursor_position()
 			menu_controller.redraw_display_flag = True
 			
 	def on_up_button(self, menu_controller):
-		if self.menu_type == 'list':
+		if self.menu_type == 'list' or self.menu_type == 'selection':
 			menu_controller.decrement_cursor_position()
 			menu_controller.redraw_display_flag = True
 		
@@ -177,6 +176,10 @@ class Menu_Page(object):
 
 		
 class List_Page(Menu_Page):
+	
+	def __init__(self, text, menu_type, back_button_disabled=False):
+		Menu_Page.__init__(self, text, menu_type, back_button_disabled)
+		self.menu_functions = {None:None,}
 	
 	def get_image(self, menu_controller):
 		# get the cursor positon
@@ -197,7 +200,7 @@ class List_Page(Menu_Page):
 
 			# draw each item onto the image in the correct position
 			for index, menu_string in enumerate(formatted_menu_strings):
-				local_draw.text((PADDING,PADDING * (index + 1) + (MENU_ITEM_HEIGHT * index)), menu_string, font=font, fill=255)		
+				local_draw.text((PADDING,PADDING * (index + 1) + (MENU_ITEM_HEIGHT * index)), menu_string, font=font, fill=1)		
 		
 		return local_image
 		
@@ -205,6 +208,11 @@ class List_Page(Menu_Page):
 
 			# get the text string at the current cursor position
 			text_string = self.menu_items[menu_controller.cursor_position]
+			
+			# progress deeper into the menu
+			menu_controller.move_menu_location_forwards()
+			# indicate that the display needs to be redrawn
+			menu_controller.redraw_display_flag = True
 			
 			# if a function has been assigned to the menu_item...
 			if self.menu_functions.get(text_string) != None:
@@ -222,26 +230,83 @@ class List_Page(Menu_Page):
 					function_to_call(location_identifier)
 				else:
 					function_to_call()
-			else:
-				# progress deeper into the menu
-				menu_controller.move_menu_location_forwards()
-				# indicate that the display needs to be redrawn
-				menu_controller.redraw_display_flag = True
-				
+			
+			
+			
 	# generate formatted strings which include selection marker and whitespace
 	def menu_string_generator(self, menu_item_number, text_to_display, cursor_position):
 		if menu_item_number == cursor_position:
 			return SELECTION_STRING + text_to_display
 		else:
 			return SPACE_STRING + text_to_display
+			
+class Selection_Page(List_Page):
 	
+	def __init__(self, text, menu_type, parameter_name, parameter_container, menu_function):
+		Menu_Page.__init__(self, text, menu_type)
+		self.parameter_name = parameter_name
+		# get the selected instrument
+		self.selected_item = parameter_container[self.parameter_name][0]
+		# could possibly just use the menu_fucntions dictionary with a single item
+		self.menu_function = menu_function
+	
+	def get_image(self, menu_controller):
+		# get the cursor positon
+		cursor_position = menu_controller.cursor_position
+		
+		# create a new blank image
+		local_image = Image.new('1', (WIDTH, HEIGHT))
+		
+		# Get drawing object to draw on image.
+		local_draw = ImageDraw.Draw(local_image)
+
+		# ...create a new list to add formatted menu strings to and...
+		formatted_menu_strings = []
+		
+		# ...format each string in the menu
+		for index, menu_item in enumerate(self.menu_items):
+			formatted_menu_strings.append(self.menu_string_generator(index, menu_item, cursor_position))
+
+		# draw each item onto the image in the correct position
+		for index, menu_string in enumerate(formatted_menu_strings):
+			# calcuate x and y locations
+			x_location = PADDING
+			y_location = PADDING * (index + 1) + (MENU_ITEM_HEIGHT * index)
+			
+			if index == self.selected_item:
+				# draw a selection rectangle
+				# the rectange is defined by the xy coordinates of two opposing corners 
+				local_draw.rectangle((0, y_location - 3, 116, y_location + 14), outline=0, fill=1)
+				
+				#draw.rectangle((0,0,width,height), outline=0, fill=0)
+				local_draw.text((x_location, y_location), menu_string, font=font, fill=0)
+			else:
+				#local_draw.text((PADDING,PADDING * (index + 1) + (MENU_ITEM_HEIGHT * index)), menu_string, font=font, fill=1)
+				local_draw.text((x_location, y_location), menu_string, font=font, fill=1)		
+				
+		return local_image
+		
+	def on_enter_event(self, menu_controller, parameter_container):
+		# update the parameter container; determine the selected item from the cursor position
+		parameter_container[self.parameter_name][0] = menu_controller.cursor_position
+		
+		# update the internal record of the currently selected item
+		self.selected_item = parameter_container[self.parameter_name][0]
+		
+		# call the function to load the appropriate instrument
+		self.menu_function(self.parameter_name)
+		
+		# indicate that the display needs to be redrawn
+		menu_controller.redraw_display_flag = True
 		
 class Value_Page(Menu_Page):
 	
-	def __init__(self, text, menu_type, parameter_name):
+	def __init__(self, text, menu_type, parameter_name, parameter_container):
 		Menu_Page.__init__(self, text, menu_type)
 		self.parameter_name = parameter_name
-		self.value_to_draw = '0'
+		# get the initial value to draw to the screen
+		current_value = parameter_container[self.parameter_name][0]
+		self.value_to_draw = parameter_container[self.parameter_name][1][current_value]
 		self.max_value = 127
 	
 	def get_image(self, menu_controller):
@@ -256,7 +321,7 @@ class Value_Page(Menu_Page):
 			if menu_string == 'Value:':
 				menu_string += ' ' 
 				menu_string += self.value_to_draw
-			local_draw.text((PADDING,PADDING * (index + 1) + (MENU_ITEM_HEIGHT * index)), menu_string, font=font, fill=255)
+			local_draw.text((PADDING,PADDING * (index + 1) + (MENU_ITEM_HEIGHT * index)), menu_string, font=font, fill=1)
 		
 		return local_image
 		
@@ -284,7 +349,19 @@ class Value_Page(Menu_Page):
 		# indicate that the display needs to be redrawn			
 		menu_controller.redraw_display_flag = True
 	
-	
+class Splash_Page(Menu_Page):
+	def get_image(self, menu_controller):
+		# create a new blank image
+		local_image = Image.new('1', (WIDTH, HEIGHT))
+		
+		# Get drawing object to draw on image.
+		local_draw = ImageDraw.Draw(local_image)
+		
+		for index, menu_string in enumerate(self.menu_items):
+			local_draw.text((PADDING,PADDING * (index + 1) + (MENU_ITEM_HEIGHT * index)), menu_string, font=font, fill=1)
+		
+		return local_image
+
 
 
 	

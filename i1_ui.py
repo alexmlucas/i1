@@ -103,6 +103,72 @@ MENU_ITEM_HEIGHT = 14
 # Load font.
 font = ImageFont.truetype('BodgeR.ttf', 12)
 
+# create arrays of strings to dispaly as parameter values
+root_note_values  = {0:'A', 1:'A#', 2:'B',
+					 3:'C', 4:'C#', 5:'D',
+					 6:'D#',7:'E',  8:'F',
+					 9:'F#',10:'G',11:'G#'}
+					 
+chord_type_values = {0:'Major', 1:'Major 6', 2:'Major 7',
+					 3:'minor', 4:'minor 6', 5:'minor 7',
+					 6:'Dominant'}
+
+# parameter name, current index, index, parameter value as string
+parameter_container = dict()
+# the container consists of the...
+# name of the parameter
+# the index point of the value which show be displayed
+# an array of strings to display										   
+parameter_container['effect_1_parameter_1'] = [0, {0:'0',
+												   1:'1',
+												   2:'2',
+												   3:'3',}]
+												   
+parameter_container['effect_1_parameter_2'] = [0, {0:'0',
+												   1:'1',
+												   2:'2',
+												   3:'3',}]
+
+parameter_container['effect_1_parameter_3'] = [0, {0:'0',
+												   1:'1',
+												   2:'2',
+												   3:'3',}]
+
+parameter_container['effect_1_parameter_4'] = [0, {0:'0',
+												   1:'1',
+												   2:'2',
+												   3:'3',}]	
+												   
+parameter_container['red_chord_root_note'] = [0, root_note_values]
+parameter_container['green_chord_root_note'] = [0, root_note_values]
+parameter_container['blue_chord_root_note'] = [0, root_note_values]
+parameter_container['yellow_chord_root_note'] = [0, root_note_values]
+
+parameter_container['red_chord_type'] = [0, chord_type_values]
+parameter_container['green_chord_type'] = [0, chord_type_values]
+parameter_container['blue_chord_type'] = [0, chord_type_values]
+parameter_container['yellow_chord_type'] = [0, chord_type_values]
+
+parameter_container['instrument'] = [0, {0:'Stratocaster',
+											 1:'Telecaster',
+											 2:'Les Paul',
+										     3:'Acoustic'}]
+
+parameter_container['effect_slot_1_type'] = [0, {0:'Off',
+												 1:'Distortion',
+												 2:'Flanger',
+												 3:'Chorus'}]
+
+
+parameter_container['effect_slot_2_type'] = [0, {0:'Off',
+												 1:'Distortion',
+												 2:'Flanger',
+												 3:'Chorus'}]												 
+												 										     
+
+# create an instance of the menu controller
+menu_controller = Menu_Controller()
+
 # create text strings for each menu page
 main_text = ('Global', 'Instrument', 'Effect', 'Chords')
 global_text = ('Wristband',)
@@ -116,41 +182,95 @@ effect_type_text = ('Off', 'Distortion', 'Flanger', 'Chorus')
 parameter_value_text = ('Parameter Name', 'Value:')
 chords_text = ('Red', 'Green', 'Blue', 'Yellow')
 chord_config_text = ('Root Note', 'Type')
-root_note_text = ('Root Note:', 'A')
-chord_type_text = ('Chord Type:', 'Major', )
+root_note_text = ('Root Note', 'Value:')
+chord_type_text = ('Chord Type', 'Value:', )
+
+# dummy handler functions
+def reconnect_bluetooth_handler():
+	print('reconnecting to bluetooth')
+	# it will take some time to conenct here - a try except block would be useful
+	# delay to emulate connection time
+	time.sleep(2)
+	# if successful show success Splash_Page
+	menu_controller.current_menu_location = '0000'
+	# redraw the display
+	menu_controller.redraw_display_flag = True
+	# pause before returning to main menu
+	time.sleep(1)
+	# set menu location to be that of the main menu
+	menu_controller.current_menu_location = ''
+	# redraw the display
+	menu_controller.redraw_display_flag = True
+	
+def instrument_selection_handler(parameter_name):
+	
+	index = parameter_container[parameter_name][0]
+	selected_instrument = parameter_container[parameter_name][1][index]
+	
+	print('The selected instrument is {}'.format(selected_instrument))
+
+def effect_selection_handler(parameter_name):
+	print('The selected effect is {}'.format(selected_effect))
+	
+def effect_selection_handler(location_identifier):
+	if location_identifier == '2000':
+		print('Switching off the effect in Slot 1')
+	if location_identifier == '2001':
+		print('Loading Distorion in Slot 1')
+	if location_identifier == '2002':
+		print('Loading Flanger in Slot 1')
+	if location_identifier == '2003':
+		print('Loading Chorus in Slot 1')
+	if location_identifier == '2100':
+		print('Switching off the effect in Slot 2')
+	if location_identifier == '2101':
+		print('Loading Distorion in Slot 2')
+	if location_identifier == '2102':
+		print('Loading Flanger in Slot 2')
+	if location_identifier == '2103':
+		print('Loading Chorus in Slot 2')
+		
+def root_note_selection_handler(location_identifier):
+	if location_identifier == '10':
+		print('Loading Stratocaster')
+	elif location_identifier == '11':
+		print('Loading Telecaster')
+	elif location_identifier == '12':
+		print('Loading Les Paul')
+	elif location_identifier == '13':
+		print('Loading Acoustic')
 
 # create instances of each Menu_Page
 main = List_Page(main_text, 'list', back_button_disabled=True)
 _global = List_Page(global_text, 'list')
 wristband = List_Page(wristband_text, 'list')
-reconnect = Menu_Page(reconnect_text, 'splash')
-connection_success = Menu_Page(reconnect_text, 'splash')
-instrument = List_Page(instrument_text, 'list')
+reconnect = Splash_Page(reconnect_text, 'splash')
+connection_success = Splash_Page(connection_success_text, 'splash')
+instrument = Selection_Page(instrument_text, 'selection', 'instrument', parameter_container, instrument_selection_handler)
 effect = List_Page(effect_text, 'list')
 effect_slot_1 = List_Page(effect_slot_text, 'list')
 effect_slot_2 = List_Page(effect_slot_text, 'list')
-effect_slot_1_type = List_Page(effect_type_text, 'list')
-effect_slot_2_type = List_Page(effect_type_text, 'list')
-effect_slot_1_parameter_1 = Value_Page(parameter_value_text, 'list', 'effect_1_parameter_1')
-effect_slot_1_parameter_2 = List_Page(parameter_value_text, 'list')
-effect_slot_2_parameter_1 = List_Page(parameter_value_text, 'list')
-effect_slot_2_parameter_2 = List_Page(parameter_value_text, 'list')
+effect_slot_1_type = Selection_Page(effect_type_text, 'selection', 'effect_slot_1_type', parameter_container, effect_selection_handler)
+effect_slot_2_type = Selection_Page(effect_type_text, 'selection', 'effect_slot_2_type', parameter_container, effect_selection_handler)
+effect_slot_1_parameter_1 = Value_Page(parameter_value_text, 'value', 'effect_1_parameter_1', parameter_container)
+effect_slot_1_parameter_2 = Value_Page(parameter_value_text, 'value', 'effect_1_parameter_2', parameter_container)
+effect_slot_2_parameter_1 = Value_Page(parameter_value_text, 'value', 'effect_1_parameter_3', parameter_container)
+effect_slot_2_parameter_2 = Value_Page(parameter_value_text, 'value', 'effect_1_parameter_4', parameter_container)
 chords = List_Page(chords_text, 'list')
 red_chord_config = List_Page(chord_config_text, 'list')
-green_chord_config = Menu_Page(chord_config_text, 'list')
-blue_chord_config = Menu_Page(chord_config_text, 'list')
-yellow_chord_config = Menu_Page(chord_config_text, 'list')
-red_root_note = Menu_Page(root_note_text, 'value')
-red_chord_type = Menu_Page(chord_type_text, 'value')
-green_root_note = Menu_Page(root_note_text, 'value')
-green_chord_type = Menu_Page(chord_type_text, 'value')
-blue_root_note = Menu_Page(root_note_text, 'value')
-blue_chord_type = Menu_Page(chord_type_text, 'value')
-yellow_root_note = Menu_Page(root_note_text, 'value')
-yellow_chord_type = Menu_Page(chord_type_text, 'value')
+green_chord_config = List_Page(chord_config_text, 'list')
+blue_chord_config = List_Page(chord_config_text, 'list')
+yellow_chord_config = List_Page(chord_config_text, 'list')
+red_root_note = Value_Page(root_note_text, 'value', 'red_chord_root_note', parameter_container)
+red_chord_type = Value_Page(chord_type_text, 'value', 'red_chord_type', parameter_container)
+green_root_note = Value_Page(root_note_text, 'value', 'green_chord_root_note', parameter_container)
+green_chord_type = Value_Page(chord_type_text, 'value', 'green_chord_type', parameter_container)
+blue_root_note = Value_Page(root_note_text, 'value', 'blue_chord_root_note', parameter_container)
+blue_chord_type = Value_Page(chord_type_text, 'value', 'blue_chord_type', parameter_container)
+yellow_root_note = Value_Page(root_note_text, 'value', 'yellow_chord_root_note', parameter_container)
+yellow_chord_type = Value_Page(chord_type_text, 'value', 'yellow_chord_type', parameter_container)
 
 ### Construct the Menu ###
-menu_controller = Menu_Controller()
 
 # dictionary keys are used to determine location
 # the number of characters in the dicationary key indicates the tier of the menu
@@ -170,7 +290,6 @@ menu_controller.structure['3'] = chords
 ## Tier 2 ##
 # add a Menu_Page for each item listed in the _global Menu_Page
 menu_controller.structure['00'] = wristband 
-
 
 # add a Menu_Page for each item listed in the effect Menu_Page
 menu_controller.structure['20'] = effect_slot_1 # Effect Slot 1
@@ -218,70 +337,9 @@ menu_controller.structure['0000'] = connection_success
 for key, value in menu_controller.structure.items():
 	value.location = key
 
-
-# dummy handler functions
-def reconnect_bluetooth_handler():
-	print('reconnecting to bluetooth')
-	
-def instrument_selection_handler(location_identifier):
-	if location_identifier == '10':
-		print('Loading Stratocaster')
-	elif location_identifier == '11':
-		print('Loading Telecaster')
-	elif location_identifier == '12':
-		print('Loading Les Paul')
-	elif location_identifier == '13':
-		print('Loading Acoustic')
-	
-def effect_selection_handler(location_identifier):
-	if location_identifier == '2000':
-		print('Switching off the effect in Slot 1')
-	if location_identifier == '2001':
-		print('Loading Distorion in Slot 1')
-	if location_identifier == '2002':
-		print('Loading Flanger in Slot 1')
-	if location_identifier == '2003':
-		print('Loading Chorus in Slot 1')
-	if location_identifier == '2100':
-		print('Switching off the effect in Slot 2')
-	if location_identifier == '2101':
-		print('Loading Distorion in Slot 2')
-	if location_identifier == '2102':
-		print('Loading Flanger in Slot 2')
-	if location_identifier == '2103':
-		print('Loading Chorus in Slot 2')
-		
-def root_note_selection_handler(location_identifier):
-	if location_identifier == '10':
-		print('Loading Stratocaster')
-	elif location_identifier == '11':
-		print('Loading Telecaster')
-	elif location_identifier == '12':
-		print('Loading Les Paul')
-	elif location_identifier == '13':
-		print('Loading Acoustic')
-
 # reconnect to bluetooth
 wristband.assign_enter_function('Reconnect', reconnect_bluetooth_handler)
-# load an instrument 
-instrument.assign_enter_function('Stratocaster', instrument_selection_handler)
-instrument.assign_enter_function('Telecaster', instrument_selection_handler)
-instrument.assign_enter_function('Les Paul', instrument_selection_handler)
-instrument.assign_enter_function('Acoustic', instrument_selection_handler)
 
-# parameter name, current index, index, parameter value as string
-parameter_container = dict()
-parameter_container['effect_1_parameter_1'] = [0, {0:'0',
-												   1:'1',
-												   2:'2',
-												   3:'3',}]
-												   
-parameter_container['effect_1_parameter_2'] = [0, {0:'0',
-												   1:'1',
-												   2:'2',
-												   3:'3',}]
-							
-	
 def draw_display(incoming_image):
 	# clear the display
 	disp.clear()
@@ -311,7 +369,11 @@ while True:
 		current_menu.on_back_button(menu_controller)
 	
 	if enter_button.process() == 1:
-		current_menu.on_enter_event(menu_controller)
+		# if the current menu is a Selection_Page pass in the parameter container
+		if type(current_menu) is Selection_Page:
+			current_menu.on_enter_event(menu_controller, parameter_container)
+		else:
+			current_menu.on_enter_event(menu_controller)
 			
 	if preset_one_button.process() == 1:
 		print("Preset-one button pressed")
@@ -341,8 +403,6 @@ while True:
 	if menu_encoder_scan_result != None:
 		# the menu encoder only acts when a Value_Page is selected
 		if type(current_menu) is Value_Page:
-
-			print(parameter_container['effect_1_parameter_1'][0])
 			# pass on the result of the scan to the menu page
 			current_menu.on_encoder_event(menu_encoder_scan_result, menu_controller, parameter_container)
 				
