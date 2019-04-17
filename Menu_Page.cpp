@@ -10,6 +10,9 @@ void Menu_Page::set_text(const char *menu_txt){
   m_string = menu_txt;
 }
 
+void Menu_Page::set_2d_text(const char *const *menu_txt){
+  m_text_2d = menu_txt;
+}
 
 void Menu_Page::set_location(char location[]){
   for(int i; i < sizeof(location); i++){
@@ -30,11 +33,12 @@ void Menu_Page::draw(Adafruit_SSD1306 &display){
 
   display.drawLine(0, 14, 128, 14, WHITE);
   display.display();
-  Serial.println("hey you!");
+
+  Serial.println();
+  Serial.println("Within class");
   Serial.println(int(m_string));
   Serial.println(char(pgm_read_byte_near(m_string)));
   Serial.println(char(pgm_read_byte_near(m_string+1)));
-  Serial.println("yes you!");
 
   char myChar;
 
@@ -44,7 +48,8 @@ void Menu_Page::draw(Adafruit_SSD1306 &display){
   }
 
   Serial.println();
-
+  strcpy_P(m_string_buffer, (char *)pgm_read_word(&(m_text_2d[1])));
+  Serial.println(m_string_buffer);
   
 }
 

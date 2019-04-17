@@ -77,6 +77,7 @@ const char master_level[] PROGMEM = "Master Level";
 const char test_array[] PROGMEM = "test";
 const char flash_test PROGMEM = 'f';
 
+// An array of constant pointers to constant chars?
 const char *const main_menu_txt[] PROGMEM = {song, guitar, zone, mix_levels};
 const char *const guitar_menu_txt[] PROGMEM = {guitar, classic_rock, hard_rock, acoustic};
 
@@ -107,6 +108,9 @@ Simple_Encoder selection_encoder;
 const char *a_pointer; 
 const char *m_pointer;
 
+// A pointer to an array of constant pointers to constant chars.
+const char *const *d_pointer;
+
 // Create Menu_Page instances
 Menu_Page main_menu("list");
 
@@ -119,9 +123,14 @@ char current_menu_location[] = {""};
 // Redraw display flag
 bool redraw_display = true;
 
+// Buffer for reading menu text
+char string_buffer[30];
+
 void setup() {
   a_pointer = test_array;
+  d_pointer = main_menu_txt;
   main_menu.set_text(a_pointer);
+  main_menu.set_2d_text(d_pointer);
   
   Serial.begin(19200);
   
@@ -138,18 +147,21 @@ void setup() {
   
   m_pointer = test_array;
   
-  Serial.println(int(&test_array));
-  Serial.println(int(m_pointer));
-  Serial.println(char(pgm_read_byte_near(m_pointer)));
-  Serial.println(char(pgm_read_byte_near(m_pointer+1)));
+  Serial.println(int(&main_menu_txt));
+  Serial.println(int(d_pointer));
+  
+  //Serial.println(char(pgm_read_byte_near(m_pointer)));
+  //Serial.println(char(pgm_read_byte_near(m_pointer+1)));
+  
   /*for(int i = 0; i < 6; i++){
     strcpy_P(string_buffer, (char *)pgm_read_word(&(main_menu_txt[i])));
     Serial.println(string_buffer);
     delay(500);
   }*/
+  strcpy_P(string_buffer, (char *)pgm_read_word(&(d_pointer[1])));
 
-  //strcpy_P(string_buffer, (char *)pgm_read_word(&(main_menu_txt[1])));
-  //Serial.println(string_buffer);
+  //strcpy_P(string_buffer, (char *)pgm_read_word(&(main_menu_txt[0])));
+  Serial.println(string_buffer);
   
   selection_encoder.initialise(ENCODER_PIN_A, ENCODER_PIN_B, DEBOUNCE_TIME);
   

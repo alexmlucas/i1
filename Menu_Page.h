@@ -18,6 +18,8 @@ class Menu_Page{
     char m_string_buffer[30];
     // a pointer to type const char.
     const char *m_string;
+    // A pointer to an array of constant pointers to constant chars.
+    const char *const *m_text_2d;
     
   public:
     Menu_Page(char menu_type[]);
@@ -26,6 +28,7 @@ class Menu_Page{
     void set_enter_disabled(bool cursor_disabled);
     void set_back_disabled(bool cursor_disabled);
     void set_text(const char *menu_txt);
+    void set_2d_text(const char *const *m_text_2d);
     void draw(Adafruit_SSD1306 &display);
 };
 #endif
