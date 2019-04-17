@@ -1,22 +1,18 @@
-#include "Simple_Button.h"
+#include "Shift_Register_Button.h"
 
-Simple_Button::Simple_Button(){
-  // Default constructor
-}
-
-Simple_Button::Simple_Button(int pin, int debounce_milliseconds,const char &serial_handle){
+Shift_Register_Button::Shift_Register_Button(int bit_position, int debounce_milliseconds, const char &serial_handle){
   m_last_event_time = 0;
-  m_pin = pin;
+  //m_pin = pin;
   m_debounce_ms = debounce_milliseconds;
   m_current_state = false;
+  m_bit_position = bit_position;
   m_serial_handle = serial_handle;
-  pinMode(m_pin, INPUT);
 }
 
-bool Simple_Button::check_button_pressed(){
+bool Shift_Register_Button::check_button_pressed(byte &shift_register_reading){
   boolean button_state;
 
-  if(digitalRead(m_pin) == HIGH){
+  if(bitRead(shift_register_reading, m_bit_position) == HIGH){
     button_state = HIGH;
   } else{
     button_state = LOW;
@@ -33,20 +29,9 @@ bool Simple_Button::check_button_pressed(){
       // If the button_state is HIGH, do something...
       if(button_state == HIGH){
         send_serial();
-        if(callback_function != NULL){
-          Serial.println("a callback function exisits");
-        }
       }
     }
   }
+  
   return m_current_state;
-}
-
-void Simple_Button::set_callback_func(void (*f)()){
-  callback_function = f;
-}
-
-void Simple_Button::send_serial(){
-  Serial.println(m_serial_handle);
-  //Serial.println("test");
 }
