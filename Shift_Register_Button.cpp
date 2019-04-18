@@ -28,6 +28,7 @@ bool Shift_Register_Button::check_button_pressed(byte &shift_register_reading){
       m_last_event_time = millis();
       // If the button_state is HIGH, do something...
       if(button_state == HIGH){
+        // send_serial is a inherited function.
         send_serial();
       }
     }

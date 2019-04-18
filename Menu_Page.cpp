@@ -1,56 +1,61 @@
 #include "Menu_Page.h"
 
-Menu_Page::Menu_Page(char menu_type[]){
-  for(int i; i < sizeof(menu_type); i++){
+Menu_Page::Menu_Page(char const *menu_type, char const *menu_location, Menu_Controller *menu_controller, Parameter_Container *parameter_container){
+  /*for(int i = 0; i < sizeof(menu_type); i++){
     m_menu_type[i] = menu_type[i];
-  }
+  }*/
+  
+  // Assign class member pointers to incoming memory addresses.
+  m_menu_controller = menu_controller;
+  m_parameter_container = parameter_container;
 }
 
-void Menu_Page::set_text(const char *menu_txt){
-  m_string = menu_txt;
+void Menu_Page::set_text(const char *const *menu_text){
+  m_menu_text = menu_text;
 }
 
-void Menu_Page::set_2d_text(const char *const *menu_txt){
-  m_text_2d = menu_txt;
-}
-
-void Menu_Page::set_location(char location[]){
-  for(int i; i < sizeof(location); i++){
+void Menu_Page::set_location(char const *location){
+  /*for(int i = 0; i < sizeof(location); i++){
     m_location[i] = location[i];
-  }
+  }*/
 }
 
 void Menu_Page::draw(Adafruit_SSD1306 &display){
-  display.clearDisplay();
-  display.setCursor(PADDING,0 + PADDING);
-  display.println(F("Song 1"));
-  display.setCursor(PADDING, 16 + PADDING);
-  display.println(F("> Guitar"));
-  display.setCursor(PADDING + 13, 32 + PADDING);
-  display.println(F("Zone"));
-  display.setCursor(PADDING + 13, 48 + PADDING);
-  display.println(F("Mix"));
+  char string_buffer[16];                                                       // Buffer for reading strings from program memory.
+  char param_buffer_1[] = " ";                                                  // First buffer for parameter value
+  char param_buffer_2[0];                                                       // Second buffer for parameter value
 
-  display.drawLine(0, 14, 128, 14, WHITE);
-  display.display();
-
-  Serial.println();
-  Serial.println("Within class");
-  Serial.println(int(m_string));
-  Serial.println(char(pgm_read_byte_near(m_string)));
-  Serial.println(char(pgm_read_byte_near(m_string+1)));
-
-  char myChar;
-
-  for(byte k = 0; k < strlen_P(m_string); k++){
-    myChar = pgm_read_byte_near(m_string + k);
-    Serial.print(myChar);
-  }
-
-  Serial.println();
-  strcpy_P(m_string_buffer, (char *)pgm_read_word(&(m_text_2d[1])));
-  Serial.println(m_string_buffer);
+  sprintf(param_buffer_2, "%d", m_parameter_container->get_selected_song());    // Get the selected song value, convert to 'char'
+  strcat(param_buffer_1, param_buffer_2);                                       // Concatenate the two parameter buffers
   
+  display.clearDisplay();                                                       // Clear the display.
+                                                          
+                                                                                // Draw the page title.
+  display.setCursor((PADDING),PADDING);                                         // Set the cursor position.
+  strcpy_P(string_buffer, (char *)pgm_read_word(&(m_menu_text[0])));            // Copy title string into flash memory; always index 0.
+  
+  strcat(string_buffer, param_buffer_1);                                        // Concatenate the menu text string with the parameter buffer.
+  
+  display.println(string_buffer);                                           // Write text to display.
+  display.drawLine(0, 14, 128, 14, WHITE);                                  // Underline the title.
+ 
+  for(int i = 1; i < NUMBER_OF_LINES; i++){                                 // Interate through the remaining strings in the array.
+
+    if(m_menu_controller->get_cursor_position() == i-1){                    // Is the cursor in the same position as the text?
+      
+      display.setCursor((PADDING),(LINE_HEIGHT * i) + (PADDING));               // Calculate and set the cursor position.
+      display.println('>');                                                     // Print the cursor.
+      display.setCursor((PADDING + WHITE_SPACE),(LINE_HEIGHT * i) + (PADDING)); // Calculate and set the text position.
+      strcpy_P(string_buffer, (char *)pgm_read_word(&(m_menu_text[i])));        // Copy text string into flash memory.
+      display.println(string_buffer);                                           // Write the text to the display.
+    } else {
+                                                                                // The cursor is not the same position as the text...
+      display.setCursor((PADDING + WHITE_SPACE),(LINE_HEIGHT * i) + (PADDING)); // ...so just write the text string.
+      strcpy_P(string_buffer, (char *)pgm_read_word(&(m_menu_text[i])));
+      display.println(string_buffer);
+    }
+  }
+  display.display();                                                            // Display the new image.                 
 }
 
 void Menu_Page::set_cursor_disabled(bool cursor_disabled){

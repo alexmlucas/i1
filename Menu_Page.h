@@ -1,34 +1,34 @@
 #ifndef MENU_PAGE
 #define MENU_PAGE
 #include "Arduino.h"
+#include "Menu_Controller.h"
+#include "Parameter_Container.h"
 #include <Adafruit_SSD1306.h>
 
-const int PADDING PROGMEM = 2;
+const int PADDING PROGMEM = 3;
+const int LINE_HEIGHT PROGMEM = 15;
+const int NUMBER_OF_LINES PROGMEM = 4;
+const int WHITE_SPACE PROGMEM = 16;
 
 class Menu_Page{
   protected:
-    char m_items[4][8];
     bool m_cursor_disabled;
     bool m_enter_disabled;
     bool m_back_disabled;
     char m_menu_type[];
-    char m_location[];
-    char *const m_menu_txt[];
-    // Buffer used when copying strings from Program Memory to RAM.
-    char m_string_buffer[30];
-    // a pointer to type const char.
-    const char *m_string;
-    // A pointer to an array of constant pointers to constant chars.
-    const char *const *m_text_2d;
+    char const *m_location;
+    char m_string_buffer[30];                                         // Buffer used when copying strings from Program Memory to RAM.
+    const char *const *m_menu_text;                                   // A pointer to an array of constant pointers to constant chars.
+    Menu_Controller *m_menu_controller;                               // Pointer to the menu_controller
+    Parameter_Container *m_parameter_container;                        // Pointer to the parameter_container.
     
   public:
-    Menu_Page(char menu_type[]);
-    void set_location(char location[]);
+    Menu_Page(char const *menu_type, char const *menu_location, Menu_Controller *menu_controller, Parameter_Container *parameter_container);
+    void set_location(char const *location);
     void set_cursor_disabled(bool cursor_disabled);
     void set_enter_disabled(bool cursor_disabled);
     void set_back_disabled(bool cursor_disabled);
-    void set_text(const char *menu_txt);
-    void set_2d_text(const char *const *m_text_2d);
+    void set_text(const char *const *menu_text);
     void draw(Adafruit_SSD1306 &display);
 };
 #endif

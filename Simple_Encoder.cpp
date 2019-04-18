@@ -4,7 +4,7 @@ Simple_Encoder::Simple_Encoder(){
   // Set default values
 }
 
-void Simple_Encoder::initialise(int pin_A, int pin_B, int debounce_milliseconds){
+void Simple_Encoder::initialise(int pin_A, int pin_B, int debounce_milliseconds, Menu_Controller *menu_controller){
   m_pin_A = pin_A;
   m_pin_B = pin_B;
   m_debounce_ms = debounce_milliseconds;
@@ -16,6 +16,9 @@ void Simple_Encoder::initialise(int pin_A, int pin_B, int debounce_milliseconds)
 
   pinMode(m_pin_A, INPUT_PULLUP);
   pinMode(m_pin_B, INPUT_PULLUP); 
+
+  // Both pointers now point to the same memory address.
+  m_menu_controller = menu_controller;
 }
 
 int Simple_Encoder::track_position(){
@@ -32,13 +35,13 @@ int Simple_Encoder::track_position(){
     // ... read the current value of pin_B.
     // If the value of pin_B is LOW, a clockwise rotation has occured.
     if(digitalRead(m_pin_B) == LOW){
-      if(m_encoder_position < m_encoder_max){
-        m_encoder_position++;
+      if(m_menu_controller->get_cursor_position() < m_menu_controller->get_cursor_max_value()){
+        m_menu_controller->increment_cursor_position();
       }
     } else {
       //...otherwise an anit-clockwise rotation has occured.
-      if(m_encoder_position > m_encoder_min){
-        m_encoder_position--;
+      if(m_menu_controller->get_cursor_position() > m_menu_controller->get_cursor_min_value()){
+        m_menu_controller->decrement_cursor_position();
       }
     }
 

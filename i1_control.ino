@@ -1,7 +1,7 @@
 // Display includes
 #include <SPI.h>
 #include <Wire.h>
-//#include <Adafruit_GFX.h>
+#include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
 // Button includes
@@ -11,8 +11,10 @@
 
 // Menu includes
 #include "Menu_Page.h"
+#include "Menu_Controller.h"
+#include "Parameter_Container.h"
 
-#define OLED_RESET A2
+#define OLED_RESET 15
 
 // Create an instance of the display
 Adafruit_SSD1306 display(OLED_RESET);
@@ -21,13 +23,13 @@ Adafruit_SSD1306 display(OLED_RESET);
 #define DEBOUNCE_TIME 50
 
 // Define the encoder pins
-#define ENCODER_PIN_A 2
-#define ENCODER_PIN_B 4
+#define ENCODER_PIN_A 5
+#define ENCODER_PIN_B 6
 
 // Define the button/switch pins
-#define RECONNECT_BTN_PIN 12
-#define POWER_BTN_PIN 13
-#define ACCESS_SWT_PIN A1
+#define RECONNECT_BTN_PIN 20
+#define POWER_BTN_PIN 14
+#define ACCESS_SWT_PIN 11
 
 // Define button bits
 #define PLAY_BTN_BIT 0
@@ -41,8 +43,12 @@ Adafruit_SSD1306 display(OLED_RESET);
 
 // Define the shift register pins.
 #define SHIFT_REG_LATCH 8
-#define SHIFT_REG_DATA A3
+#define SHIFT_REG_DATA 9
 #define SHIFT_REG_CLOCK 7
+
+// Define the min & max cursor values
+#define MIN_CURSOR_VALUE 0
+#define MAX_CURSOR_VALUE 2
 
 // Define characters to be sent as serial strings.
 const char RECONNECT_CHAR PROGMEM = 'a'; 
@@ -77,12 +83,15 @@ const char master_level[] PROGMEM = "Master Level";
 const char test_array[] PROGMEM = "test";
 const char flash_test PROGMEM = 'f';
 
+// Menu locations
+const char main_menu_location PROGMEM = '0';
+
+// Pointers to menu locations
+const char *p_main_menu_location = &main_menu_location;
+
 // An array of constant pointers to constant chars?
 const char *const main_menu_txt[] PROGMEM = {song, guitar, zone, mix_levels};
 const char *const guitar_menu_txt[] PROGMEM = {guitar, classic_rock, hard_rock, acoustic};
-
-// Here, you're actually declaring a two dimensional array.
-const char main_menu_txt_1[] PROGMEM = {"Song, Guitar, Zone, Mix Levels"};
 
 // Define a variable to hold the data from the shift register
 byte shift_reg_byte = 0;
@@ -90,7 +99,7 @@ byte shift_reg_byte = 0;
 // Create Simple_Button instances
 Simple_Button reconnect_button(RECONNECT_BTN_PIN, DEBOUNCE_TIME, RECONNECT_CHAR);
 Simple_Button power_button(POWER_BTN_PIN, DEBOUNCE_TIME, POWER_CHAR);
-//Simple_Button access_switch(ACCESS_SWT_PIN, DEBOUNCE_TIME, ACCESS_SWT_CHAR);
+Simple_Button access_switch(ACCESS_SWT_PIN, DEBOUNCE_TIME, ACCESS_SWT_CHAR);
 
 // Create Shift_Register_Button instances
 Shift_Register_Button play_button(PLAY_BTN_BIT, DEBOUNCE_TIME, PLAY_CHAR);
@@ -105,34 +114,60 @@ Shift_Register_Button enter_button(ENTER_BTN_BIT, DEBOUNCE_TIME, ENTER_CHAR);
 // Create Simple_Encoder instance.
 Simple_Encoder selection_encoder;
 
-const char *a_pointer; 
-const char *m_pointer;
-
 // A pointer to an array of constant pointers to constant chars.
-const char *const *d_pointer;
+const char *const *menu_text_pointer;
 
-// Create Menu_Page instances
-Menu_Page main_menu("list");
-
-// Byte for storing incoming serial data
+// Byte for storing incoming serial data.
 int incomingByte = 0;
 
-// String representing the current menu location
+// String representing the current menu location.
 char current_menu_location[] = {""};
 
-// Redraw display flag
-bool redraw_display = true;
-
-// Buffer for reading menu text
+// Buffer for reading menu text.
 char string_buffer[30];
 
+// Read and monitior encoder position.
+int current_encoder_position, last_encoder_position;
+
+// Create an instance of Menu_Controller.
+Menu_Controller menu_controller(MIN_CURSOR_VALUE, MAX_CURSOR_VALUE);
+
+// Create a pointer to the menu_controller
+Menu_Controller *p_menu_controller = &menu_controller;
+
+// Instance of parameter container
+Parameter_Container parameter_container;
+
+// Pointer to parameter container
+Parameter_Container *p_parameter_container = &parameter_container;
+
+// Create Menu_Page instances.
+Menu_Page main_menu("list", p_main_menu_location, p_menu_controller, p_parameter_container);
+//Menu_Page guitar_menu("selection");
+//Menu_Page zone_menu("list");
+//Menu_Page mix_levels_menu("list");
+
+// Pointer to current Menu_Page
+Menu_Page *p_current_menu_page = &main_menu;
+
+
+/*// Structure for parameter values.
+struct parameter_container{
+  int currently_selected_song = 0;
+} parameters;
+
+// Pointer to parameter container
+parameter_container *p_parameters;
+*/
+
 void setup() {
-  a_pointer = test_array;
-  d_pointer = main_menu_txt;
-  main_menu.set_text(a_pointer);
-  main_menu.set_2d_text(d_pointer);
-  
-  Serial.begin(19200);
+  menu_text_pointer = main_menu_txt;
+  main_menu.set_text(menu_text_pointer);
+
+  menu_text_pointer = guitar_menu_txt;
+  //guitar_menu.set_text(menu_text_pointer);
+
+  Serial.begin(9600);
   
   // Initialise the display with the 12C address 0x3D
   display.begin(SSD1306_SWITCHCAPVCC, 0x3D);
@@ -142,28 +177,10 @@ void setup() {
   // Clear the display.
   display.clearDisplay();
   display.setCursor(0,0);
-  display.println(F("Hello World!"));
+  display.println(F("Hello Alex!"));
   display.display();
-  
-  m_pointer = test_array;
-  
-  Serial.println(int(&main_menu_txt));
-  Serial.println(int(d_pointer));
-  
-  //Serial.println(char(pgm_read_byte_near(m_pointer)));
-  //Serial.println(char(pgm_read_byte_near(m_pointer+1)));
-  
-  /*for(int i = 0; i < 6; i++){
-    strcpy_P(string_buffer, (char *)pgm_read_word(&(main_menu_txt[i])));
-    Serial.println(string_buffer);
-    delay(500);
-  }*/
-  strcpy_P(string_buffer, (char *)pgm_read_word(&(d_pointer[1])));
-
-  //strcpy_P(string_buffer, (char *)pgm_read_word(&(main_menu_txt[0])));
-  Serial.println(string_buffer);
-  
-  selection_encoder.initialise(ENCODER_PIN_A, ENCODER_PIN_B, DEBOUNCE_TIME);
+ 
+  selection_encoder.initialise(ENCODER_PIN_A, ENCODER_PIN_B, DEBOUNCE_TIME, p_menu_controller);
   
   // Set the pins of the shift register
   pinMode(SHIFT_REG_LATCH, OUTPUT);
@@ -174,11 +191,15 @@ void setup() {
 }
 
 void loop() {
-  if(redraw_display == true){
-    main_menu.draw(display);
-    redraw_display = false;  
+  
+  if(menu_controller.get_redraw_display_flag() == true){
+    // Change to a pointer to the currently selected menu.
+    p_current_menu_page->draw(display);
+    menu_controller.set_redraw_display_flag(false);  
   }
+  
   //Serial.print(main_menu_txt[0][0]);
+
 
   // Set the latch pin to 1 to collect parallel data.
   digitalWrite(SHIFT_REG_LATCH, 1);
@@ -201,7 +222,7 @@ void loop() {
   // Process the buttons connected directly to the microcontroller
   reconnect_button.check_button_pressed();
   power_button.check_button_pressed();
-  //access_switch.check_button_pressed();
+  access_switch.check_button_pressed();
 
   enter_button.set_callback_func(test_function);
 
@@ -211,16 +232,28 @@ void loop() {
     Serial.println(incomingByte, DEC);
   }*/
 
-  while(Serial.available()) {
+  /*while(Serial.available()) {
     Serial.readString();
     Serial.print("done");
+  }*/
+
+  // Get the current encoder position
+  // Perhaps split this into two functions, track_position() and get_position()
+  current_encoder_position = selection_encoder.track_position();
+
+  // Has the value changed?
+  if(current_encoder_position != last_encoder_position){
+    // Print the value.
+    Serial.println(current_encoder_position);
+    // Update the last known value.
+    last_encoder_position = current_encoder_position;
   }
 }
 
 byte shift_in(int incoming_data_pin, int incoming_clock_pin){
   int i;
   int temp = 0;
-  int pin_state;
+  //int pin_state;
   byte data_in = 0;
 
   // Set the clock pin to high in preparation for
