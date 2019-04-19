@@ -37,3 +37,12 @@ bool Menu_Controller::get_redraw_display_flag(){
 void Menu_Controller::set_redraw_display_flag(bool redraw_display_flag){
   m_redraw_display_flag = redraw_display_flag;
 }
+
+void Menu_Controller::set_currently_selected_menu(void *currently_selected_menu){
+  m_currently_selected_menu = currently_selected_menu;                              // Update the currently selected menu.
+  set_redraw_display_flag(true);                                                    // Set the flag to redraw the display.
+}
+
+void* Menu_Controller::get_currently_selected_menu(){
+  return m_currently_selected_menu;
+}

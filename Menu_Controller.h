@@ -9,8 +9,9 @@ class Menu_Controller{
     int m_cursor_min_value;
     char m_current_menu_location;
     bool m_redraw_display_flag;
-
+    
   public:
+    void *m_currently_selected_menu;            // Generic pointer for pointing to currently selected menu.
     Menu_Controller(int cursor_min_value, int cursor_max_value);
     void increment_cursor_position();
     void decrement_cursor_position();
@@ -22,5 +23,7 @@ class Menu_Controller{
     void move_menu_location_forwards();
     void move_menu_location_backwards();
     char get_current_menu_page();
+    void set_currently_selected_menu(void *currently_selected_menu);
+    void* get_currently_selected_menu();
 };
 #endif

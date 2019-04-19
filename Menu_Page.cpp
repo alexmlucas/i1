@@ -20,6 +20,14 @@ void Menu_Page::set_location(char const *location){
   }*/
 }
 
+void Menu_Page::set_sub_menus(Menu_Page *sub_menus[]){
+  for(int i = 0; i < 3; i++){
+    m_sub_menus[i] = sub_menus[i];
+  }
+  /*Serial.print("The class array is pointing to this address: ");
+  Serial.println((int)&*m_sub_menus[0]);*/
+}
+
 void Menu_Page::draw(Adafruit_SSD1306 &display){
   char string_buffer[16];                                                       // Buffer for reading strings from program memory.
   char param_buffer_1[] = " ";                                                  // First buffer for parameter value
@@ -68,4 +76,9 @@ void Menu_Page::set_enter_disabled(bool enter_disabled){
 
 void Menu_Page::set_back_disabled(bool back_disabled){
   m_back_disabled = back_disabled;
+}
+
+void Menu_Page::on_enter(){
+  int cursor_position = m_menu_controller->get_cursor_position();                 // Get the current cursor position.
+  m_menu_controller->set_currently_selected_menu(m_sub_menus[cursor_position]);   // Update the currently selected menu.
 }

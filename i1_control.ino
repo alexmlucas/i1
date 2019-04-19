@@ -92,24 +92,11 @@ const char *p_main_menu_location = &main_menu_location;
 // An array of constant pointers to constant chars?
 const char *const main_menu_txt[] PROGMEM = {song, guitar, zone, mix_levels};
 const char *const guitar_menu_txt[] PROGMEM = {guitar, classic_rock, hard_rock, acoustic};
+const char *const zone_menu_txt[] PROGMEM = {zone, red_zone, green_zone, blue_zone};
+const char *const mix_levels_menu_txt[] PROGMEM = {mix_levels, guitar_level, backing_level, master_level};
 
 // Define a variable to hold the data from the shift register
 byte shift_reg_byte = 0;
-
-// Create Simple_Button instances
-Simple_Button reconnect_button(RECONNECT_BTN_PIN, DEBOUNCE_TIME, RECONNECT_CHAR);
-Simple_Button power_button(POWER_BTN_PIN, DEBOUNCE_TIME, POWER_CHAR);
-Simple_Button access_switch(ACCESS_SWT_PIN, DEBOUNCE_TIME, ACCESS_SWT_CHAR);
-
-// Create Shift_Register_Button instances
-Shift_Register_Button play_button(PLAY_BTN_BIT, DEBOUNCE_TIME, PLAY_CHAR);
-Shift_Register_Button stop_button(STOP_BTN_BIT, DEBOUNCE_TIME, STOP_CHAR);
-Shift_Register_Button song_1_button(SONG_1_BTN_BIT, DEBOUNCE_TIME, SONG_1_CHAR);
-Shift_Register_Button song_2_button(SONG_2_BTN_BIT, DEBOUNCE_TIME, SONG_2_CHAR);
-Shift_Register_Button song_3_button(SONG_3_BTN_BIT, DEBOUNCE_TIME, SONG_3_CHAR);
-Shift_Register_Button song_4_button(SONG_4_BTN_BIT, DEBOUNCE_TIME, SONG_4_CHAR);
-Shift_Register_Button back_button(BACK_BTN_BIT, DEBOUNCE_TIME, BACK_CHAR);
-Shift_Register_Button enter_button(ENTER_BTN_BIT, DEBOUNCE_TIME, ENTER_CHAR);
 
 // Create Simple_Encoder instance.
 Simple_Encoder selection_encoder;
@@ -141,15 +128,17 @@ Parameter_Container parameter_container;
 // Pointer to parameter container
 Parameter_Container *p_parameter_container = &parameter_container;
 
-// Create Menu_Page instances.
+// Create instances of Menu_Page objects.
 Menu_Page main_menu("list", p_main_menu_location, p_menu_controller, p_parameter_container);
-//Menu_Page guitar_menu("selection");
-//Menu_Page zone_menu("list");
-//Menu_Page mix_levels_menu("list");
+Menu_Page guitar_menu("selection", p_main_menu_location, p_menu_controller, p_parameter_container);
+Menu_Page zone_menu("list", p_main_menu_location, p_menu_controller, p_parameter_container);
+Menu_Page mix_levels_menu("list", p_main_menu_location, p_menu_controller, p_parameter_container);
 
-// Pointer to current Menu_Page
-Menu_Page *p_current_menu_page = &main_menu;
+// Pointers to sub menus
+Menu_Page *p_sub_pages[3] = {&guitar_menu, &zone_menu, &mix_levels_menu};
 
+// Pointer to current menu page.
+Menu_Page *p_current_menu_page;
 
 /*// Structure for parameter values.
 struct parameter_container{
@@ -160,14 +149,50 @@ struct parameter_container{
 parameter_container *p_parameters;
 */
 
+// Create Simple_Button instances
+Simple_Button reconnect_button(RECONNECT_BTN_PIN, DEBOUNCE_TIME, RECONNECT_CHAR, p_menu_controller);
+Simple_Button power_button(POWER_BTN_PIN, DEBOUNCE_TIME, POWER_CHAR, p_menu_controller);
+Simple_Button access_switch(ACCESS_SWT_PIN, DEBOUNCE_TIME, ACCESS_SWT_CHAR, p_menu_controller);
+
+// Create Shift_Register_Button instances
+Shift_Register_Button play_button(PLAY_BTN_BIT, DEBOUNCE_TIME, PLAY_CHAR);
+Shift_Register_Button stop_button(STOP_BTN_BIT, DEBOUNCE_TIME, STOP_CHAR);
+Shift_Register_Button song_1_button(SONG_1_BTN_BIT, DEBOUNCE_TIME, SONG_1_CHAR);
+Shift_Register_Button song_2_button(SONG_2_BTN_BIT, DEBOUNCE_TIME, SONG_2_CHAR);
+Shift_Register_Button song_3_button(SONG_3_BTN_BIT, DEBOUNCE_TIME, SONG_3_CHAR);
+Shift_Register_Button song_4_button(SONG_4_BTN_BIT, DEBOUNCE_TIME, SONG_4_CHAR);
+Shift_Register_Button back_button(BACK_BTN_BIT, DEBOUNCE_TIME, BACK_CHAR);
+Shift_Register_Button enter_button(ENTER_BTN_BIT, DEBOUNCE_TIME, ENTER_CHAR);
+
 void setup() {
+  
+  // Point at menu text, pass the pointer to the Menu_Page objects
   menu_text_pointer = main_menu_txt;
   main_menu.set_text(menu_text_pointer);
-
   menu_text_pointer = guitar_menu_txt;
-  //guitar_menu.set_text(menu_text_pointer);
+  guitar_menu.set_text(menu_text_pointer);
+  menu_text_pointer = zone_menu_txt;
+  zone_menu.set_text(menu_text_pointer);
+  menu_text_pointer = mix_levels_menu_txt;
+  mix_levels_menu.set_text(menu_text_pointer);
+
+  menu_controller.set_currently_selected_menu(&main_menu);
+
+  // set callback functions
+  reconnect_button.set_callback_func(enter_pressed);
 
   Serial.begin(9600);
+  // Wait for the serial stream to get going.
+  delay(500);
+
+  main_menu.set_sub_menus(p_sub_pages);
+
+  Serial.print("The address of the guitar menu is: ");
+  Serial.println((int)&guitar_menu);
+
+  Serial.print("We're pointing to this address: ");
+  // print the address of the value pointed at by p_sub_pages[0]
+  Serial.println((int)&*p_sub_pages[0]);
   
   // Initialise the display with the 12C address 0x3D
   display.begin(SSD1306_SWITCHCAPVCC, 0x3D);
@@ -194,6 +219,7 @@ void loop() {
   
   if(menu_controller.get_redraw_display_flag() == true){
     // Change to a pointer to the currently selected menu.
+    p_current_menu_page = (Menu_Page*)menu_controller.get_currently_selected_menu();
     p_current_menu_page->draw(display);
     menu_controller.set_redraw_display_flag(false);  
   }
@@ -217,14 +243,16 @@ void loop() {
   song_3_button.check_button_pressed(shift_reg_byte);
   song_4_button.check_button_pressed(shift_reg_byte);
   back_button.check_button_pressed(shift_reg_byte);
+  
   enter_button.check_button_pressed(shift_reg_byte);
+  
   
   // Process the buttons connected directly to the microcontroller
   reconnect_button.check_button_pressed();
   power_button.check_button_pressed();
   access_switch.check_button_pressed();
 
-  enter_button.set_callback_func(test_function);
+  
 
   /*if(Serial.available() > 0){
     incomingByte = Serial.read();
@@ -286,8 +314,9 @@ void print_bits(byte incoming_byte){
   Serial.println();
 }
 
-void test_function(){
-  Serial.println(F("hello"));
+void enter_pressed(Menu_Controller* p_menu_controller){                                 // Function expects a pointer to a Menu_Controller.
+  Menu_Page *m_menu = (Menu_Page*)p_menu_controller->m_currently_selected_menu;         // Create local pointer to the currently selected Menu_Page, via the Menu_Controller pointer.
+  m_menu->on_enter();                                                                   // Call the on_enter() function of the Menu_Page.
 }
 
 void test_function_2(){
