@@ -8,7 +8,7 @@ class Shift_Register_Button: public Simple_Button{
     int m_bit_position;
     
   public:
-    Shift_Register_Button(int bit_position, int debounce_milliseconds, const char &serial_handle);      // The constructor 
-    bool check_button_pressed(byte &shift_register_reading);   // Call this to see if the button is being pressed   
+    Shift_Register_Button(int bit_position, int debounce_milliseconds, Menu_Controller *menu_controller);   // The constructor 
+    bool check_button_pressed(byte &shift_register_reading);                                                // Call this to see if the button is being pressed   
 };
 #endif
