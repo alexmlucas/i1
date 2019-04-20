@@ -27,8 +27,8 @@ class Menu_Page{
     void set_sub_menus(Menu_Page *sub_menus[3]);
     void set_previous_menu(Menu_Page *previous_menu);
     virtual void draw(Adafruit_SSD1306 &display);
-    virtual bool on_enter();
-    virtual bool on_back();
+    virtual void on_enter();
+    virtual void on_back();
     virtual void on_encoder(uint8_t *pin_value);
 };
 #endif

@@ -41,7 +41,3 @@ void Main_Page::draw(Adafruit_SSD1306 &display){
   }
   display.display();                                                            // Display the new image.                 
 }
-
-bool Main_Page::on_back(){
-  return false;                                                                 // Return false to indicate that the back button is not operational on this menu page.
-}

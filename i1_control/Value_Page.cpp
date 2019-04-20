@@ -1,11 +1,10 @@
 #include "Value_Page.h"
 
-Value_Page::Value_Page(const char *const *menu_text, const char *const *parameter_text, Menu_Controller *menu_controller, Parameter_Container *parameter_container, int *target_parameter):Menu_Page(menu_text, menu_controller, parameter_container){
-  m_menu_text = menu_text;                                                      // Set the menu text.
-  m_menu_controller = menu_controller;                                          // Assign class member pointers to incoming memory addresses.
-  m_parameter_container = parameter_container;
+Value_Page::Value_Page(const char *const *menu_text, const char *const *parameter_text, int parameter_max_value, Menu_Controller *menu_controller, Parameter_Container *parameter_container, int *target_parameter):Menu_Page(menu_text, menu_controller, parameter_container){
   m_target_parameter = target_parameter;
   m_parameter_text = parameter_text;
+  m_parameter_max_value = parameter_max_value;
+  m_enter_enabled = false;
 }
 
 void Value_Page::draw(Adafruit_SSD1306 &display){
@@ -29,6 +28,21 @@ void Value_Page::draw(Adafruit_SSD1306 &display){
   
   display.display();                                                            // Display the new image.                 
 }
-bool Value_Page::on_enter(){
-  return false;
+
+void Value_Page::on_encoder(uint8_t *pin_value){
+  
+  if(*pin_value == LOW){                                                        // If true, a clockwise rotation has occured.
+    Serial.println("pin low");
+    Serial.println(m_parameter_max_value);
+
+    if(*m_target_parameter < m_parameter_max_value){                            // If the max parameter value has not yet been reached...
+      Serial.println("increment");
+      (*m_target_parameter)++;                                                  // ...increment the target parameter.  
+      m_menu_controller->set_redraw_display_flag(true);                         // Redraw the display.
+    }
+  } else if (*m_target_parameter > 0){                                          // If the code reaches this point, an anti-clockwise rotation has occured...
+      Serial.println("pin high");
+      (*m_target_parameter)--;                                                  // ...check to see if the target parameterr is above the minimum allowed and decrement if so.
+      m_menu_controller->set_redraw_display_flag(true);                         // Redraw the display.
+  }  
 }

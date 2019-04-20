@@ -95,7 +95,7 @@ const char *const zone_menu_txt[] PROGMEM = {zone, red_zone, green_zone, blue_zo
 const char *const mix_levels_menu_txt[] PROGMEM = {mix_levels, guitar_level, backing_level, master_level};
 const char *const guitar_level_menu_txt[] PROGMEM = {guitar_level}; // add parameter string here?
 
-const char *const mix_levels_param[] PROGMEM = {"0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1"};
+const char *const mix_levels_param[] PROGMEM = {"0  ", "0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1  "};
 
 // Define a variable to hold the data from the shift register
 byte shift_reg_byte = 0;
@@ -121,12 +121,13 @@ int current_encoder_position, last_encoder_position;
 Menu_Controller menu_controller(MIN_CURSOR_VALUE, MAX_CURSOR_VALUE);                                    // Create an instance of Menu_Controller.
 Parameter_Container parameter_container;                                                                // Create an instance of Parameter_Container.
 
+
 Main_Page main_menu(main_menu_txt, &menu_controller, &parameter_container);                             // Create instances of Menu_Page objects.
 Selection_Page guitar_menu(guitar_menu_txt, &menu_controller, &parameter_container, &parameter_container.m_selected_guitar);
 List_Page zone_menu(zone_menu_txt, &menu_controller, &parameter_container);
 List_Page mix_levels_menu(mix_levels_menu_txt, &menu_controller, &parameter_container);
 
-Value_Page guitar_level_menu(guitar_level_menu_txt, mix_levels_param, &menu_controller, &parameter_container, &parameter_container.m_guitar_level);
+Value_Page guitar_level_menu(guitar_level_menu_txt, mix_levels_param, 11, &menu_controller, &parameter_container, &parameter_container.m_guitar_level);
 
 Menu_Page *p_main_sub_menus[3] = {&guitar_menu, &zone_menu, &mix_levels_menu};                          // Create an array of pointers to sub menus.
 Menu_Page *p_mix_levels_sub_menus[3] = {&guitar_level_menu, &guitar_level_menu, &guitar_level_menu};
@@ -158,6 +159,7 @@ void setup() {
   Serial.begin(9600);
   // Wait for the serial stream to get going.
   delay(500);
+  Serial.println(sizeof(mix_levels_param)/sizeof(mix_levels_param[0]));
 
   main_menu.set_sub_menus(p_main_sub_menus);
   mix_levels_menu.set_sub_menus(p_mix_levels_sub_menus);

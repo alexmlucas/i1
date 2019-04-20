@@ -59,18 +59,16 @@ void Menu_Page::draw(Adafruit_SSD1306 &display){
   display.display();                                                            // Display the new image.                 
 }
 
-bool Menu_Page::on_enter(){
+void Menu_Page::on_enter(){
   int cursor_position = m_menu_controller->get_cursor_position();               // Get the current cursor position.
   m_menu_controller->set_currently_selected_menu(m_sub_menus[cursor_position]); // Update the currently selected menu.
-  return true;
 }
 
-bool Menu_Page::on_back(){
+void Menu_Page::on_back(){
   m_menu_controller->set_currently_selected_menu(m_previous_menu);              // Update the currently selected menu to previous.
-  return true;
 }
 
-void Menu_Page::on_encoder(uint8_t *pin_value){
+void Menu_Page::on_encoder(uint8_t *pin_value){  
   if(*pin_value == LOW){                                                                            // If true, a clockwise rotation has occured.
     if(m_menu_controller->get_cursor_position() < m_menu_controller->get_cursor_max_value()){       // If the max cursor value has not yet been reached...
       m_menu_controller->increment_cursor_position();                                               // ...increment the cursor position.               
