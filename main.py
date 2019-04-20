@@ -31,8 +31,8 @@ NUMBER_OF_CHORDS = 2
 NUMBER_OF_STRINGS = 6
 
 
+
 class ChordStrummer:
-	global midiout
 	c_major_chord_notes = [[0, 48, 52, 55, 60, 64],[0, 0, 50, 57, 62, 65],[40, 47, 52, 55, 59, 64],[0, 0, 53, 55, 60, 65],[43, 47, 50, 55, 59, 65],[0, 45, 52, 57, 60, 64],[0, 47, 50, 55, 62, 0]]
 
 	def play_chord(self, chord_number, string_number):
@@ -88,10 +88,44 @@ class StringSegmenter:
 			return False
 
 
+# https://stackoverflow.com/questions/323972/is-there-any-way-to-kill-a-thread
+
+class ChordStrummerThread(threading.Thread):
+	# Thread class with a stop() method. The thread itself has to check
+	# regularly for the stopped() condition.
+	# https: // www.pythoncentral.io/how-to-create-a-thread-in-python/
+	# https: // www.youtube.com / watch?v = cY9pih5Sdk4
+	c_major_chord_notes = [[0, 48, 52, 55, 60, 64], [0, 0, 50, 57, 62, 65], [40, 47, 52, 55, 59, 64], [0, 0, 53, 55, 60, 65], [43, 47, 50, 55, 59, 65], [0, 45, 52, 57, 60, 64], [0, 47, 50, 55, 62, 0]]
+
+	def __init__(self, chord, string):
+		super(ChordStrummerThread, self).__init__()
+		# https://docs.python.org/2.0/lib/event-objects.html
+		self._stop_event = threading.Event()
+		self.chord_number = chord
+		self.string_number = string
+
+	def stop(self):
+		# sets the stop event to true.
+		self._stop_event.set()
+
+	def stopped(self):
+		return self._stop_event.is_set
+
+	def run(self):
+		if self.c_major_chord_notes[self.chord_number][self.string_number] != 0:
+			note_on = [0x90, self.c_major_chord_notes[self.chord_number][self.string_number], 112]
+			midiout.send_message(note_on)
+			time.sleep(0.5)
+			note_off = [0x80, self.c_major_chord_notes[self.chord_number][self.string_number], 0]
+			midiout.send_message(note_off)
+			self._stop_event.set()
+
 
 def main():
 
 	my_chord = ChordStrummer()
+	note_events = []
+
 	loom = []
 
 	def trigger_thread(guitar_string_number):
@@ -111,7 +145,12 @@ def main():
 			float_data = float(data)
 			int_data = int(float_data)
 			if int_data is not -1:
-				trigger_thread(int(float_data))
+				# chord is triggered here...
+				n1 = ChordStrummerThread(int(current_selected_chord), int(float_data))
+				note_events.append(n1)
+				n1.start()
+
+				#trigger_thread(int(float_data))
 
 	current_selected_chord = 1
 
@@ -150,7 +189,7 @@ def main():
 	# to change the timeout.
 
 	# Connect to serial port
-	sip_puff_serial_port = serial.Serial('/dev/tty.usbmodem141131', 115200, timeout=0.1)
+	sip_puff_serial_port = serial.Serial('/dev/tty.usbmodem141141', 115200, timeout=0.1)
 	# Pause to allow time for serial connection to be established.
 	time.sleep(1)
 

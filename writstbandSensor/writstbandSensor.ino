@@ -85,7 +85,7 @@ void setup(void)
   pinMode(motorPin, OUTPUT);
   digitalWrite(motorPin, LOW);
   
-  while (!Serial); // required for Flora & Micro
+  // while (!Serial); // required for Flora & Micro
   delay(500);
 
   boolean success;
@@ -116,7 +116,7 @@ void setup(void)
   /* Print Bluefruit information */
   ble.info();
 
-  // this line is particularly required for Flora, but is a good idea
+  // this line is particularly require for Flora, but is a good idea
   // anyways for the super long lines ahead!
   // ble.setInterCharWriteDelay(5); // 5 ms
 
