@@ -1,9 +1,6 @@
 #include "List_Page.h"
 
 List_Page::List_Page(const char *const *menu_text, Menu_Controller *menu_controller, Parameter_Container *parameter_container):Menu_Page(menu_text, menu_controller, parameter_container){
-  m_menu_text = menu_text;                                                      // Set the menu text.
-  m_menu_controller = menu_controller;                                          // Assign class member pointers to incoming memory addresses.
-  m_parameter_container = parameter_container;
 }
 
 void List_Page::draw(Adafruit_SSD1306 &display){

@@ -2,6 +2,7 @@
 #define SIMPLE_ENCODER
 #include "Arduino.h"                                                  // Include the header file that defines INPUT and HIGH.
 #include "Menu_Controller.h"
+#include "Menu_Page.h"
 
 class Simple_Encoder{
   private:

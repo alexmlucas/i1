@@ -290,18 +290,18 @@ void print_bits(byte incoming_byte){
   Serial.println();
 }
 
-void enter_pressed(Menu_Controller* p_menu_controller){                                 // Function expects a pointer to a Menu_Controller.
-  Menu_Page *m_menu = (Menu_Page*)p_menu_controller->m_currently_selected_menu;         // Create local pointer to the currently selected Menu_Page, via the Menu_Controller pointer.
+void enter_pressed(Menu_Controller* p_menu_controller){                                // Function expects a pointer to a Menu_Controller.
+  Menu_Page *m_menu = (Menu_Page*)p_menu_controller->m_currently_selected_menu;        // Create local pointer to the currently selected Menu_Page, via the Menu_Controller pointer.
   
-  if(m_menu->on_enter()){                                                               // if the currently selected menu has an on_enter() function...
-    m_menu->on_enter();                                                                 // ... call it.
+  if(m_menu->m_enter_enabled){                                                         // if the currently selected menu has an on_enter() function...
+    m_menu->on_enter();                                                                // ... call it.
   }                                                                   
 }
 
 void back_pressed(Menu_Controller* p_menu_controller){                                 // Function expects a pointer to a Menu_Controller.
   Menu_Page *m_menu = (Menu_Page*)p_menu_controller->m_currently_selected_menu;        // Create local pointer to the currently selected Menu_Page, via the Menu_Controller pointer.
   
-  if(m_menu->on_back()){                                                               // if the currently selected menu has an on_enter() function...
+  if(m_menu->m_back_enabled){                                                          // if the currently selected menu has an on_enter() function...
     m_menu->on_back();                                                                 // ... call it.
   }                                                                   
 }
