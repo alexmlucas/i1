@@ -7,7 +7,6 @@
 
 const int PADDING PROGMEM = 3;
 const int LINE_HEIGHT PROGMEM = 15;
-const int NUMBER_OF_LINES PROGMEM = 4;
 const int WHITE_SPACE PROGMEM = 16;
 
 class Menu_Page{
@@ -18,6 +17,7 @@ class Menu_Page{
     Parameter_Container *m_parameter_container;                       // Pointer to the parameter_container.
     Menu_Page *m_sub_menus[3];                                        // Array of pointers to sub menus.
     Menu_Page *m_previous_menu;                                       // Pointer to previous menu.
+    int m_number_of_menu_items;
     
   public:
     bool m_enter_enabled;

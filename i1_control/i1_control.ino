@@ -15,6 +15,7 @@
 #include "List_Page.h"
 #include "Selection_Page.h"
 #include "Value_Page.h"
+#include "Splash_Page.h"
 #include "Menu_Controller.h"
 #include "Parameter_Container.h"
 
@@ -79,6 +80,14 @@ const char green_zone[] PROGMEM = "Green Zone";
 const char blue_zone[] PROGMEM = "Blue Zone";
 const char scale[] PROGMEM = "Scale";
 const char root[] PROGMEM = "Root";
+const char reconnecting[] PROGMEM = "Reconnecting";
+const char wristband[] PROGMEM = "wristband";
+const char please_wait[] PROGMEM = "please wait...";
+const char sorry[] PROGMEM = "Sorry, I could";
+const char not_connect[] PROGMEM = "not connect to";
+const char the_wristband[] PROGMEM = "the wristband.";
+
+
 const char scale_param[] PROGMEM = "Major, Minor, Blues, Pent. Major, Pent. Minor, Major Chord, Minor Chord";
 
 const char root_param[] PROGMEM = "A, A#, B, C, C#, D, D#, E, F, F#, G, G#";
@@ -94,6 +103,8 @@ const char *const guitar_menu_txt[] PROGMEM = {guitar, classic_rock, hard_rock, 
 const char *const zone_menu_txt[] PROGMEM = {zone, red_zone, green_zone, blue_zone};
 const char *const mix_levels_menu_txt[] PROGMEM = {mix_levels, guitar_level, backing_level, master_level};
 const char *const guitar_level_menu_txt[] PROGMEM = {guitar_level}; // add parameter string here?
+const char *const reconnect_menu_txt[] PROGMEM = {reconnecting, wristband, please_wait};
+const char *const connection_fail_menu_txt[] PROGMEM = {sorry, not_connect, the_wristband};
 
 const char *const mix_levels_param[] PROGMEM = {"0  ", "0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1  "};
 
@@ -129,8 +140,11 @@ List_Page mix_levels_menu(mix_levels_menu_txt, &menu_controller, &parameter_cont
 
 Value_Page guitar_level_menu(guitar_level_menu_txt, mix_levels_param, 11, &menu_controller, &parameter_container, &parameter_container.m_guitar_level);
 
+Splash_Page reconnect_menu(reconnect_menu_txt, &menu_controller, &parameter_container);
+Splash_Page connection_fail_menu(connection_fail_menu_txt, &menu_controller, &parameter_container);
+
 Menu_Page *p_main_sub_menus[3] = {&guitar_menu, &zone_menu, &mix_levels_menu};                          // Create an array of pointers to sub menus.
-Menu_Page *p_mix_levels_sub_menus[3] = {&guitar_level_menu, &guitar_level_menu, &guitar_level_menu};
+Menu_Page *p_mix_levels_sub_menus[3] = {&guitar_level_menu, &reconnect_menu, &connection_fail_menu};
 
 Menu_Page *p_current_menu_page;                                                                         // Create a pointer to the currently selected menu page.
 

@@ -12,7 +12,7 @@ void Value_Page::draw(Adafruit_SSD1306 &display){
   int selected_value = *m_target_parameter;                                     // The selected item equals the value at the address pointed to by m_target_parameter.          
   
   display.clearDisplay();                                                       // Clear the display.
-  display.setTextColor(WHITE);                            
+  display.setTextColor(WHITE);                                                  // Set the text to white.
                                                                                 // Draw the page title.
   display.setCursor((PADDING),PADDING);                                         // Set the cursor position.
   strcpy_P(string_buffer, (char *)pgm_read_word(&(m_menu_text[0])));            // Copy title string into flash memory; always index 0.

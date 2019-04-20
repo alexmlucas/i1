@@ -13,6 +13,7 @@ void Main_Page::draw(Adafruit_SSD1306 &display){
   strcat(param_buffer_1, param_buffer_2);                                           // Concatenate the two parameter buffers
   
   display.clearDisplay();                                                       // Clear the display.
+  display.setTextColor(WHITE);                                                  // Set text to white.
                                                           
                                                                                 // Draw the page title.
   display.setCursor((PADDING),PADDING);                                         // Set the cursor position.
@@ -23,7 +24,7 @@ void Main_Page::draw(Adafruit_SSD1306 &display){
   display.println(string_buffer);                                               // Write text to display.
   display.drawLine(0, 14, 128, 14, WHITE);                                      // Underline the title.
  
-  for(int i = 1; i < NUMBER_OF_LINES; i++){                                     // Iterate through the remaining strings in the array.
+  for(int i = 1; i < m_number_of_menu_items; i++){                                     // Iterate through the remaining strings in the array.
 
     if(m_menu_controller->get_cursor_position() == i-1){                        // Is the cursor in the same position as the text?
       
