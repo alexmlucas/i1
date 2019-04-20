@@ -1,6 +1,6 @@
 #include "Main_Page.h"
 
-Main_Page::Main_Page(const char *const *menu_text, Menu_Controller *menu_controller, Parameter_Container *parameter_container):Menu_Page(menu_text, menu_controller, parameter_container){
+Main_Page::Main_Page(const char *const *menu_text, Menu_Controller *menu_controller, Parameter_Container *parameter_container, int *number_of_menu_items):Menu_Page(menu_text, menu_controller, parameter_container, number_of_menu_items){
   m_back_enabled = false;
 }
 
@@ -24,7 +24,7 @@ void Main_Page::draw(Adafruit_SSD1306 &display){
   display.println(string_buffer);                                               // Write text to display.
   display.drawLine(0, 14, 128, 14, WHITE);                                      // Underline the title.
  
-  for(int i = 1; i < m_number_of_menu_items; i++){                                     // Iterate through the remaining strings in the array.
+  for(int i = 1; i < *m_number_of_menu_items; i++){                                     // Iterate through the remaining strings in the array.
 
     if(m_menu_controller->get_cursor_position() == i-1){                        // Is the cursor in the same position as the text?
       

@@ -1,6 +1,6 @@
 #include "Value_Page.h"
 
-Value_Page::Value_Page(const char *const *menu_text, const char *const *parameter_text, int parameter_max_value, Menu_Controller *menu_controller, Parameter_Container *parameter_container, int *target_parameter):Menu_Page(menu_text, menu_controller, parameter_container){
+Value_Page::Value_Page(const char *const *menu_text, const char *const *parameter_text, int parameter_max_value, Menu_Controller *menu_controller, Parameter_Container *parameter_container, int *target_parameter, int *number_of_menu_items):Menu_Page(menu_text, menu_controller, parameter_container, number_of_menu_items){
   m_target_parameter = target_parameter;
   m_parameter_text = parameter_text;
   m_parameter_max_value = parameter_max_value;

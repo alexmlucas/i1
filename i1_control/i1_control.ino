@@ -55,6 +55,9 @@ Adafruit_SSD1306 display(OLED_RESET);
 #define MIN_CURSOR_VALUE 0
 #define MAX_CURSOR_VALUE 2
 
+int THREE = 3;
+int FOUR = 4;
+
 // Define characters to be sent as serial strings.
 const char RECONNECT_CHAR PROGMEM = 'a'; 
 const char POWER_CHAR PROGMEM = 'b';
@@ -70,14 +73,18 @@ const char ENTER_CHAR PROGMEM = 'k';
 
 const char song[] PROGMEM = "Song";
 const char guitar[] PROGMEM = "Guitar";
+const char backing[] PROGMEM = "Backing";
+const char master[] PROGMEM = "Master";
 const char zone[] PROGMEM = "Zone";
 const char mix_levels[] PROGMEM = "Mix Levels";
-const char classic_rock[] PROGMEM = "Classic Rock";
-const char hard_rock[] PROGMEM = "Hard Rock";
-const char acoustic[] PROGMEM = "Acoustic";
 const char red_zone[] PROGMEM = "Red Zone";
 const char green_zone[] PROGMEM = "Green Zone";
 const char blue_zone[] PROGMEM = "Blue Zone";
+
+const char classic_rock[] PROGMEM = "Classic Rock";
+const char hard_rock[] PROGMEM = "Hard Rock";
+const char acoustic[] PROGMEM = "Acoustic";
+
 const char scale[] PROGMEM = "Scale";
 const char root[] PROGMEM = "Root";
 const char reconnecting[] PROGMEM = "Reconnecting";
@@ -87,22 +94,25 @@ const char sorry[] PROGMEM = "Sorry, I could";
 const char not_connect[] PROGMEM = "not connect to";
 const char the_wristband[] PROGMEM = "the wristband.";
 
+//const char scale_param[] PROGMEM = "Major, Minor, Blues, Pent. Major, Pent. Minor, Major Chord, Minor Chord";
+//const char root_param[] PROGMEM = "A, A#, B, C, C#, D, D#, E, F, F#, G, G#";
 
-const char scale_param[] PROGMEM = "Major, Minor, Blues, Pent. Major, Pent. Minor, Major Chord, Minor Chord";
 
-const char root_param[] PROGMEM = "A, A#, B, C, C#, D, D#, E, F, F#, G, G#";
-const char guitar_level[] PROGMEM = "Guitar Level";
-const char backing_level[] PROGMEM = "Backing Level";
-const char master_level[] PROGMEM = "Master Level";
+
 const char test_array[] PROGMEM = "test";
-const char flash_test PROGMEM = 'f';
+//const char flash_test PROGMEM = 'f';
 
 // An array of constant pointers to constant chars?
 const char *const main_menu_txt[] PROGMEM = {song, guitar, zone, mix_levels};
 const char *const guitar_menu_txt[] PROGMEM = {guitar, classic_rock, hard_rock, acoustic};
 const char *const zone_menu_txt[] PROGMEM = {zone, red_zone, green_zone, blue_zone};
-const char *const mix_levels_menu_txt[] PROGMEM = {mix_levels, guitar_level, backing_level, master_level};
-const char *const guitar_level_menu_txt[] PROGMEM = {guitar_level}; // add parameter string here?
+const char *const red_zone_menu_txt[] PROGMEM = {red_zone, scale, root};
+const char *const green_zone_menu_txt[] PROGMEM = {green_zone, scale, root};
+const char *const blue_zone_menu_txt[] PROGMEM = {blue_zone, scale, root};
+
+
+const char *const mix_levels_menu_txt[] PROGMEM = {mix_levels, guitar, backing, master};
+const char *const guitar_level_menu_txt[] PROGMEM = {guitar}; // add parameter string here?
 const char *const reconnect_menu_txt[] PROGMEM = {reconnecting, wristband, please_wait};
 const char *const connection_fail_menu_txt[] PROGMEM = {sorry, not_connect, the_wristband};
 
@@ -133,15 +143,21 @@ Menu_Controller menu_controller(MIN_CURSOR_VALUE, MAX_CURSOR_VALUE);            
 Parameter_Container parameter_container;                                                                // Create an instance of Parameter_Container.
 
 
-Main_Page main_menu(main_menu_txt, &menu_controller, &parameter_container);                             // Create instances of Menu_Page objects.
-Selection_Page guitar_menu(guitar_menu_txt, &menu_controller, &parameter_container, &parameter_container.m_selected_guitar);
-List_Page zone_menu(zone_menu_txt, &menu_controller, &parameter_container);
-List_Page mix_levels_menu(mix_levels_menu_txt, &menu_controller, &parameter_container);
+Main_Page main_menu(main_menu_txt, &menu_controller, &parameter_container, &FOUR);                      // Create instances of Menu_Page objects.
+Selection_Page guitar_menu(guitar_menu_txt, &menu_controller, &parameter_container, &parameter_container.m_selected_guitar, &FOUR);
 
-Value_Page guitar_level_menu(guitar_level_menu_txt, mix_levels_param, 11, &menu_controller, &parameter_container, &parameter_container.m_guitar_level);
+List_Page zone_menu(zone_menu_txt, &menu_controller, &parameter_container, &FOUR);
+List_Page red_zone_menu(red_zone_menu_txt, &menu_controller, &parameter_container, &THREE);
+List_Page green_zone_menu(green_zone_menu_txt, &menu_controller, &parameter_container, &THREE);
+List_Page blue_zone_menu(blue_zone_menu_txt, &menu_controller, &parameter_container, &THREE);
 
-Splash_Page reconnect_menu(reconnect_menu_txt, &menu_controller, &parameter_container);
-Splash_Page connection_fail_menu(connection_fail_menu_txt, &menu_controller, &parameter_container);
+
+List_Page mix_levels_menu(mix_levels_menu_txt, &menu_controller, &parameter_container, &FOUR);
+
+Value_Page guitar_level_menu(guitar_level_menu_txt, mix_levels_param, 11, &menu_controller, &parameter_container, &parameter_container.m_guitar_level, &FOUR);
+
+Splash_Page reconnect_menu(reconnect_menu_txt, &menu_controller, &parameter_container, &THREE);
+Splash_Page connection_fail_menu(connection_fail_menu_txt, &menu_controller, &parameter_container, &THREE);
 
 Menu_Page *p_main_sub_menus[3] = {&guitar_menu, &zone_menu, &mix_levels_menu};                          // Create an array of pointers to sub menus.
 Menu_Page *p_mix_levels_sub_menus[3] = {&guitar_level_menu, &reconnect_menu, &connection_fail_menu};

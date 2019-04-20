@@ -5,7 +5,7 @@
 
 class Main_Page: public Menu_Page{  
   public:
-    Main_Page(const char *const *menu_text, Menu_Controller *menu_controller, Parameter_Container *parameter_container);
+    Main_Page(const char *const *menu_text, Menu_Controller *menu_controller, Parameter_Container *parameter_container, int *number_of_menu_items);
     void draw(Adafruit_SSD1306 &display);
 };
 #endif

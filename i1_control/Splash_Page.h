@@ -5,7 +5,7 @@
 
 class Splash_Page: public Menu_Page{  
   public:
-    Splash_Page(const char *const *menu_text, Menu_Controller *menu_controller, Parameter_Container *parameter_container);
+    Splash_Page(const char *const *menu_text, Menu_Controller *menu_controller, Parameter_Container *parameter_container, int *number_of_menu_items);
     void draw(Adafruit_SSD1306 &display);
 };
 #endif

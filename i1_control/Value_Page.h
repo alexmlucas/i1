@@ -9,7 +9,7 @@ class Value_Page: public Menu_Page{
     int *m_target_parameter;
     int m_parameter_max_value;
   public:
-    Value_Page(const char *const *menu_text, const char *const *parameter_text, int parameter_max_value, Menu_Controller *menu_controller, Parameter_Container *parameter_container, int *target_parameter);
+    Value_Page(const char *const *menu_text, const char *const *parameter_text, int parameter_max_value, Menu_Controller *menu_controller, Parameter_Container *parameter_container, int *target_parameter, int *number_of_menu_items);
     void on_encoder(uint8_t *pin_value);
     virtual void draw(Adafruit_SSD1306 &display);
 };
