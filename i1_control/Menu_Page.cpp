@@ -35,7 +35,7 @@ void Menu_Page::on_back(){
 }
 
 void Menu_Page::on_encoder(uint8_t *pin_value){  
-  if(*pin_value == LOW){                                                                            // If true, a clockwise rotation has occured.
+  if(*pin_value == LOW){                                                          // If true, a clockwise rotation has occured.
     if(m_menu_controller->get_cursor_position() < *m_number_of_menu_items){       // If the max cursor value has not yet been reached...
       m_menu_controller->increment_cursor_position();                             // ...increment the cursor position.               
     }

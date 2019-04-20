@@ -55,6 +55,7 @@ Adafruit_SSD1306 display(OLED_RESET);
 #define MIN_CURSOR_VALUE 0
 #define MAX_CURSOR_VALUE 2
 
+int TWO = 2;
 int THREE = 3;
 int FOUR = 4;
 
@@ -84,9 +85,14 @@ const char blue_zone[] PROGMEM = "Blue Zone";
 const char classic_rock[] PROGMEM = "Classic Rock";
 const char hard_rock[] PROGMEM = "Hard Rock";
 const char acoustic[] PROGMEM = "Acoustic";
-
 const char scale[] PROGMEM = "Scale";
+const char red_scale[] PROGMEM = "Red Scale";
+const char green_scale[] PROGMEM = "Green Scale";
+const char blue_scale[] PROGMEM = "Blue Scale";
 const char root[] PROGMEM = "Root";
+const char red_root[] PROGMEM = "Red Root";
+const char green_root[] PROGMEM = "Green Root";
+const char blue_root[] PROGMEM = "Blue Root";
 const char reconnecting[] PROGMEM = "Reconnecting";
 const char wristband[] PROGMEM = "wristband";
 const char please_wait[] PROGMEM = "please wait...";
@@ -96,8 +102,6 @@ const char the_wristband[] PROGMEM = "the wristband.";
 
 //const char scale_param[] PROGMEM = "Major, Minor, Blues, Pent. Major, Pent. Minor, Major Chord, Minor Chord";
 //const char root_param[] PROGMEM = "A, A#, B, C, C#, D, D#, E, F, F#, G, G#";
-
-
 
 const char test_array[] PROGMEM = "test";
 //const char flash_test PROGMEM = 'f';
@@ -109,14 +113,25 @@ const char *const zone_menu_txt[] PROGMEM = {zone, red_zone, green_zone, blue_zo
 const char *const red_zone_menu_txt[] PROGMEM = {red_zone, scale, root};
 const char *const green_zone_menu_txt[] PROGMEM = {green_zone, scale, root};
 const char *const blue_zone_menu_txt[] PROGMEM = {blue_zone, scale, root};
-
+const char *const red_scale_menu_txt[] PROGMEM = {red_scale};
+const char *const green_scale_menu_txt[] PROGMEM = {green_scale};
+const char *const blue_scale_menu_txt[] PROGMEM = {blue_scale};
+const char *const red_root_menu_txt[] PROGMEM = {red_root};
+const char *const green_root_menu_txt[] PROGMEM = {green_root};
+const char *const blue_root_menu_txt[] PROGMEM = {blue_root};
 
 const char *const mix_levels_menu_txt[] PROGMEM = {mix_levels, guitar, backing, master};
-const char *const guitar_level_menu_txt[] PROGMEM = {guitar}; // add parameter string here?
+const char *const guitar_level_menu_txt[] PROGMEM = {guitar}; 
+const char *const backing_level_menu_txt[] PROGMEM = {backing}; 
+const char *const master_level_menu_txt[] PROGMEM = {master};
+
 const char *const reconnect_menu_txt[] PROGMEM = {reconnecting, wristband, please_wait};
 const char *const connection_fail_menu_txt[] PROGMEM = {sorry, not_connect, the_wristband};
 
-const char *const mix_levels_param[] PROGMEM = {"0  ", "0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1  "};
+const char *const mix_levels_param[] PROGMEM = {"0", "0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1"};
+const char *const scales_param[] PROGMEM = {"Major", "Minor", "Blues", "Pent. Major", "Pent. Minor", "Major Chord", "Minor Chord"};
+const char *const root_param[] PROGMEM = {"A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"};
+
 
 // Define a variable to hold the data from the shift register
 byte shift_reg_byte = 0;
@@ -139,37 +154,45 @@ char string_buffer[30];
 // Read and monitior encoder position.
 int current_encoder_position, last_encoder_position;
 
-Menu_Controller menu_controller(MIN_CURSOR_VALUE, MAX_CURSOR_VALUE);                                    // Create an instance of Menu_Controller.
-Parameter_Container parameter_container;                                                                // Create an instance of Parameter_Container.
+Menu_Controller menu_controller(MIN_CURSOR_VALUE, MAX_CURSOR_VALUE);      // Create an instance of Menu_Controller.
+Parameter_Container parameter_container;                                  // Create an instance of Parameter_Container.
 
-
-Main_Page main_menu(main_menu_txt, &menu_controller, &parameter_container, &FOUR);                      // Create instances of Menu_Page objects.
-Selection_Page guitar_menu(guitar_menu_txt, &menu_controller, &parameter_container, &parameter_container.m_selected_guitar, &FOUR);
-
+// *** Initialise Menu_Page(s) ***    
+Main_Page main_menu(main_menu_txt, &menu_controller, &parameter_container, &FOUR);                                                                                // Main page
+Selection_Page guitar_menu(guitar_menu_txt, &menu_controller, &parameter_container, &parameter_container.m_selected_guitar, &FOUR);                               // Main page sub menus
 List_Page zone_menu(zone_menu_txt, &menu_controller, &parameter_container, &FOUR);
-List_Page red_zone_menu(red_zone_menu_txt, &menu_controller, &parameter_container, &THREE);
+List_Page mix_levels_menu(mix_levels_menu_txt, &menu_controller, &parameter_container, &FOUR);
+List_Page red_zone_menu(red_zone_menu_txt, &menu_controller, &parameter_container, &THREE);                                                                       // Zone page sub menus
 List_Page green_zone_menu(green_zone_menu_txt, &menu_controller, &parameter_container, &THREE);
 List_Page blue_zone_menu(blue_zone_menu_txt, &menu_controller, &parameter_container, &THREE);
-
-
-List_Page mix_levels_menu(mix_levels_menu_txt, &menu_controller, &parameter_container, &FOUR);
-
-Value_Page guitar_level_menu(guitar_level_menu_txt, mix_levels_param, 11, &menu_controller, &parameter_container, &parameter_container.m_guitar_level, &FOUR);
-
-Splash_Page reconnect_menu(reconnect_menu_txt, &menu_controller, &parameter_container, &THREE);
+Value_Page red_scale_menu(red_scale_menu_txt, scales_param, 7, &menu_controller, &parameter_container, &parameter_container.m_red_scale, &TWO);                   // Red zone page sub menus
+Value_Page red_root_menu(red_root_menu_txt, root_param, 11, &menu_controller, &parameter_container, &parameter_container.m_red_root, &TWO);
+Value_Page green_scale_menu(green_scale_menu_txt, scales_param, 7, &menu_controller, &parameter_container, &parameter_container.m_green_scale, &TWO);             // Green zone page sub menus
+Value_Page green_root_menu(green_root_menu_txt, root_param, 11, &menu_controller, &parameter_container, &parameter_container.m_green_root, &TWO);                 // Blue zone page sub menus
+Value_Page blue_scale_menu(blue_scale_menu_txt, scales_param, 7, &menu_controller, &parameter_container, &parameter_container.m_blue_scale, &TWO);
+Value_Page blue_root_menu(blue_root_menu_txt, root_param, 11, &menu_controller, &parameter_container, &parameter_container.m_blue_root, &TWO);                    // Mix levels page sub menus
+Value_Page guitar_level_menu(guitar_level_menu_txt, mix_levels_param, 11, &menu_controller, &parameter_container, &parameter_container.m_guitar_level, &TWO);
+Value_Page backing_level_menu(backing_level_menu_txt, mix_levels_param, 11, &menu_controller, &parameter_container, &parameter_container.m_backing_level, &TWO);
+Value_Page master_level_menu(master_level_menu_txt, mix_levels_param, 11, &menu_controller, &parameter_container, &parameter_container.m_master_level, &TWO);     
+Splash_Page reconnect_menu(reconnect_menu_txt, &menu_controller, &parameter_container, &THREE);                                                                   // Splash pages
 Splash_Page connection_fail_menu(connection_fail_menu_txt, &menu_controller, &parameter_container, &THREE);
 
-Menu_Page *p_main_sub_menus[3] = {&guitar_menu, &zone_menu, &mix_levels_menu};                          // Create an array of pointers to sub menus.
-Menu_Page *p_mix_levels_sub_menus[3] = {&guitar_level_menu, &reconnect_menu, &connection_fail_menu};
+// *** Initialise Pointers to Sub Menu_Page(s) ***  
+Menu_Page *p_main_sub_menus[] = {&guitar_menu, &zone_menu, &mix_levels_menu};                        
+Menu_Page *p_zone_sub_menus[] = {&red_zone_menu, &green_zone_menu, &blue_zone_menu};
+Menu_Page *p_red_zone_sub_menus[] = {&red_scale_menu, &red_root_menu};
+Menu_Page *p_green_zone_sub_menus[] = {&green_scale_menu, &green_root_menu};
+Menu_Page *p_blue_zone_sub_menus[] = {&blue_scale_menu, &blue_root_menu};    
+Menu_Page *p_mix_levels_sub_menus[] = {&guitar_level_menu, &reconnect_menu, &connection_fail_menu};
 
-Menu_Page *p_current_menu_page;                                                                         // Create a pointer to the currently selected menu page.
+Menu_Page *p_current_menu_page;                                           // Create a pointer to the currently selected menu page.
 
-// Create Simple_Button instances
+// *** Create Simple_Button instances ***
 Simple_Button reconnect_button(RECONNECT_BTN_PIN, DEBOUNCE_TIME, &menu_controller);
 Simple_Button power_button(POWER_BTN_PIN, DEBOUNCE_TIME, &menu_controller);
 Simple_Button access_switch(ACCESS_SWT_PIN, DEBOUNCE_TIME, &menu_controller);
 
-// Create Shift_Register_Button instances
+// *** Create Shift_Register_Button instances ***
 Shift_Register_Button play_button(PLAY_BTN_BIT, DEBOUNCE_TIME, &menu_controller);
 Shift_Register_Button stop_button(STOP_BTN_BIT, DEBOUNCE_TIME, &menu_controller);
 Shift_Register_Button song_1_button(SONG_1_BTN_BIT, DEBOUNCE_TIME, &menu_controller);
@@ -180,51 +203,51 @@ Shift_Register_Button back_button(BACK_BTN_BIT, DEBOUNCE_TIME, &menu_controller)
 Shift_Register_Button enter_button(ENTER_BTN_BIT, DEBOUNCE_TIME, &menu_controller);
 
 void setup() {
-  menu_controller.set_currently_selected_menu(&main_menu);
+  menu_controller.set_currently_selected_menu(&main_menu);                // Begin by setting the main_menu as the Menu_Page currently selected
 
-  // set callback functions
-  enter_button.set_callback_func(enter_pressed);
-  back_button.set_callback_func(back_pressed);
-
-  Serial.begin(9600);
-  // Wait for the serial stream to get going.
-  delay(500);
-  Serial.println(sizeof(mix_levels_param)/sizeof(mix_levels_param[0]));
-
-  main_menu.set_sub_menus(p_main_sub_menus);
+  // *** Build the menu system ***
+  main_menu.set_sub_menus(p_main_sub_menus);                              // Add sub Menu_Page(s) to Menu_Page(s)
+  zone_menu.set_sub_menus(p_zone_sub_menus);
+  red_zone_menu.set_sub_menus(p_red_zone_sub_menus);
+  green_zone_menu.set_sub_menus(p_green_zone_sub_menus);
+  blue_zone_menu.set_sub_menus(p_blue_zone_sub_menus);
   mix_levels_menu.set_sub_menus(p_mix_levels_sub_menus);
   
-  zone_menu.set_previous_menu(&main_menu);
-  guitar_menu.set_previous_menu(&main_menu);
+  guitar_menu.set_previous_menu(&main_menu);                              // Make the Menu_Page(s) aware of their parents. 
+  zone_menu.set_previous_menu(&main_menu);                                
   mix_levels_menu.set_previous_menu(&main_menu);
+  red_zone_menu.set_previous_menu(&zone_menu);                                                    
+  green_zone_menu.set_previous_menu(&zone_menu);  
+  blue_zone_menu.set_previous_menu(&zone_menu);  
   guitar_level_menu.set_previous_menu(&mix_levels_menu);
+  backing_level_menu.set_previous_menu(&mix_levels_menu);
+  master_level_menu.set_previous_menu(&mix_levels_menu);
+  red_scale_menu.set_previous_menu(&red_zone_menu);
+  red_root_menu.set_previous_menu(&red_zone_menu);
+  green_scale_menu.set_previous_menu(&red_zone_menu);
+  green_root_menu.set_previous_menu(&red_zone_menu);
+  blue_scale_menu.set_previous_menu(&red_zone_menu);
+  blue_root_menu.set_previous_menu(&red_zone_menu);
 
-  Serial.print("The address of the guitar menu is: ");
-  Serial.println((int)&guitar_menu);
+  enter_button.set_callback_func(enter_pressed);                                                // Set button callback functions
+  back_button.set_callback_func(back_pressed);
 
-  Serial.print("We're pointing to this address: ");
-  // print the address of the value pointed at by p_sub_pages[0]
-  Serial.println((int)&*p_main_sub_menus[0]);
+  Serial.begin(9600);                                                                           // Begin serial
+  delay(500);                                                                                   // Wait for the serial stream to get going.
+
+  selection_encoder.initialise(ENCODER_PIN_A, ENCODER_PIN_B, DEBOUNCE_TIME, &menu_controller);  // Initialise the encoder
   
-  // Initialise the display with the 12C address 0x3D
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3D);
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  
-  // Clear the display.
-  display.clearDisplay();
-  display.setCursor(0,0);
-  display.println(F("Hello Alex!"));
-  display.display();
- 
-  selection_encoder.initialise(ENCODER_PIN_A, ENCODER_PIN_B, DEBOUNCE_TIME, &menu_controller);
-  
-  // Set the pins of the shift register
-  pinMode(SHIFT_REG_LATCH, OUTPUT);
+  pinMode(SHIFT_REG_LATCH, OUTPUT);                                                             // Set the pins of the shift register
   pinMode(SHIFT_REG_CLOCK, OUTPUT);
   pinMode(SHIFT_REG_DATA, INPUT);
   
-  delay(10);
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3D);                                                    // Initialise the display with the 12C address 0x3D
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.clearDisplay();
+  display.display();
+ 
+  delay(10);                                                                                    // Pause again before we get going.
 }
 
 void loop() {
@@ -236,7 +259,6 @@ void loop() {
     menu_controller.set_redraw_display_flag(false);  
   }
   
-  //Serial.print(main_menu_txt[0][0]);
   
   // Set the latch pin to 1 to collect parallel data.
   digitalWrite(SHIFT_REG_LATCH, 1);
