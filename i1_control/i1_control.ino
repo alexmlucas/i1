@@ -53,6 +53,19 @@ Adafruit_SSD1306 display(OLED_RESET);
 #define SHIFT_REG_DATA 9
 #define SHIFT_REG_CLOCK 7
 
+// Define LED pins
+#define ZN_LED_R A9
+#define ZN_LED_G A8
+#define ZN_LED_B A7
+#define WB_LED_R A3
+#define WB_LED_G A2
+#define PL_LED_G 10
+
+// Define play button states
+#define PLAYING 0
+#define PAUSED 1
+#define STOPPED 2
+
 // Define the min & max cursor values
 #define MIN_CURSOR_VALUE 0
 #define MAX_CURSOR_VALUE 2
@@ -146,7 +159,7 @@ Simple_Encoder selection_encoder;
 const char *const *menu_text_pointer;
 
 // Byte for storing incoming serial data.
-int incomingByte = 0;
+int incoming_byte = 0;
 
 // String representing the current menu location.
 char current_menu_location[] = {""};
@@ -293,6 +306,16 @@ void setup() {
   Serial.begin(9600);                                                                           // Begin serial
   delay(500);                                                                                   // Wait for the serial stream to get going.
 
+  // Set up the LED pins.
+  pinMode(ZN_LED_R, OUTPUT);
+  pinMode(ZN_LED_G, OUTPUT);
+  pinMode(ZN_LED_B, OUTPUT);
+  pinMode(WB_LED_R, OUTPUT);
+  pinMode(WB_LED_G, OUTPUT);
+  pinMode(PL_LED_G, OUTPUT);
+
+  set_red_zone_on();
+
   selection_encoder.initialise(ENCODER_PIN_A, ENCODER_PIN_B, DEBOUNCE_TIME, &menu_controller);  // Initialise the encoder
   
   pinMode(SHIFT_REG_LATCH, OUTPUT);                                                             // Set the pins of the shift register
@@ -306,30 +329,12 @@ void setup() {
   display.display();
  
   delay(10);                                                                                    // Pause again before we get going.
-  //Serial.println("Hello");
-
-  // print the size of a pointer divided by the number of pointers.
-  // Serial.println(sizeof(scales_param)/sizeof(scales_param[0]));
-
-  char test[] = "hey";
-  char test2[] = "f";
-  char test3 = 'g';
-  char *test4;
-  test4 = &test3;
-  //Serial.println(sizeof(test4));
-
+  
   // an array of pointers to constant chars.
   // unusual that the addresses do not need to be passed in. Perhaps this is a peculiarity...
   // ...of char arrays and the fact that we're declaring and initialising the array of pointers to const chars at the same time.
-  const char* test_array[] = {test, test2};
+  // const char* test_array[] = {test, test2};
 
-  // Serial.println(sizeof(test_array)/sizeof(test_array[1]));
-  Serial.println(sizeof(main_menu_txt));
-  Serial.print("The address of the text is: ");
-  Serial.println((int)&main_menu_txt);
-  
-  function_test(main_menu_txt);
-  function_test(reconnect_menu_txt);
 }
 
 void loop() {
@@ -365,11 +370,32 @@ void loop() {
   power_button.check_button_pressed();
   access_switch.check_button_pressed();
   
-  /*if(Serial.available() > 0){
-    incomingByte = Serial.read();
+  if(Serial.available() > 0){
+    incoming_byte = Serial.read();
     Serial.print("I received:");
-    Serial.println(incomingByte, DEC);
-  }*/
+    Serial.println(incoming_byte, DEC);
+
+    switch(incoming_byte){
+      case 49: 
+        set_red_zone_on();
+        break;
+      case 50:
+        set_green_zone_on();
+        break;
+      case 51:
+        set_blue_zone_on();
+        break;
+      case 52:
+        set_play_on();
+        break;
+      case 53:
+        set_play_off();
+        break; 
+      case 54:
+        set_play_flash();
+        break; 
+    }
+  }
 
   /*while(Serial.available()) {
     Serial.readString();
@@ -441,15 +467,32 @@ void back_pressed(Menu_Controller* p_menu_controller){                          
   }                                                      
 }
 
-void send_serial(char handle){
-  Serial.println(handle);
-
+void set_red_zone_on(){
+  analogWrite(ZN_LED_R, 255);
+  analogWrite(ZN_LED_G, 0);
+  analogWrite(ZN_LED_B, 0);
 }
 
-void function_test(const char *const menu_text[]){
-  Serial.println((int)pgm_read_ptr(&(menu_text)));   
-  //Serial.println(sizeof(pgm_read_ptr(menu_text)));
-  Serial.println(sizeof(menu_text));
-  //strcpy_P(string_buffer, (char *)pgm_read_word(&(m_menu_text[i])));
-  //Serial.println(sizeof(menu_text)/sizeof(menu_text[1]));                                                          
+void set_green_zone_on(){
+  analogWrite(ZN_LED_R, 0);
+  analogWrite(ZN_LED_G, 255);
+  analogWrite(ZN_LED_B, 0);
+}
+
+void set_blue_zone_on(){
+  analogWrite(ZN_LED_R, 0);
+  analogWrite(ZN_LED_G, 0);
+  analogWrite(ZN_LED_B, 255);
+}
+
+void set_play_on(){
+  analogWrite(PL_LED_G, 255);
+}
+
+void set_play_off(){
+  analogWrite(PL_LED_G, 0);
+}
+
+void set_play_flash(){
+  analogWrite(PL_LED_G, 0);
 }

@@ -9,7 +9,7 @@ void Main_Page::draw(Adafruit_SSD1306 &display){
   char param_buffer_1[] = " ";                                                  // First buffer for parameter value
   char param_buffer_2[0];                                                       // Second buffer for parameter value
 
-  sprintf(param_buffer_2, "%d", (m_parameter_container->get_selected_song()+1));    // Get the selected song value, convert to 'char. Add 1 to remove zero index for displaying.
+  sprintf(param_buffer_2, "%d", (m_parameter_container->m_selected_song + 1));    // Get the selected song value, convert to 'char. Add 1 to remove zero index for displaying.
   strcat(param_buffer_1, param_buffer_2);                                           // Concatenate the two parameter buffers
   
   display.clearDisplay();                                                       // Clear the display.

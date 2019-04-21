@@ -15,8 +15,12 @@ class Parameter_Container{
     int m_red_root;
     int m_green_root;
     int m_blue_root;
+    int m_selected_zone;
+
+    // each parameter needs an associated char.
+    // could each parameter be a pointer to a struct which has two members,
+    // a parameter value and a char. In doing this we could have a generic set method.
     Parameter_Container();
-    int get_selected_song();
-    void set_selected_song(int selected_song);
+    // Include set methods here from each parameter which also sends a serial message.
 };
 #endif
