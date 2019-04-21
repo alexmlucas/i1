@@ -7,7 +7,7 @@ class Selection_Page: public Menu_Page{
   protected:
     int *m_target_parameter;  
   public:
-    Selection_Page(const char *const *menu_text, Menu_Controller *menu_controller, Parameter_Container *parameter_container, int *target_parameter, int *number_of_menu_items);
+    Selection_Page(Menu_Controller *menu_controller, Parameter_Container *parameter_container, int *target_parameter);
     void on_enter();
     virtual void draw(Adafruit_SSD1306 &display);
 };

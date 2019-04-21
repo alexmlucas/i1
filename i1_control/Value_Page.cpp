@@ -1,10 +1,14 @@
 #include "Value_Page.h"
 
-Value_Page::Value_Page(const char *const *menu_text, const char *const *parameter_text, int parameter_max_value, Menu_Controller *menu_controller, Parameter_Container *parameter_container, int *target_parameter, int *number_of_menu_items):Menu_Page(menu_text, menu_controller, parameter_container, number_of_menu_items){
+Value_Page::Value_Page(Menu_Controller *menu_controller, Parameter_Container *parameter_container, int *target_parameter):Menu_Page(menu_controller, parameter_container){
   m_target_parameter = target_parameter;
-  m_parameter_text = parameter_text;
-  m_parameter_max_value = parameter_max_value;
   m_enter_enabled = false;
+}
+
+void Value_Page::set_parameter_text(const char *const *parameter_text, int number_of_parameter_items){
+  m_parameter_text = parameter_text; 
+  m_number_of_parameter_items = number_of_parameter_items;
+  m_parameter_max_value = m_number_of_parameter_items - 1;
 }
 
 void Value_Page::draw(Adafruit_SSD1306 &display){

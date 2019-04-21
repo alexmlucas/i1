@@ -17,18 +17,19 @@ class Menu_Page{
     Parameter_Container *m_parameter_container;                       // Pointer to the parameter_container.
     Menu_Page *m_sub_menus[3];                                        // Array of pointers to sub menus.
     Menu_Page *m_previous_menu;                                       // Pointer to previous menu.
-    int *m_number_of_menu_items;
+    int m_number_of_menu_items;
     
   public:
     bool m_enter_enabled;
     bool m_back_enabled;
     bool m_encoder_enabled;
-    Menu_Page(const char *const *menu_text, Menu_Controller *menu_controller, Parameter_Container *parameter_container, int *number_of_menu_items);
+    Menu_Page(Menu_Controller *menu_controller, Parameter_Container *parameter_container);
     void set_sub_menus(Menu_Page *sub_menus[3]);
     void set_previous_menu(Menu_Page *previous_menu);
     virtual void draw(Adafruit_SSD1306 &display);
     virtual void on_enter();
     virtual void on_back();
     virtual void on_encoder(uint8_t *pin_value);
+    void set_menu_text(const char *const *menu_text, int number_of_menu_items);
 };
 #endif

@@ -5,7 +5,7 @@
 
 class List_Page: public Menu_Page{  
   public:
-    List_Page(const char *const *menu_text, Menu_Controller *menu_controller, Parameter_Container *parameter_container, int *number_of_menu_items);
+    List_Page(Menu_Controller *menu_controller, Parameter_Container *parameter_container);
     void draw(Adafruit_SSD1306 &display);
 };
 #endif
