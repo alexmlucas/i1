@@ -5,8 +5,10 @@
 #include <Adafruit_SSD1306.h>
 
 // Button includes
-#include "Simple_Button.h"
-#include "Shift_Register_Button.h"
+#include "Control_Button.h"
+#include "Shift_Register_Control_Button.h"
+#include "Shift_Register_Menu_Button.h"
+
 #include "Simple_Encoder.h"
 
 // Menu includes
@@ -189,19 +191,20 @@ Menu_Page *p_mix_levels_sub_menus[] = {&guitar_level_menu, &reconnect_menu, &con
 Menu_Page *p_current_menu_page;                                           // Create a pointer to the currently selected menu page.
 
 // *** Create Simple_Button instances ***
-Simple_Button reconnect_button(RECONNECT_BTN_PIN, DEBOUNCE_TIME, &menu_controller);
-Simple_Button power_button(POWER_BTN_PIN, DEBOUNCE_TIME, &menu_controller);
-Simple_Button access_switch(ACCESS_SWT_PIN, DEBOUNCE_TIME, &menu_controller);
+Control_Button reconnect_button(RECONNECT_BTN_PIN, DEBOUNCE_TIME, 'a');
+Control_Button power_button(POWER_BTN_PIN, DEBOUNCE_TIME, 'b');
+Control_Button access_switch(ACCESS_SWT_PIN, DEBOUNCE_TIME, 'c');
 
 // *** Create Shift_Register_Button instances ***
-Shift_Register_Button play_button(PLAY_BTN_BIT, DEBOUNCE_TIME, &menu_controller);
-Shift_Register_Button stop_button(STOP_BTN_BIT, DEBOUNCE_TIME, &menu_controller);
-Shift_Register_Button song_1_button(SONG_1_BTN_BIT, DEBOUNCE_TIME, &menu_controller);
-Shift_Register_Button song_2_button(SONG_2_BTN_BIT, DEBOUNCE_TIME, &menu_controller);
-Shift_Register_Button song_3_button(SONG_3_BTN_BIT, DEBOUNCE_TIME, &menu_controller);
-Shift_Register_Button song_4_button(SONG_4_BTN_BIT, DEBOUNCE_TIME, &menu_controller);
-Shift_Register_Button back_button(BACK_BTN_BIT, DEBOUNCE_TIME, &menu_controller);
-Shift_Register_Button enter_button(ENTER_BTN_BIT, DEBOUNCE_TIME, &menu_controller);
+Shift_Register_Control_Button play_button(PLAY_BTN_BIT, DEBOUNCE_TIME, 'd');
+Shift_Register_Control_Button stop_button(STOP_BTN_BIT, DEBOUNCE_TIME, 'e');
+Shift_Register_Control_Button song_1_button(SONG_1_BTN_BIT, DEBOUNCE_TIME, 'f');
+Shift_Register_Control_Button song_2_button(SONG_2_BTN_BIT, DEBOUNCE_TIME, 'g');
+Shift_Register_Control_Button song_3_button(SONG_3_BTN_BIT, DEBOUNCE_TIME, 'h');
+Shift_Register_Control_Button song_4_button(SONG_4_BTN_BIT, DEBOUNCE_TIME, 'i');
+
+Shift_Register_Menu_Button back_button(BACK_BTN_BIT, DEBOUNCE_TIME, &menu_controller);
+Shift_Register_Menu_Button enter_button(ENTER_BTN_BIT, DEBOUNCE_TIME, &menu_controller);
 
 void setup() {
   
@@ -435,7 +438,12 @@ void back_pressed(Menu_Controller* p_menu_controller){                          
   
   if(m_menu->m_back_enabled){                                                          // if the currently selected menu has an on_enter() function...
     m_menu->on_back();                                                                 // ... call it.
-  }                                                                   
+  }                                                      
+}
+
+void send_serial(char handle){
+  Serial.println(handle);
+
 }
 
 void function_test(const char *const menu_text[]){
