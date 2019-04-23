@@ -8,7 +8,7 @@ class Shift_Register_Control_Button: public Control_Button{
     int m_bit_position;
     
   public:
-    Shift_Register_Control_Button(int bit_position, int debounce_milliseconds, int parameter_value);
+    Shift_Register_Control_Button(int bit_position, int debounce_milliseconds);
     bool check_button_pressed(byte &shift_register_reading);
 };
 #endif

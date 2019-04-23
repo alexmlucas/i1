@@ -1,14 +1,13 @@
 #include "Selection_Page.h"
 
-Selection_Page::Selection_Page(Menu_Controller *menu_controller, Parameter_Container *parameter_container, int *target_parameter):Menu_Page(menu_controller, parameter_container){
+Selection_Page::Selection_Page(Menu_Controller *menu_controller, Parameter_Container *parameter_container):Menu_Page(menu_controller, parameter_container){
   m_menu_controller = menu_controller;                                          // Assign class member pointers to incoming memory addresses.
   m_parameter_container = parameter_container;                                  // *** The parameter container is redundant here as we're pointing to the parameter value directly. ***
-  m_target_parameter = target_parameter;
 }
 
 void Selection_Page::draw(Adafruit_SSD1306 &display){
   char string_buffer[16];                                                       // Buffer for reading strings from program memory.
-  int selected_item = *m_target_parameter;                                      // The selected item equals the value at the address pointed to by m_target_parameter.          
+  int selected_item = m_parameter_struct->value;                                // The selected item equals the value at the address pointed to by m_target_parameter.          
   
   display.clearDisplay();                                                       // Clear the display.
   display.setTextColor(WHITE);                                                  // Set text to white.
@@ -42,6 +41,6 @@ void Selection_Page::draw(Adafruit_SSD1306 &display){
 
 void Selection_Page::on_enter(){
   int cursor_position = m_menu_controller->get_cursor_position();               // Get the current cursor position.
-  *m_target_parameter = cursor_position;                                        // Set the selected parameter to that of the cursor position.
+  m_parameter_struct->value = cursor_position;                                        // Set the selected parameter to that of the cursor position.
   m_menu_controller->set_redraw_display_flag(true);                             // Update the currently selected menu.
 }

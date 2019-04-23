@@ -1,6 +1,6 @@
 #include "Shift_Register_Control_Button.h"
 
-Shift_Register_Control_Button::Shift_Register_Control_Button(int bit_position, int debounce_milliseconds, int parameter_value):Control_Button(debounce_milliseconds, parameter_value){
+Shift_Register_Control_Button::Shift_Register_Control_Button(int bit_position, int debounce_milliseconds):Control_Button(debounce_milliseconds){
   m_bit_position = bit_position;
 }
 
@@ -19,6 +19,7 @@ bool Shift_Register_Control_Button::check_button_pressed(byte &shift_register_re
       m_last_event_time = millis();                             // Reset the timer ready for the next iteration.
       if(button_state == HIGH){                                 // If the button is HIGH...
         m_parameter_container->set_parameter(m_parameter_struct, m_parameter_value);
+        m_menu_controller->set_redraw_display_flag(true);
       }
     }
   }

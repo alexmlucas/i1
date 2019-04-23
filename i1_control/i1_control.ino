@@ -4,11 +4,10 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-// Button includes
+// Control includes
 #include "Control_Button.h"
 #include "Shift_Register_Control_Button.h"
 #include "Shift_Register_Menu_Button.h"
-
 #include "Simple_Encoder.h"
 
 // Menu includes
@@ -171,26 +170,26 @@ char string_buffer[30];
 int current_encoder_position, last_encoder_position;
 
 Menu_Controller menu_controller(MIN_CURSOR_VALUE, MAX_CURSOR_VALUE);      // Create an instance of Menu_Controller.
-Parameter_Container parameter_container(&menu_controller);                // Create an instance of Parameter_Container.
+Parameter_Container parameter_container;                // Create an instance of Parameter_Container.
 Parameter_Container *p_parameter_container;
 
 // *** Initialise Menu_Page(s) ***
 Main_Page main_menu(&menu_controller, &parameter_container);
-Selection_Page guitar_menu(&menu_controller, &parameter_container, &parameter_container.m_selected_guitar);
+Selection_Page guitar_menu(&menu_controller, &parameter_container);
 List_Page zone_menu(&menu_controller, &parameter_container);
 List_Page mix_levels_menu(&menu_controller, &parameter_container);
 List_Page red_zone_menu(&menu_controller, &parameter_container);
 List_Page green_zone_menu(&menu_controller, &parameter_container);
 List_Page blue_zone_menu(&menu_controller, &parameter_container);
-Value_Page red_scale_menu(&menu_controller, &parameter_container, &parameter_container.m_red_scale);
-Value_Page red_root_menu(&menu_controller, &parameter_container, &parameter_container.m_red_root);
-Value_Page green_scale_menu(&menu_controller, &parameter_container, &parameter_container.m_green_scale);
-Value_Page green_root_menu( &menu_controller, &parameter_container, &parameter_container.m_green_root);
-Value_Page blue_scale_menu(&menu_controller, &parameter_container, &parameter_container.m_blue_scale);
-Value_Page blue_root_menu(&menu_controller, &parameter_container, &parameter_container.m_blue_root);
-Value_Page guitar_level_menu(&menu_controller, &parameter_container, &parameter_container.m_guitar_level);
-Value_Page backing_level_menu(&menu_controller, &parameter_container, &parameter_container.m_backing_level);
-Value_Page master_level_menu(&menu_controller, &parameter_container, &parameter_container.m_master_level);
+Value_Page red_scale_menu(&menu_controller, &parameter_container);
+Value_Page red_root_menu(&menu_controller, &parameter_container);
+Value_Page green_scale_menu(&menu_controller, &parameter_container);
+Value_Page green_root_menu( &menu_controller, &parameter_container);
+Value_Page blue_scale_menu(&menu_controller, &parameter_container);
+Value_Page blue_root_menu(&menu_controller, &parameter_container);
+Value_Page guitar_level_menu(&menu_controller, &parameter_container);
+Value_Page backing_level_menu(&menu_controller, &parameter_container);
+Value_Page master_level_menu(&menu_controller, &parameter_container);
 Splash_Page reconnect_menu(&menu_controller, &parameter_container);
 Splash_Page connection_fail_menu(&menu_controller, &parameter_container);
 
@@ -205,17 +204,17 @@ Menu_Page *p_mix_levels_sub_menus[] = {&guitar_level_menu, &reconnect_menu, &con
 Menu_Page *p_current_menu_page;                                           // Create a pointer to the currently selected menu page.
 
 // *** Create Simple_Button instances ***
-Control_Button reconnect_button(RECONNECT_BTN_PIN, DEBOUNCE_TIME, 'a');
-Control_Button power_button(POWER_BTN_PIN, DEBOUNCE_TIME, 'b');
-Control_Button access_switch(ACCESS_SWT_PIN, DEBOUNCE_TIME, 'c');
+Control_Button reconnect_button(RECONNECT_BTN_PIN, DEBOUNCE_TIME);
+Control_Button power_button(POWER_BTN_PIN, DEBOUNCE_TIME);
+Control_Button access_switch(ACCESS_SWT_PIN, DEBOUNCE_TIME);
 
 // *** Create Shift_Register_Button instances ***
-Shift_Register_Control_Button play_button(PLAY_BTN_BIT, DEBOUNCE_TIME, 'd');
-Shift_Register_Control_Button stop_button(STOP_BTN_BIT, DEBOUNCE_TIME, 'e');
-Shift_Register_Control_Button song_1_button(SONG_1_BTN_BIT, DEBOUNCE_TIME, 'f');
-Shift_Register_Control_Button song_2_button(SONG_2_BTN_BIT, DEBOUNCE_TIME, 'g');
-Shift_Register_Control_Button song_3_button(SONG_3_BTN_BIT, DEBOUNCE_TIME, 'h');
-Shift_Register_Control_Button song_4_button(SONG_4_BTN_BIT, DEBOUNCE_TIME, 'i');
+Shift_Register_Control_Button play_button(PLAY_BTN_BIT, DEBOUNCE_TIME);
+Shift_Register_Control_Button stop_button(STOP_BTN_BIT, DEBOUNCE_TIME);
+Shift_Register_Control_Button song_1_button(SONG_1_BTN_BIT, DEBOUNCE_TIME);
+Shift_Register_Control_Button song_2_button(SONG_2_BTN_BIT, DEBOUNCE_TIME);
+Shift_Register_Control_Button song_3_button(SONG_3_BTN_BIT, DEBOUNCE_TIME);
+Shift_Register_Control_Button song_4_button(SONG_4_BTN_BIT, DEBOUNCE_TIME);
 
 Shift_Register_Menu_Button back_button(BACK_BTN_BIT, DEBOUNCE_TIME, &menu_controller);
 Shift_Register_Menu_Button enter_button(ENTER_BTN_BIT, DEBOUNCE_TIME, &menu_controller);
@@ -275,6 +274,19 @@ void setup() {
   backing_level_menu.set_parameter_text(mix_levels_param_txt, text_size);
   master_level_menu.set_parameter_text(mix_levels_param_txt, text_size);
 
+  // *** Assign parameter structs to Menu_Page(s) ***
+  main_menu.set_parameter_struct(&parameter_container.m_song);
+  guitar_menu.set_parameter_struct(&parameter_container.m_guitar);
+  red_scale_menu.set_parameter_struct(&parameter_container.m_red_scale);
+  red_root_menu.set_parameter_struct(&parameter_container.m_red_root);
+  green_scale_menu.set_parameter_struct(&parameter_container.m_green_scale);
+  green_root_menu.set_parameter_struct(&parameter_container.m_green_root);
+  blue_scale_menu.set_parameter_struct(&parameter_container.m_blue_scale);
+  blue_root_menu.set_parameter_struct(&parameter_container.m_blue_root);
+  guitar_level_menu.set_parameter_struct(&parameter_container.m_guitar_level);
+  backing_level_menu.set_parameter_struct(&parameter_container.m_backing_level);
+  master_level_menu.set_parameter_struct(&parameter_container.m_master_level);
+
   menu_controller.set_currently_selected_menu(&main_menu);                // Setting the main_menu as the Menu_Page currently selected
 
   // *** Build the menu system ***
@@ -303,13 +315,22 @@ void setup() {
  
   enter_button.set_callback_func(enter_pressed);                                                // Set button callback functions
   back_button.set_callback_func(back_pressed);
-  //song_1_button.set_callback_func(parameter_container.*fnc_ptr));
-  //song_1_button.set_callback_func(parameter_container.set_selected_song);
 
   Serial.begin(9600);                                                                           // Begin serial
   delay(500);                                                                                   // Wait for the serial stream to get going.
 
-  song_1_button.configure_parameter(&parameter_container.m_test_parameter_1, 3);
+
+  song_1_button.set_menu_controller(&menu_controller);
+  song_2_button.set_menu_controller(&menu_controller);
+  song_3_button.set_menu_controller(&menu_controller);
+  song_4_button.set_menu_controller(&menu_controller);
+  
+  song_1_button.configure_parameter(&parameter_container.m_song, 0);
+  song_2_button.configure_parameter(&parameter_container.m_song, 1);
+  song_3_button.configure_parameter(&parameter_container.m_song, 2);
+  song_4_button.configure_parameter(&parameter_container.m_song, 3);
+
+  
 
   // Set up the LED pins.
   pinMode(ZN_LED_R, OUTPUT);
@@ -345,6 +366,7 @@ void setup() {
 void loop() {
   
   if(menu_controller.get_redraw_display_flag() == true){
+    Serial.println("redrawing display");
     // Change to a pointer to the currently selected menu.
     p_current_menu_page = (Menu_Page*)menu_controller.get_currently_selected_menu();
     p_current_menu_page->draw(display);

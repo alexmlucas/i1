@@ -3,6 +3,7 @@
 #include "Arduino.h"
 #include "Menu_Controller.h"
 #include "Parameter_Container.h"
+#include "Parameter.h"
 #include <Adafruit_SSD1306.h>
 
 const int PADDING PROGMEM = 3;
@@ -18,6 +19,7 @@ class Menu_Page{
     Menu_Page *m_sub_menus[3];                                        // Array of pointers to sub menus.
     Menu_Page *m_previous_menu;                                       // Pointer to previous menu.
     int m_number_of_menu_items;
+    Parameter *m_parameter_struct;
     
   public:
     bool m_enter_enabled;
@@ -31,5 +33,7 @@ class Menu_Page{
     virtual void on_back();
     virtual void on_encoder(uint8_t *pin_value);
     void set_menu_text(const char *const *menu_text, int number_of_menu_items);
+    void set_parameter_struct(Parameter *parameter_struct);
+
 };
 #endif

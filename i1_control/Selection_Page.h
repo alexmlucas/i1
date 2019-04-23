@@ -4,10 +4,8 @@
 #include "Menu_Page.h"                          // Include the parent class
 
 class Selection_Page: public Menu_Page{
-  protected:
-    int *m_target_parameter;  
   public:
-    Selection_Page(Menu_Controller *menu_controller, Parameter_Container *parameter_container, int *target_parameter);
+    Selection_Page(Menu_Controller *menu_controller, Parameter_Container *parameter_container);
     void on_enter();
     virtual void draw(Adafruit_SSD1306 &display);
 };

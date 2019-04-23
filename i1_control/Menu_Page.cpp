@@ -8,6 +8,10 @@ Menu_Page::Menu_Page(Menu_Controller *menu_controller, Parameter_Container *para
   m_encoder_enabled = true;
 }
 
+void Menu_Page::set_parameter_struct(Parameter *parameter_struct){
+  m_parameter_struct = parameter_struct; 
+}
+
 void Menu_Page::set_menu_text(const char *const *menu_text, int number_of_menu_items){
   m_menu_text = menu_text; 
   m_number_of_menu_items = number_of_menu_items;
