@@ -7,8 +7,7 @@ Value_Page::Value_Page(Menu_Controller *menu_controller, Parameter_Container *pa
 
 void Value_Page::set_parameter_text(const char *const *parameter_text, int number_of_parameter_items){
   m_parameter_text = parameter_text; 
-  m_number_of_parameter_items = number_of_parameter_items;
-  m_parameter_max_value = m_number_of_parameter_items - 1;
+  m_parameter_max_value = number_of_parameter_items - 1;
 }
 
 void Value_Page::draw(Adafruit_SSD1306 &display){

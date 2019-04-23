@@ -18,7 +18,6 @@ class Menu_Page{
     Menu_Page *m_sub_menus[3];                                        // Array of pointers to sub menus.
     Menu_Page *m_previous_menu;                                       // Pointer to previous menu.
     int m_number_of_menu_items;
-    char silly_char;
     
   public:
     bool m_enter_enabled;

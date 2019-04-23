@@ -11,7 +11,6 @@ Menu_Page::Menu_Page(Menu_Controller *menu_controller, Parameter_Container *para
 void Menu_Page::set_menu_text(const char *const *menu_text, int number_of_menu_items){
   m_menu_text = menu_text; 
   m_number_of_menu_items = number_of_menu_items;
-  silly_char = 's';
 }
 
 void Menu_Page::set_sub_menus(Menu_Page *sub_menus[]){

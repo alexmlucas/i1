@@ -171,7 +171,8 @@ char string_buffer[30];
 int current_encoder_position, last_encoder_position;
 
 Menu_Controller menu_controller(MIN_CURSOR_VALUE, MAX_CURSOR_VALUE);      // Create an instance of Menu_Controller.
-Parameter_Container parameter_container;                                  // Create an instance of Parameter_Container.
+Parameter_Container parameter_container(&menu_controller);                // Create an instance of Parameter_Container.
+Parameter_Container *p_parameter_container;
 
 // *** Initialise Menu_Page(s) ***
 Main_Page main_menu(&menu_controller, &parameter_container);
@@ -299,12 +300,16 @@ void setup() {
   green_root_menu.set_previous_menu(&red_zone_menu);
   blue_scale_menu.set_previous_menu(&red_zone_menu);
   blue_root_menu.set_previous_menu(&red_zone_menu);
-
+ 
   enter_button.set_callback_func(enter_pressed);                                                // Set button callback functions
   back_button.set_callback_func(back_pressed);
+  //song_1_button.set_callback_func(parameter_container.*fnc_ptr));
+  //song_1_button.set_callback_func(parameter_container.set_selected_song);
 
   Serial.begin(9600);                                                                           // Begin serial
   delay(500);                                                                                   // Wait for the serial stream to get going.
+
+  song_1_button.configure_parameter(&parameter_container.m_test_parameter_1, 3);
 
   // Set up the LED pins.
   pinMode(ZN_LED_R, OUTPUT);

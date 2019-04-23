@@ -3,15 +3,20 @@
 #include "Arduino.h"
 #include "Menu_Controller.h"
 #include "Simple_Button.h"
+#include "Parameter.h"
+#include "Parameter_Container.h"
 
 class Control_Button: public Simple_Button{
   protected:
-    char m_serial_char;
+    int m_parameter_value;
+    Parameter *m_parameter_struct;
+    Parameter_Container *m_parameter_container;
 
   public:
-    Control_Button(int debounce_milliseconds, char serial_char); 
-    Control_Button(int pin, int debounce_milliseconds, char serial_char);    
-    bool check_button_pressed();                                            // Call this to see if the button is being pressed
-    void set_callback_func(void (*f)(Menu_Controller*));                    // Set the callback function, expects a pointer to a function which expects a pointer to a Menu_Controller
+    Control_Button(int debounce_milliseconds, int parameter_value);                // Present to allow base class to be initialised from shift_register button, which doesn't have a pin.
+    Control_Button(int pin, int debounce_milliseconds, int parameter_value);    
+    void check_button_pressed();                                       
+    void configure_parameter(Parameter *parameter, int parameter_value);
+    void set_parameter_container(Parameter_Container *parameter_container);
 };
 #endif

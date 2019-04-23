@@ -8,11 +8,10 @@ class Value_Page: public Menu_Page{
     const char *const *m_parameter_text;                                   // A pointer to an array of constant pointers to constant chars.
     int *m_target_parameter;
     int m_parameter_max_value;
-    int m_number_of_parameter_items;
   public:
     Value_Page(Menu_Controller *menu_controller, Parameter_Container *parameter_container, int *target_parameter);
     void on_encoder(uint8_t *pin_value);
-    virtual void draw(Adafruit_SSD1306 &display);
+    void draw(Adafruit_SSD1306 &display);
     void set_parameter_text(const char *const *parameter_text, int number_of_parameter_items);
 };
 #endif
