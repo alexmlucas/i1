@@ -204,17 +204,17 @@ Menu_Page *p_mix_levels_sub_menus[] = {&guitar_level_menu, &reconnect_menu, &con
 Menu_Page *p_current_menu_page;                                           // Create a pointer to the currently selected menu page.
 
 // *** Create Simple_Button instances ***
-Control_Button reconnect_button(RECONNECT_BTN_PIN, DEBOUNCE_TIME);
-Control_Button power_button(POWER_BTN_PIN, DEBOUNCE_TIME);
-Control_Button access_switch(ACCESS_SWT_PIN, DEBOUNCE_TIME);
+Control_Button reconnect_button(RECONNECT_BTN_PIN, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_reconnect, 0);
+Control_Button power_button(POWER_BTN_PIN, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_power, 0);
+Control_Button access_switch(ACCESS_SWT_PIN, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_selected_zone, 0);
 
 // *** Create Shift_Register_Button instances ***
-Shift_Register_Control_Button play_button(PLAY_BTN_BIT, DEBOUNCE_TIME);
-Shift_Register_Control_Button stop_button(STOP_BTN_BIT, DEBOUNCE_TIME);
-Shift_Register_Control_Button song_1_button(SONG_1_BTN_BIT, DEBOUNCE_TIME);
-Shift_Register_Control_Button song_2_button(SONG_2_BTN_BIT, DEBOUNCE_TIME);
-Shift_Register_Control_Button song_3_button(SONG_3_BTN_BIT, DEBOUNCE_TIME);
-Shift_Register_Control_Button song_4_button(SONG_4_BTN_BIT, DEBOUNCE_TIME);
+Shift_Register_Control_Button play_button(PLAY_BTN_BIT, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_play, 1);
+Shift_Register_Control_Button stop_button(STOP_BTN_BIT, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_play, 0);
+Shift_Register_Control_Button song_1_button(SONG_1_BTN_BIT, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_song, 0);
+Shift_Register_Control_Button song_2_button(SONG_2_BTN_BIT, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_song, 1);
+Shift_Register_Control_Button song_3_button(SONG_3_BTN_BIT, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_song, 2);
+Shift_Register_Control_Button song_4_button(SONG_4_BTN_BIT, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_song, 3);
 
 Shift_Register_Menu_Button back_button(BACK_BTN_BIT, DEBOUNCE_TIME, &menu_controller);
 Shift_Register_Menu_Button enter_button(ENTER_BTN_BIT, DEBOUNCE_TIME, &menu_controller);
@@ -320,7 +320,7 @@ void setup() {
   delay(500);                                                                                   // Wait for the serial stream to get going.
 
 
-  song_1_button.set_menu_controller(&menu_controller);
+  /*song_1_button.set_menu_controller(&menu_controller);
   song_2_button.set_menu_controller(&menu_controller);
   song_3_button.set_menu_controller(&menu_controller);
   song_4_button.set_menu_controller(&menu_controller);
@@ -328,7 +328,7 @@ void setup() {
   song_1_button.configure_parameter(&parameter_container.m_song, 0);
   song_2_button.configure_parameter(&parameter_container.m_song, 1);
   song_3_button.configure_parameter(&parameter_container.m_song, 2);
-  song_4_button.configure_parameter(&parameter_container.m_song, 3);
+  song_4_button.configure_parameter(&parameter_container.m_song, 3);*/
 
   
 
@@ -366,7 +366,6 @@ void setup() {
 void loop() {
   
   if(menu_controller.get_redraw_display_flag() == true){
-    Serial.println("redrawing display");
     // Change to a pointer to the currently selected menu.
     p_current_menu_page = (Menu_Page*)menu_controller.get_currently_selected_menu();
     p_current_menu_page->draw(display);

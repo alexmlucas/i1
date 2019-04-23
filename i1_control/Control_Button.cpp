@@ -3,7 +3,11 @@
 Control_Button::Control_Button(int debounce_milliseconds):Simple_Button(debounce_milliseconds){
 }
 
-Control_Button::Control_Button(int pin, int debounce_milliseconds):Simple_Button(pin, debounce_milliseconds){
+Control_Button::Control_Button(int pin, int debounce_milliseconds, Menu_Controller *menu_controller, Parameter_Container *parameter_container, Parameter *parameter_struct, int parameter_value):Simple_Button(pin, debounce_milliseconds){
+  m_menu_controller = menu_controller;
+  m_parameter_container = parameter_container;
+  m_parameter_struct = parameter_struct;
+  m_parameter_value = parameter_value;
 }
 
 void Control_Button::check_button_pressed(){
@@ -25,17 +29,4 @@ void Control_Button::check_button_pressed(){
       }
     }
   }
-}
-
-void Control_Button::configure_parameter(Parameter *parameter_struct, int parameter_value){
-  m_parameter_struct = parameter_struct;
-  m_parameter_value = parameter_value;
-}
-
-void Control_Button::set_parameter_container(Parameter_Container *parameter_container){
-  m_parameter_container = parameter_container;
-}
-
-void Control_Button::set_menu_controller(Menu_Controller *menu_controller){
-  m_menu_controller = menu_controller;
 }

@@ -1,7 +1,11 @@
 #include "Shift_Register_Control_Button.h"
 
-Shift_Register_Control_Button::Shift_Register_Control_Button(int bit_position, int debounce_milliseconds):Control_Button(debounce_milliseconds){
+Shift_Register_Control_Button::Shift_Register_Control_Button(int bit_position, int debounce_milliseconds, Menu_Controller *menu_controller, Parameter_Container *parameter_container, Parameter *parameter_struct, int parameter_value):Control_Button(debounce_milliseconds){
   m_bit_position = bit_position;
+  m_menu_controller = menu_controller;
+  m_parameter_container = parameter_container;
+  m_parameter_struct = parameter_struct;
+  m_parameter_value = parameter_value;
 }
 
 bool Shift_Register_Control_Button::check_button_pressed(byte &shift_register_reading){
