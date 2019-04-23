@@ -1,5 +1,7 @@
 # sip/puff variant
 # -*- coding: utf-8 -*-
+
+# what are abstract methods and properties?
 import struct
 import threading
 import multiprocessing
@@ -13,6 +15,7 @@ import logging
 import time
 import uuid
 import Adafruit_BluefruitLE
+# from Adafruit_BluefruitLE.services import UART
 
 # Define service and characteristic UUIDs used by the BNO service.
 BNO_SERVICE_UUID = uuid.UUID('369B19D1-A340-497E-A8CE-DAFA92D76793')
@@ -143,6 +146,7 @@ def main():
 	def received(data):
 		if is_float(data):
 			float_data = float(data)
+			print(float_data)
 			int_data = int(float_data)
 			if int_data is not -1:
 				# chord is triggered here...
@@ -166,17 +170,24 @@ def main():
 
 	# Disconnect any currently connected BNO devices.  Good for cleaning up and
 	# starting from a fresh state.
-	print('Disconnecting any connected BNO devices...')
+	print('Disconnecting any connected UART devices...')
 	ble.disconnect_devices([BNO_SERVICE_UUID])
+	##UART.disconnect_devices()
 
-	# Scan for BNO devices.
+	# Scan for BNO devices.tony d bluetooth raspberry pi
+
 	print('Searching for BNO device...')
 	try:
 		adapter.start_scan()
 		# Search for the first BNO device found (will time out after 60 seconds
 		# but you can specify an optional timeout_sec parameter to change it).
-		device = ble.find_device(name='BNO')
+		#device = ble.find_device(name='BNO')
+		device = ble.find_device(service_uuids=[BNO_SERVICE_UUID])
+
 		# device = ble.find_device(name='Adafruit Bluefruit LE')
+
+		## device = UART.find_device()
+
 		if device is None:
 			raise RuntimeError('Failed to find BNO device!')
 	finally:
@@ -196,7 +207,7 @@ def main():
 	# open a MIDI port. Currently hard-wired to IAC driver.
 	if available_ports:
 		print(available_ports)
-		midiout.open_port(1)
+		# midiout.open_port(1)
 
 		# Intitialise variables.
 		wristband_imu_value_as_float = 0.0
@@ -204,31 +215,32 @@ def main():
 		current_wristband_position_as_segment_number = 0
 
 		# Flush serial inputs and outputs.
-		sip_puff_serial_port.flushInput()
-		sip_puff_serial_port.flushOutput()
+		## sip_puff_serial_port.flushInput()
+		## sip_puff_serial_port.flushOutput()
 
 		# Divide range of IMU into segments.
 		wristband_segmenter = StringSegmenter(-61, 0, NUMBER_OF_STRINGS)
 
 		# flush sip puff sensor
-		sip_puff_serial_port.flushInput()
-		sip_puff_serial_port.flushOutput()
+		## sip_puff_serial_port.flushInput()
+		## sip_puff_serial_port.flushOutput()
 
 		# Request data from sip puff sensor.
 		request_string  = 'r'
 		newline = '\n'
-		sip_puff_serial_port.write(request_string.encode() + newline.encode())
+		## sip_puff_serial_port.write(request_string.encode() + newline.encode())
 
 		# Pause between requesting and reading data.
 		time.sleep(0.025)
 
 		#######################################
 		# Read data from sip/puff switch.
-		new_selected_chord = sip_puff_serial_port.readline().rstrip().decode()
-		current_selected_chord = new_selected_chord
-		chord_to_display = str(current_selected_chord)
-		sip_puff_serial_port.write(chord_to_display.encode() + b'x0a')
+		# new_selected_chord = sip_puff_serial_port.readline().rstrip().decode()
+		## current_selected_chord = new_selected_chord
 
+		current_selected_chord = 1
+		chord_to_display = str(current_selected_chord)
+		## sip_puff_serial_port.write(chord_to_display.encode() + b'x0a')
 		pluck_time = None
 
 		try:
@@ -239,7 +251,7 @@ def main():
 			device.discover([BNO_SERVICE_UUID], [YAW_CHAR_UUID, MOTOR_CHAR_UUID])
 
 			# Find the BNO service and its characteristics.
-			bno = device.find_service(BNO_SERVICE_UUID)
+			bno = device.find_serivce[BNO_SERVICE_UUID]
 			yaw = bno.find_characteristic(YAW_CHAR_UUID)
 			motor = bno.find_characteristic(MOTOR_CHAR_UUID)
 
@@ -249,28 +261,30 @@ def main():
 
 			while True:
 				# Flush serial inputs and outputs.
-				sip_puff_serial_port.flushInput()
-				sip_puff_serial_port.flushOutput()
+				## sip_puff_serial_port.flushInput()
+				## sip_puff_serial_port.flushOutput()
 
 				# Request data from sip/puff sensor.
 				request_string = "r"
-				sip_puff_serial_port.write(request_string.encode() + b'x0a')
+				## sip_puff_serial_port.write(request_string.encode() + b'x0a')
 
 				# Pause between requesting and reading data.
 				# time.sleep(0.025)
 
 				# Read data from sip puff sensor.
-				new_selected_chord = sip_puff_serial_port.readline().rstrip().decode()
+				## new_selected_chord = sip_puff_serial_port.readline().rstrip().decode()
+
+				new_selected_chord = 2
 
 				if new_selected_chord != current_selected_chord:
 					chord_to_display = str(new_selected_chord)
-					sip_puff_serial_port.write(chord_to_display.encode() + b'x0a')
+					## sip_puff_serial_port.write(chord_to_display.encode() + b'x0a')
 					current_selected_chord = new_selected_chord
 
 				last_pluck_time = pluck_time
 				pluck_time = time.time()
-				if last_pluck_time is not None:
-					print(f"Delay: {pluck_time - last_pluck_time}")
+				#if last_pluck_time is not None:
+				#	print(f"Delay: {pluck_time - last_pluck_time}")
 				#print(
 				#	f" N Threads: {len(loom)}")
 		finally:
