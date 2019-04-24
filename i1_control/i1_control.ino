@@ -10,6 +10,7 @@
 #include "Shift_Register_Menu_Button.h"
 #include "Simple_Encoder.h"
 #include "Single_Led.h"
+#include "Rgb_Led.h"
 
 // Menu includes
 #include "Menu_Page.h"
@@ -222,9 +223,18 @@ Shift_Register_Menu_Button enter_button(ENTER_BTN_BIT, DEBOUNCE_TIME, &menu_cont
 
 // *** Create Single_Led instances ***
 Single_Led play_led(PL_LED_G);
+Single_Led wristband_connected_led(WB_LED_G);
+Single_Led wristband_not_connected_led(WB_LED_R);
+
+// *** Create Rgb_Led instances ***
+int zone_led_array[] = {ZN_LED_R, ZN_LED_G, ZN_LED_B};
+int RED[] = {255, 0, 0};
+int GREEN[] = {0, 255, 0};
+int BLUE[] = {0, 0, 255};
+
+Rgb_Led zone_leds(zone_led_array);
 
 void setup() {
-  
   // *** Assign menu text to Menu_Page(s) ***
   int text_size;
   text_size = sizeof(main_menu_txt)/sizeof(main_menu_txt[0]);                       // Main Menu
@@ -342,9 +352,6 @@ void setup() {
   pinMode(WB_LED_G, OUTPUT);
   //pinMode(PL_LED_G, OUTPUT);
 
-  play_led.set_on(true);
-  play_led.set_flashing(true);
-
   set_red_zone_on();
 
   selection_encoder.initialise(ENCODER_PIN_A, ENCODER_PIN_B, DEBOUNCE_TIME, &menu_controller);  // Initialise the encoder
@@ -403,33 +410,41 @@ void loop() {
 
   // Process the leds
   play_led.update_flashing();
+  wristband_not_connected_led.update_flashing();
   
   if(Serial.available() > 0){
     incoming_byte = Serial.read();
-    Serial.print("I received:");
-    Serial.println(incoming_byte, DEC);
+    //Serial.print("I received:");
+    //Serial.println(incoming_byte, DEC);
 
     switch(incoming_byte){
       case 49: 
-        set_red_zone_on();
+        wristband_not_connected_led.set_flashing(true);
+        wristband_connected_led.set_on(false);
         break;
       case 50:
-        set_green_zone_on();
+        wristband_not_connected_led.set_flashing(false);
+        wristband_not_connected_led.set_on(false);
+        wristband_connected_led.set_on(true);
         break;
       case 51:
-        set_blue_zone_on();
+        play_led.set_flashing(false); // move these functions to the Simple Led class?
+        play_led.set_on(true);
         break;
       case 52:
-        set_play_on();
+        play_led.set_flashing(false);
+        play_led.set_on(false);
         break;
       case 53:
-        set_play_off();
-        break; 
+        play_led.set_flashing(true);
       case 54:
-        //set_wristband_error();
-        break;
+        zone_leds.set_colour(RED);
+        break; 
       case 55:
-        //set_wristband_good();
+        zone_leds.set_colour(GREEN); 
+        break;
+      case 56:
+        zone_leds.set_colour(BLUE); 
         break; 
     }
   }

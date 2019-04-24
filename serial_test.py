@@ -1,8 +1,9 @@
 import serial
 import time
+#import io
 
 # Connect to serial port
-control_board = serial.Serial('/dev/tty.usbmodem14111', 2000000, timeout=0.1)
+control_board = serial.Serial('/dev/cu.usbmodem4297351', 9600, timeout=0.1)
 
 # Flush serial inputs and outputs.
 control_board.flushInput()
@@ -20,18 +21,55 @@ control_board.flushOutput()
 menu_string_1 = "Guitar"
 newline = 'n'
 
+STOPPED = 0
+PLAYING = 1
+PAUSED = 2
+
+playback_state = STOPPED
+selected_zone = 0;
+
 while True:
+	
+	
+	# Read data from serial port.
+	incoming_serial = control_board.readline().rstrip().decode()
+	
 	# Flush the serial input
 	control_board.flushInput()
 	
-	# Read data from sip/puff switch.
-	menu_request = control_board.readline().rstrip().decode()
-	
-	if(menu_request):
-		print(menu_request)
-	
-	if(menu_request is 'g'):
-		control_board.write(menu_string_1.encode() + newline.encode())
+	if incoming_serial:
+		print(incoming_serial)
+		
+	if incoming_serial == 'o1':
+		print("play")
+		
+		if (playback_state == STOPPED or playback_state == PAUSED):
+			#... switch on the play button.
+			control_board.write(b'3')		# switch on the play button on the control surface.
+			playback_state = PLAYING		
+		elif playback_state == PLAYING:
+			control_board.write(b'5')		# activate the pause state.s
+			
+	#control_board.write(menu_string_1.encode() + newline.encode())
+		
+	if incoming_serial == 'a3':
+		print("song 2 requested")
+		#control_board.write(menu_string_1.encode() + newline.encode())
+		
+	if incoming_serial == 'l0':
+		if selected_zone < 2:
+			selected_zone += 1
+		else:
+			selected_zone = 0
+		
+		if selected_zone == 0:
+			control_board.write(b'6')
+		elif selected_zone == 1:
+			control_board.write(b'7')
+		elif selected_zone == 2:
+			control_board.write(b'8')	
+		
+		
 		
 		
 	#time.sleep(0.1)

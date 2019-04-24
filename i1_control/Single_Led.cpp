@@ -26,6 +26,8 @@ void Single_Led::set_on(bool _state){
 
 void Single_Led::set_flashing(bool _state){
   m_flash_flag = _state;
+  m_currently_on = false;
+  analogWrite(m_pin, 0);
 }
 
 void Single_Led::update_flashing(){
