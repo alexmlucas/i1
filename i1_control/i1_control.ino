@@ -9,6 +9,7 @@
 #include "Shift_Register_Control_Button.h"
 #include "Shift_Register_Menu_Button.h"
 #include "Simple_Encoder.h"
+#include "Single_Led.h"
 
 // Menu includes
 #include "Menu_Page.h"
@@ -219,6 +220,9 @@ Shift_Register_Control_Button song_4_button(SONG_4_BTN_BIT, DEBOUNCE_TIME, &menu
 Shift_Register_Menu_Button back_button(BACK_BTN_BIT, DEBOUNCE_TIME, &menu_controller);
 Shift_Register_Menu_Button enter_button(ENTER_BTN_BIT, DEBOUNCE_TIME, &menu_controller);
 
+// *** Create Single_Led instances ***
+Single_Led play_led(PL_LED_G);
+
 void setup() {
   
   // *** Assign menu text to Menu_Page(s) ***
@@ -330,15 +334,16 @@ void setup() {
   song_3_button.configure_parameter(&parameter_container.m_song, 2);
   song_4_button.configure_parameter(&parameter_container.m_song, 3);*/
 
-  
-
   // Set up the LED pins.
   pinMode(ZN_LED_R, OUTPUT);
   pinMode(ZN_LED_G, OUTPUT);
   pinMode(ZN_LED_B, OUTPUT);
   pinMode(WB_LED_R, OUTPUT);
   pinMode(WB_LED_G, OUTPUT);
-  pinMode(PL_LED_G, OUTPUT);
+  //pinMode(PL_LED_G, OUTPUT);
+
+  play_led.set_on(true);
+  play_led.set_flashing(true);
 
   set_red_zone_on();
 
@@ -395,6 +400,9 @@ void loop() {
   reconnect_button.check_button_pressed();
   power_button.check_button_pressed();
   access_switch.check_button_pressed();
+
+  // Process the leds
+  play_led.update_flashing();
   
   if(Serial.available() > 0){
     incoming_byte = Serial.read();
@@ -418,7 +426,10 @@ void loop() {
         set_play_off();
         break; 
       case 54:
-        set_play_flash();
+        //set_wristband_error();
+        break;
+      case 55:
+        //set_wristband_good();
         break; 
     }
   }
@@ -519,6 +530,10 @@ void set_play_off(){
   analogWrite(PL_LED_G, 0);
 }
 
-void set_play_flash(){
-  analogWrite(PL_LED_G, 0);
+/*void set_wristband_error(){
+  analogWrite(WB_LED_R, 255);
 }
+
+void set_wristband_good(){
+  analogWrite(WB_LED_G, 255);
+}*/
