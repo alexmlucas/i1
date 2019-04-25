@@ -1,4 +1,4 @@
-#include "Rgb_Led.h";
+#include "Rgb_Led.h"
 
 Rgb_Led::Rgb_Led(){
   int m_currently_on[3] = {false, false, false};
@@ -6,17 +6,19 @@ Rgb_Led::Rgb_Led(){
 
 void Rgb_Led::set_pinout(int pins[3]){
   for(int i = 0; i < 3; i++){
-    m_pins[i] = pins[i];                  // Set the pin values
-    m_colour[i] = 0;                      // Set the LED colours, default to off.
+    m_pins[i] = pins[i];                  // Set the pin values.
     pinMode(m_pins[i], OUTPUT);           // Set the pin to OUTPUT
-    analogWrite(m_pins[i], m_colour[i]);  // Write the colour values to the pins.
+    analogWrite(m_pins[i], 0);            // Default state of off.
   }
 }
 
-void Rgb_Led::set_colour(int colour[3]){
+void Rgb_Led::set_colour(int *colour){
+  Serial.println((int)colour);
+  m_colour = colour;
+  
   for(int i = 0; i < 3; i++){
-    m_colour[i] = colour[i];              // Set the colour values
-    analogWrite(m_pins[i], m_colour[i]);  // Write the colour values to the pins.
+    Serial.print(*(m_colour+i));
+    analogWrite(m_pins[i], *(m_colour+i));  // Write the colour values to the pins.
   }
 }
 

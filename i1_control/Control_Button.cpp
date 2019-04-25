@@ -26,15 +26,26 @@ void Control_Button::check_button_pressed(){
       m_current_state = button_state;                           // ... change state.
       m_last_event_time = millis();                             // Reset the timer ready for the next iteration.
       if(button_state == HIGH){                                 // If the button is HIGH...
-        m_parameter_container->set_parameter(m_parameter_struct, m_parameter_value);
+        
+        //m_parameter_container->set_parameter(m_parameter_struct, m_parameter_value);  
+
+        if(callback_function != NULL){                                                  // ... If there's a callback function...
+          callback_function(m_led, m_parameter_container, m_parameter_struct);          // ... call it!
+        }
+
         if(m_redraw_display == true){
           m_menu_controller->set_redraw_display_flag(true);
         }
-
-         if(m_update_leds == true){
-          //m_menu_controller->set_redraw_display_flag(true);
-        }
+      
       }
     }
   }
+}
+
+void Control_Button::set_callback_func(void (*f)(Single_Led *, Parameter_Container *parameter_container, Parameter *parameter_struct)){
+  callback_function = f;
+}
+
+void Control_Button::set_led(Single_Led *led){
+  m_led = led;
 }

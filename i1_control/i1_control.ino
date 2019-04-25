@@ -232,10 +232,15 @@ int wristband_led_pins[] = {WB_LED_R, WB_LED_G};
 
 int RG_RED[] = {255, 0};
 int RG_GREEN[] = {255, 0};
+int RG_OFF[] = {0, 0};
 
-int RED[] = {255, 0, 0};
-int GREEN[] = {0, 255, 0};
-int BLUE[] = {0, 0, 255};
+int RGB_RED[] = {255, 0, 0};
+int RGB_GREEN[] = {0, 255, 0};
+int RGB_BLUE[] = {0, 0, 255};
+int RGB_OFF[] = {0, 0, 0};
+
+int *p_rgb_red = RGB_RED; 
+int *p_rgb_blue = RGB_BLUE; 
 bool FLASH_ALL[] = {true, true, true};
 
 Single_Led play_led;
@@ -336,31 +341,48 @@ void setup() {
   green_root_menu.set_previous_menu(&red_zone_menu);
   blue_scale_menu.set_previous_menu(&red_zone_menu);
   blue_root_menu.set_previous_menu(&red_zone_menu);
+
+  Serial.begin(9600);                                                                           // Begin serial
+  delay(500);                                                                                   // Wait for the serial stream to get going.
   
+  
+
+  play_led.set_pinout(PL_LED_G);
+  wristband_leds.set_pinout(wristband_led_pins);
+  zone_leds.set_pinout(zone_led_pins);
+  
+  play_led.set_on(false);
+  wristband_leds.set_colour(RG_OFF);
+  zone_leds.set_colour(p_rgb_red);        // A hack until parameter reading is implemented.
+  zone_leds.set_colour(p_rgb_blue);        // A hack until parameter reading is implemented.
+
+
+
+
   // *** Configure the buttons ***
+  play_button.set_led(&play_led);
+  stop_button.set_led(&play_led);
+  stop_button.set_led(&zone_leds);
+  
   enter_button.set_callback_func(enter_pressed);                                                // Set button callback functions
   back_button.set_callback_func(back_pressed);
+  play_button.set_callback_func(play_pressed);
+  stop_button.set_callback_func(stop_pressed);
+  //access_switch.set_callback_func(access_switch_pressed);
 
   song_1_button.m_redraw_display = true;
   song_2_button.m_redraw_display = true;
   song_3_button.m_redraw_display = true;
   song_4_button.m_redraw_display = true;
 
-  Serial.begin(9600);                                                                           // Begin serial
-  delay(500);                                                                                   // Wait for the serial stream to get going.
-  
-  play_led.set_pinout(PL_LED_G);
-  wristband_leds.set_pinout(wristband_led_pins);
-  zone_leds.set_pinout(zone_led_pins);
 
-  play_led.set_on(true);
-  wristband_leds.set_colour(RG_RED);
-  zone_leds.set_colour(BLUE);
+
+
   
   delay(1500);
-  play_led.set_flashing(true);
-  wristband_leds.set_flashing(true);
-  zone_leds.set_flashing(true);
+  //play_led.set_flashing(true);
+  //wristband_leds.set_flashing(true);
+  //zone_leds.set_flashing(true);
   
   selection_encoder.initialise(ENCODER_PIN_A, ENCODER_PIN_B, DEBOUNCE_TIME, &menu_controller);  // Initialise the encoder
   
@@ -417,12 +439,10 @@ void loop() {
   access_switch.check_button_pressed();
 
   // Process the leds
-  play_led.update_flashing();
+  //play_led.update_flashing();
   wristband_leds.update_flashing();
   zone_leds.update_flashing();
-  /*play_led.update_flashing();
-  wristband_not_connected_led.update_flashing();*/
-  
+ 
   if(Serial.available() > 0){
     incoming_byte = Serial.read();
     //Serial.print("I received:");
@@ -530,7 +550,7 @@ void back_pressed(Menu_Controller* p_menu_controller){                          
   }                                                      
 }
 
-void set_red_zone_on(){
+/*void set_red_zone_on(){
   analogWrite(ZN_LED_R, 255);
   analogWrite(ZN_LED_G, 0);
   analogWrite(ZN_LED_B, 0);
@@ -554,7 +574,74 @@ void set_play_on(){
 
 void set_play_off(){
   analogWrite(PL_LED_G, 0);
+}*/
+
+void play_pressed(Single_Led *led, Parameter_Container *parameter_container, Parameter *parameter_struct){
+
+  Serial.print("Address is:");
+  Serial.println((int)&led);
+  
+  switch(parameter_struct->value){
+    case 0:
+      parameter_container->set_parameter(parameter_struct, 1);        // Playback is currently stopped, so start it.
+      led->set_on(true);                                              // Update the led
+      break;
+    case 1:
+      parameter_container->set_parameter(parameter_struct, 2);        // Song is playing already, so pause it.
+      led->set_flashing(true);                                        // Update the led
+      break;
+    case 2:
+      parameter_container->set_parameter(parameter_struct, 1);        // Song is paused, so commence playback.
+      led->set_on(true);                                              // Update the led
+      break;
+  }
 }
+
+void stop_pressed(Single_Led *led, Parameter_Container *parameter_container, Parameter *parameter_struct){
+  Serial.print("Address is:");
+  Serial.println((int)&led);
+  
+  if(parameter_struct->value){
+    parameter_container->set_parameter(parameter_struct, 0);          // Currently playing the song, so stop it.
+    led->set_on(false);                                               
+  }
+}
+
+void access_switch_pressed(Single_Led *led, Parameter_Container *parameter_container, Parameter *parameter_struct){
+  Serial.println("function called");
+
+  Rgb_Led *rgb_led = (Rgb_Led*)led;        // Create local pointer to the currently selected Menu_Page, via the Menu_Controller pointer.
+
+  int red[] = {255, 0, 0};
+  int *p_red = red;
+
+  Serial.println(parameter_struct->value);
+  rgb_led->set_colour(p_rgb_red); 
+  
+  /*switch(parameter_struct->value){
+    case 0:
+      
+      parameter_container->set_parameter(parameter_struct, 1);        // Playback is currently stopped, so start it.
+      Serial.println("the value is 0");
+      
+
+      rgb_led->set_colour(p_red);                                   // Update the led
+      Serial.println("the value is 0");
+      break;
+    case 1:
+      Serial.println("the value is 1");
+      parameter_container->set_parameter(parameter_struct, 2);        // Song is playing already, so pause it.
+      rgb_led->set_colour(RGB_GREEN);                                     // Update the led
+      break;
+    case 2:
+      Serial.println("the value is 2");
+      parameter_container->set_parameter(parameter_struct, 0);        // Song is paused, so commence playback.
+      rgb_led->set_colour(RGB_BLUE);                                      // Update the led
+      break;
+  }*/
+}
+
+
 
 /*void set_wristband_error(){
   analogWrite(WB_LED_R, 255);

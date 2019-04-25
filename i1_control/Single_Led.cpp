@@ -14,13 +14,16 @@ void Single_Led::set_pinout(int pin){
 }
 
 void Single_Led::set_on(bool _state){
+  set_flashing(false); // Before doing anything, make sure flashing is switched off.
+  
   switch(_state){
     case _OFF:
+      Serial.println("switching off led");    
       analogWrite(m_pin, 0);
       m_currently_on = false;
       break;
     case _ON:
-      Serial.println("switching on");
+      Serial.println("switching on led");
       analogWrite(m_pin, m_on_value);
       m_currently_on = true;
       break;
