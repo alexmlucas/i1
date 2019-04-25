@@ -1,11 +1,14 @@
 #include "Single_Led.h"                           
 
-Single_Led::Single_Led(int pin){
-  m_pin = pin;
+Single_Led::Single_Led(){
   m_on_value = 255;
   m_flash_flag = false;
   m_currently_on = false;
   m_flash_rate_ms = 250;
+}
+
+void Single_Led::set_pinout(int pin){
+  m_pin = pin;
   pinMode(m_pin, OUTPUT);
   analogWrite(m_pin, m_currently_on);
 }

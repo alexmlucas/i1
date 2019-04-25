@@ -10,6 +10,7 @@
 #include "Shift_Register_Menu_Button.h"
 #include "Simple_Encoder.h"
 #include "Single_Led.h"
+#include "Rg_Led.h"
 #include "Rgb_Led.h"
 
 // Menu includes
@@ -149,7 +150,6 @@ const char* const mix_levels_param_txt[] PROGMEM = {"0", "0.1", "0.2", "0.3", "0
 const char* const scales_param_txt[] PROGMEM = {"Major", "Minor", "Blues", "Pent. Major", "Pent. Minor", "Major Chord", "Minor Chord"};
 const char* const root_param_txt[] PROGMEM = {"A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"};
 
-
 // Define a variable to hold the data from the shift register
 byte shift_reg_byte = 0;
 
@@ -222,17 +222,27 @@ Shift_Register_Menu_Button back_button(BACK_BTN_BIT, DEBOUNCE_TIME, &menu_contro
 Shift_Register_Menu_Button enter_button(ENTER_BTN_BIT, DEBOUNCE_TIME, &menu_controller);
 
 // *** Create Single_Led instances ***
-Single_Led play_led(PL_LED_G);
+/*Single_Led play_led(PL_LED_G);
 Single_Led wristband_connected_led(WB_LED_G);
 Single_Led wristband_not_connected_led(WB_LED_R);
-
+*/
 // *** Create Rgb_Led instances ***
-int zone_led_array[] = {ZN_LED_R, ZN_LED_G, ZN_LED_B};
+int zone_led_pins[] = {ZN_LED_R, ZN_LED_G, ZN_LED_B};
+int wristband_led_pins[] = {WB_LED_R, WB_LED_G};
+
+int RG_RED[] = {255, 0};
+int RG_GREEN[] = {255, 0};
+
 int RED[] = {255, 0, 0};
 int GREEN[] = {0, 255, 0};
 int BLUE[] = {0, 0, 255};
+bool FLASH_ALL[] = {true, true, true};
 
-Rgb_Led zone_leds(zone_led_array);
+Single_Led play_led;
+Rg_Led wristband_leds;
+Rgb_Led zone_leds;
+
+
 
 void setup() {
   // *** Assign menu text to Menu_Page(s) ***
@@ -326,34 +336,32 @@ void setup() {
   green_root_menu.set_previous_menu(&red_zone_menu);
   blue_scale_menu.set_previous_menu(&red_zone_menu);
   blue_root_menu.set_previous_menu(&red_zone_menu);
- 
+  
+  // *** Configure the buttons ***
   enter_button.set_callback_func(enter_pressed);                                                // Set button callback functions
   back_button.set_callback_func(back_pressed);
 
+  song_1_button.m_redraw_display = true;
+  song_2_button.m_redraw_display = true;
+  song_3_button.m_redraw_display = true;
+  song_4_button.m_redraw_display = true;
+
   Serial.begin(9600);                                                                           // Begin serial
   delay(500);                                                                                   // Wait for the serial stream to get going.
-
-
-  /*song_1_button.set_menu_controller(&menu_controller);
-  song_2_button.set_menu_controller(&menu_controller);
-  song_3_button.set_menu_controller(&menu_controller);
-  song_4_button.set_menu_controller(&menu_controller);
   
-  song_1_button.configure_parameter(&parameter_container.m_song, 0);
-  song_2_button.configure_parameter(&parameter_container.m_song, 1);
-  song_3_button.configure_parameter(&parameter_container.m_song, 2);
-  song_4_button.configure_parameter(&parameter_container.m_song, 3);*/
+  play_led.set_pinout(PL_LED_G);
+  wristband_leds.set_pinout(wristband_led_pins);
+  zone_leds.set_pinout(zone_led_pins);
 
-  // Set up the LED pins.
-  pinMode(ZN_LED_R, OUTPUT);
-  pinMode(ZN_LED_G, OUTPUT);
-  pinMode(ZN_LED_B, OUTPUT);
-  pinMode(WB_LED_R, OUTPUT);
-  pinMode(WB_LED_G, OUTPUT);
-  //pinMode(PL_LED_G, OUTPUT);
-
-  set_red_zone_on();
-
+  play_led.set_on(true);
+  wristband_leds.set_colour(RG_RED);
+  zone_leds.set_colour(BLUE);
+  
+  delay(1500);
+  play_led.set_flashing(true);
+  wristband_leds.set_flashing(true);
+  zone_leds.set_flashing(true);
+  
   selection_encoder.initialise(ENCODER_PIN_A, ENCODER_PIN_B, DEBOUNCE_TIME, &menu_controller);  // Initialise the encoder
   
   pinMode(SHIFT_REG_LATCH, OUTPUT);                                                             // Set the pins of the shift register
@@ -410,14 +418,17 @@ void loop() {
 
   // Process the leds
   play_led.update_flashing();
-  wristband_not_connected_led.update_flashing();
+  wristband_leds.update_flashing();
+  zone_leds.update_flashing();
+  /*play_led.update_flashing();
+  wristband_not_connected_led.update_flashing();*/
   
   if(Serial.available() > 0){
     incoming_byte = Serial.read();
     //Serial.print("I received:");
     //Serial.println(incoming_byte, DEC);
 
-    switch(incoming_byte){
+    /*switch(incoming_byte){
       case 49: 
         wristband_not_connected_led.set_flashing(true);
         wristband_connected_led.set_on(false);
@@ -446,7 +457,7 @@ void loop() {
       case 56:
         zone_leds.set_colour(BLUE); 
         break; 
-    }
+    }*/
   }
 
   /*while(Serial.available()) {
