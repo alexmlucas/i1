@@ -72,7 +72,7 @@ while True:
 	if incoming_serial == 'm0':
 		control_board.write(b'6')
 		time.sleep(3)
-		control_board.write(b'7')
+		control_board.write(b'8')
 		
 		
 		

@@ -243,6 +243,12 @@ Single_Led play_led;
 Rg_Led wristband_leds;
 Rgb_Led zone_leds;
 
+// Timer variables for deactivating Splash Pages
+int time_splash_loaded_ms;
+int splash_display_time = 2000;
+int current_time_ms;
+bool splash_page_loaded;
+
 void setup() {
   // *** Assign menu text to Menu_Page(s) ***
   int text_size;
@@ -392,6 +398,14 @@ void setup() {
 }
 
 void loop() {
+  if(splash_page_loaded){
+    current_time_ms = millis();
+
+    if((current_time_ms - time_splash_loaded_ms) > splash_display_time){
+      menu_controller.set_currently_selected_menu(p_previous_menu_page);
+      splash_page_loaded = false;
+    }
+  }
   
   if(menu_controller.get_redraw_display_flag() == true){
     // Change to a pointer to the currently selected menu.
@@ -465,9 +479,12 @@ void loop() {
         wristband_leds.set_flashing(false);
         wristband_leds.set_colour(RG_GREEN);
         break;
-      case 57:
+      case 56:
         // Connection to wristband unsuccessful.
+
         menu_controller.set_currently_selected_menu(&connection_fail_menu);
+        splash_page_loaded = true;
+        time_splash_loaded_ms = millis();
         break;
     }
   }
@@ -541,6 +558,7 @@ void back_pressed(Menu_Controller* p_menu_controller){                          
     m_menu->on_back();                                                                 // ... call it.
   }                                                      
 }
+
 
 /*void set_red_zone_on(){
   analogWrite(ZN_LED_R, 255);
