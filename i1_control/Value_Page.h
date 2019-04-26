@@ -11,6 +11,6 @@ class Value_Page: public Menu_Page{
     Value_Page(Menu_Controller *menu_controller, Parameter_Container *parameter_container);
     void on_encoder(uint8_t *pin_value);
     void draw(Adafruit_SSD1306 &display);
-    void set_parameter_text(const char *const *parameter_text, int number_of_parameter_items);
+    void set_and_send_parameter_text(const char *const *parameter_text, int number_of_parameter_items);
 };
 #endif

@@ -33,7 +33,7 @@ class Menu_Page{
     virtual void on_back();
     virtual void on_encoder(uint8_t *pin_value);
     void set_menu_text(const char *const *menu_text, int number_of_menu_items);
-    void set_parameter_struct(Parameter *parameter_struct);
+    void set_and_send_parameter_struct(Parameter *parameter_struct);
 
 };
 #endif

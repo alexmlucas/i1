@@ -77,5 +77,11 @@ while True:
 		
 		
 	#time.sleep(0.1)"""
+	
+	if incoming_serial.charAt(0) == 'l':
+		if incoming_serial.charAt(1) == '1':
+			print("Song 1 selected")
+			
+	
 
 

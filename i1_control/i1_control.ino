@@ -160,7 +160,9 @@ Simple_Encoder selection_encoder;
 const char *const *menu_text_pointer;
 
 // Byte for storing incoming serial data.
-int incoming_byte = 0;
+char incoming_byte_1;
+char incoming_byte_2;
+char incoming_byte_3;
 
 // String representing the current menu location.
 char current_menu_location[] = {""};
@@ -209,7 +211,7 @@ Menu_Page *p_previous_menu_page;                                          // Cre
 // *** Create Simple_Button instances ***
 Control_Button reconnect_button(RECONNECT_BTN_PIN, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_reconnect, 0);
 Control_Button power_button(POWER_BTN_PIN, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_power, 0);
-Control_Button access_switch(ACCESS_SWT_PIN, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_selected_zone, 0);
+Control_Button access_switch(ACCESS_SWT_PIN, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_zone, 0);
 
 // *** Create Shift_Register_Button instances ***
 Shift_Register_Control_Button play_button(PLAY_BTN_BIT, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_play, 1);
@@ -291,30 +293,30 @@ void setup() {
 
   // *** Assign parameter text to Menu_Page(s) ***
   text_size = sizeof(scales_param_txt)/sizeof(scales_param_txt[0]);                 // Scales parameter text
-  red_scale_menu.set_parameter_text(scales_param_txt, text_size);
-  green_scale_menu.set_parameter_text(scales_param_txt, text_size);
-  blue_scale_menu.set_parameter_text(scales_param_txt, text_size);
+  red_scale_menu.set_and_send_parameter_text(scales_param_txt, text_size);
+  green_scale_menu.set_and_send_parameter_text(scales_param_txt, text_size);
+  blue_scale_menu.set_and_send_parameter_text(scales_param_txt, text_size);
   text_size = sizeof(root_param_txt)/sizeof(root_param_txt[0]);                     // Root parameter text
-  red_root_menu.set_parameter_text(root_param_txt, text_size);
-  green_root_menu.set_parameter_text(root_param_txt, text_size);
-  blue_root_menu.set_parameter_text(root_param_txt, text_size);
+  red_root_menu.set_and_send_parameter_text(root_param_txt, text_size);
+  green_root_menu.set_and_send_parameter_text(root_param_txt, text_size);
+  blue_root_menu.set_and_send_parameter_text(root_param_txt, text_size);
   text_size = sizeof(mix_levels_param_txt)/sizeof(mix_levels_param_txt[0]);         // Mix Levels parameter text
-  guitar_level_menu.set_parameter_text(mix_levels_param_txt, text_size);
-  backing_level_menu.set_parameter_text(mix_levels_param_txt, text_size);
-  master_level_menu.set_parameter_text(mix_levels_param_txt, text_size);
+  guitar_level_menu.set_and_send_parameter_text(mix_levels_param_txt, text_size);
+  backing_level_menu.set_and_send_parameter_text(mix_levels_param_txt, text_size);
+  master_level_menu.set_and_send_parameter_text(mix_levels_param_txt, text_size);
 
   // *** Assign parameter structs to Menu_Page(s) ***
-  main_menu.set_parameter_struct(&parameter_container.m_song);
-  guitar_menu.set_parameter_struct(&parameter_container.m_guitar);
-  red_scale_menu.set_parameter_struct(&parameter_container.m_red_scale);
-  red_root_menu.set_parameter_struct(&parameter_container.m_red_root);
-  green_scale_menu.set_parameter_struct(&parameter_container.m_green_scale);
-  green_root_menu.set_parameter_struct(&parameter_container.m_green_root);
-  blue_scale_menu.set_parameter_struct(&parameter_container.m_blue_scale);
-  blue_root_menu.set_parameter_struct(&parameter_container.m_blue_root);
-  guitar_level_menu.set_parameter_struct(&parameter_container.m_guitar_level);
-  backing_level_menu.set_parameter_struct(&parameter_container.m_backing_level);
-  master_level_menu.set_parameter_struct(&parameter_container.m_master_level);
+  main_menu.set_and_send_parameter_struct(&parameter_container.m_song);
+  guitar_menu.set_and_send_parameter_struct(&parameter_container.m_guitar);
+  red_scale_menu.set_and_send_parameter_struct(&parameter_container.m_red_scale);
+  red_root_menu.set_and_send_parameter_struct(&parameter_container.m_red_root);
+  green_scale_menu.set_and_send_parameter_struct(&parameter_container.m_green_scale);
+  green_root_menu.set_and_send_parameter_struct(&parameter_container.m_green_root);
+  blue_scale_menu.set_and_send_parameter_struct(&parameter_container.m_blue_scale);
+  blue_root_menu.set_and_send_parameter_struct(&parameter_container.m_blue_root);
+  guitar_level_menu.set_and_send_parameter_struct(&parameter_container.m_guitar_level);
+  backing_level_menu.set_and_send_parameter_struct(&parameter_container.m_backing_level);
+  master_level_menu.set_and_send_parameter_struct(&parameter_container.m_master_level);
 
   menu_controller.set_currently_selected_menu(&main_menu);                // Setting the main_menu as the Menu_Page currently selected
 
@@ -354,7 +356,6 @@ void setup() {
   wristband_leds.set_flashing(true);
   zone_leds.set_colour(p_rgb_blue);        // A hack until parameter reading is implemented.
 
-
   // *** Configure the buttons ***
   play_button.set_led(&play_led);
   stop_button.set_led(&play_led);
@@ -386,7 +387,6 @@ void setup() {
   display.display();
  
   delay(10);                                                                                    // Pause again before we get going.
-
 }
 
 void loop() {
@@ -442,11 +442,103 @@ void loop() {
   wristband_leds.update_flashing();
  
   if(Serial.available() > 0){
-    incoming_byte = Serial.read();
-    Serial.print("I received:");
-    Serial.println(incoming_byte, DEC);
+    incoming_byte_1 = Serial.read();
+    incoming_byte_2 = Serial.read();
+    incoming_byte_3 = Serial.read();
+    
+    /*Serial.print("I received: ");
+    Serial.print(incoming_byte_1);
+    Serial.print(" and ");
+    Serial.println(incoming_byte_2);*/
 
-    switch(incoming_byte){
+    if(incoming_byte_1 == 99){
+      // c character received
+      // *** m_guitar parameter ***
+      parameter_container.m_guitar.value = (incoming_byte_2 + incoming_byte_3) - 96;
+      
+      // if associated page is the current menu page, redraw the display
+      if(menu_controller.get_currently_selected_menu() == &guitar_menu){
+        menu_controller.set_redraw_display_flag(true);
+      }
+    } else if(incoming_byte_1 == 100){
+      // d character received
+      // *** m_guitar_level parameter ***
+      parameter_container.m_guitar_level.value = (incoming_byte_2 + incoming_byte_3) - 96;
+      
+      // if associated page is the current menu page, redraw the display
+      if(menu_controller.get_currently_selected_menu() == &guitar_level_menu){
+        menu_controller.set_redraw_display_flag(true);
+      }
+    } else if(incoming_byte_1 == 101){
+      // e character received
+      // *** m_backing_level parameter ***
+      parameter_container.m_backing_level.value = (incoming_byte_2 + incoming_byte_3) - 96;
+      
+      // if associated page is the current menu page, redraw the display
+      if(menu_controller.get_currently_selected_menu() == &backing_level_menu){
+        menu_controller.set_redraw_display_flag(true);
+      }
+    } else if(incoming_byte_1 == 102){
+      // f character received
+      // *** m_red_scale parameter ***
+      parameter_container.m_red_scale.value = (incoming_byte_2 + incoming_byte_3) - 96;
+      
+      // if associated page is the current menu page, redraw the display
+      if(menu_controller.get_currently_selected_menu() == &red_scale_menu){
+        menu_controller.set_redraw_display_flag(true);
+      }
+    } else if(incoming_byte_1 == 103){
+      // g character received
+      // *** m_green_scale parameter ***
+      parameter_container.m_green_scale.value = (incoming_byte_2 + incoming_byte_3) - 96;
+      
+      // if associated page is the current menu page, redraw the display
+      if(menu_controller.get_currently_selected_menu() == &green_scale_menu){
+        menu_controller.set_redraw_display_flag(true);
+      }
+    } else if(incoming_byte_1 == 104){
+      // h character received
+      // *** m_blue_scale parameter ***
+      parameter_container.m_blue_scale.value = (incoming_byte_2 + incoming_byte_3) - 96;
+      
+      // if associated page is the current menu page, redraw the display
+      if(menu_controller.get_currently_selected_menu() == &blue_scale_menu){
+        menu_controller.set_redraw_display_flag(true);
+      }
+    } else if(incoming_byte_1 == 105){
+      // i character received
+      // *** m_red_root parameter ***
+      parameter_container.m_red_root.value = (incoming_byte_2 + incoming_byte_3) - 96;
+      
+      // if associated page is the current menu page, redraw the display
+      if(menu_controller.get_currently_selected_menu() == &red_root_menu){
+        menu_controller.set_redraw_display_flag(true);
+      }
+    } else if(incoming_byte_1 == 106){
+      // j character received
+      // *** m_green_root parameter ***
+      parameter_container.m_green_root.value = (incoming_byte_2 + incoming_byte_3) - 96;
+      
+      // if associated page is the current menu page, redraw the display
+      if(menu_controller.get_currently_selected_menu() == &green_root_menu){
+        menu_controller.set_redraw_display_flag(true);
+      }
+    } else if(incoming_byte_1 == 106){
+      // k character received
+      // *** m_blue_root parameter ***
+      parameter_container.m_blue_root.value = (incoming_byte_2 + incoming_byte_3) - 96;
+      
+      // if associated page is the current menu page, redraw the display
+      if(menu_controller.get_currently_selected_menu() == &blue_root_menu){
+        menu_controller.set_redraw_display_flag(true);
+      }
+    } else if(incoming_byte_1 == 106){
+      // l character received
+      // *** m_zone parameter ***
+      parameter_container.m_zone.value = (incoming_byte_2 + incoming_byte_3) - 96;
+    }
+
+    /*switch(incoming_byte){
       case 54:
         // Attempting to connect to wristband
         p_previous_menu_page = (Menu_Page*)menu_controller.get_currently_selected_menu();       // Store a reference to the currently displayed menu.
@@ -461,12 +553,11 @@ void loop() {
         break;
       case 56:
         // Connection to wristband unsuccessful.
-
         menu_controller.set_currently_selected_menu(&connection_fail_menu);
         splash_page_loaded = true;
         time_splash_loaded_ms = millis();
         break;
-    }
+    }*/
   }
 
   // Get the current encoder position
@@ -536,15 +627,15 @@ void back_pressed(Menu_Controller* p_menu_controller){                          
 void play_pressed(Single_Led *led, Parameter_Container *parameter_container, Parameter *parameter_struct){       
   switch(parameter_struct->value){
     case 0:
-      parameter_container->set_parameter(parameter_struct, 1);        // Playback is currently stopped, so start it.
+      parameter_container->set_and_send_parameter(parameter_struct, 1);        // Playback is currently stopped, so start it.
       led->set_on(true);                                              // Update the led
       break;
     case 1:
-      parameter_container->set_parameter(parameter_struct, 2);        // Song is playing already, so pause it.
+      parameter_container->set_and_send_parameter(parameter_struct, 2);        // Song is playing already, so pause it.
       led->set_flashing(true);                                        // Update the led
       break;
     case 2:
-      parameter_container->set_parameter(parameter_struct, 1);        // Song is paused, so commence playback.
+      parameter_container->set_and_send_parameter(parameter_struct, 1);        // Song is paused, so commence playback.
       led->set_on(true);                                              // Update the led
       break;
   }
@@ -552,7 +643,7 @@ void play_pressed(Single_Led *led, Parameter_Container *parameter_container, Par
 
 void stop_pressed(Single_Led *led, Parameter_Container *parameter_container, Parameter *parameter_struct){
   if(parameter_struct->value){
-    parameter_container->set_parameter(parameter_struct, 0);          // Currently playing the song, so stop it.
+    parameter_container->set_and_send_parameter(parameter_struct, 0);          // Currently playing the song, so stop it.
     led->set_on(false);                                               
   }
 }
@@ -562,15 +653,15 @@ void access_switch_pressed(Single_Led *led, Parameter_Container *parameter_conta
 
   switch(parameter_struct->value){
     case 0:
-      parameter_container->set_parameter(parameter_struct, 1);        // Increment parameter value
+      parameter_container->set_and_send_parameter(parameter_struct, 1);        // Increment parameter value
       rgb_led->set_colour(RGB_GREEN);                                 // Update the led
       break;
     case 1:
-      parameter_container->set_parameter(parameter_struct, 2);        // Increment parameter value
+      parameter_container->set_and_send_parameter(parameter_struct, 2);        // Increment parameter value
       rgb_led->set_colour(RGB_BLUE);                                  // Update the led
       break;
     case 2:
-      parameter_container->set_parameter(parameter_struct, 0);        // Reset parameter value to 0
+      parameter_container->set_and_send_parameter(parameter_struct, 0);        // Reset parameter value to 0
       rgb_led->set_colour(RGB_RED);                                   // Update the led
       break;
   }

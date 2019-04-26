@@ -41,6 +41,6 @@ void Selection_Page::draw(Adafruit_SSD1306 &display){
 
 void Selection_Page::on_enter(){
   int cursor_position = m_menu_controller->get_cursor_position();               // Get the current cursor position.                                 
-  m_parameter_container->set_parameter(m_parameter_struct, cursor_position);    // Set the selected parameter to that of the cursor position.
+  m_parameter_container->set_and_send_parameter(m_parameter_struct, cursor_position);    // Set the selected parameter to that of the cursor position.
   m_menu_controller->set_redraw_display_flag(true);                             // Update the currently selected menu.
 }

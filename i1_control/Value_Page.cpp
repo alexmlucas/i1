@@ -4,7 +4,7 @@ Value_Page::Value_Page(Menu_Controller *menu_controller, Parameter_Container *pa
   m_enter_enabled = false;
 }
 
-void Value_Page::set_parameter_text(const char *const *parameter_text, int number_of_parameter_items){
+void Value_Page::set_and_send_parameter_text(const char *const *parameter_text, int number_of_parameter_items){
   m_parameter_text = parameter_text; 
   m_parameter_max_value = number_of_parameter_items - 1;
 }
@@ -34,11 +34,11 @@ void Value_Page::draw(Adafruit_SSD1306 &display){
 void Value_Page::on_encoder(uint8_t *pin_value){
   if(*pin_value == LOW){                                                                          // If true, a clockwise rotation has occured.
     if(m_parameter_struct->value < m_parameter_max_value){                                        // If the max parameter value has not yet been reached...
-      m_parameter_container->set_parameter(m_parameter_struct, (m_parameter_struct->value)+1);    // ...increment the target parameter.  
+      m_parameter_container->set_and_send_parameter(m_parameter_struct, (m_parameter_struct->value)+1);    // ...increment the target parameter.  
       m_menu_controller->set_redraw_display_flag(true);                                           // Redraw the display.
     }
   } else if (m_parameter_struct->value > 0){                                                      // If the code reaches this point, an anti-clockwise rotation has occured...
-      m_parameter_container->set_parameter(m_parameter_struct, (m_parameter_struct->value)-1);    // ...check to see if the target parameterr is above the minimum allowed and decrement if so.
+      m_parameter_container->set_and_send_parameter(m_parameter_struct, (m_parameter_struct->value)-1);    // ...check to see if the target parameterr is above the minimum allowed and decrement if so.
       m_menu_controller->set_redraw_display_flag(true);                                           // Redraw the display.
   }  
 }

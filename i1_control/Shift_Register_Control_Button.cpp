@@ -26,7 +26,7 @@ bool Shift_Register_Control_Button::check_button_pressed(byte &shift_register_re
         if(callback_function != NULL){                                              // ... If there's a callback function... 
           callback_function(m_led, m_parameter_container, m_parameter_struct);      // ... call it!
         } else {
-          m_parameter_container->set_parameter(m_parameter_struct, m_parameter_value);  // ... otherwise, set the parameter value, this will result in the serial cahr being transmitted.
+          m_parameter_container->set_and_send_parameter(m_parameter_struct, m_parameter_value);  // ... otherwise, set the parameter value, this will result in the serial cahr being transmitted.
         }
 
         if(m_redraw_display == true){

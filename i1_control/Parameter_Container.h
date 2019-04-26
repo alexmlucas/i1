@@ -16,13 +16,14 @@ class Parameter_Container{
     Parameter m_red_root;
     Parameter m_green_root;
     Parameter m_blue_root;
-    Parameter m_selected_zone;
+    Parameter m_zone;
     Parameter m_reconnect;
     Parameter m_power;
     Parameter m_play;
     
     Parameter_Container();
     void set_parameter(Parameter *parameter, int value);
+    void set_and_send_parameter(Parameter *parameter, int value);
     void get_parameter_value(Parameter *parameter, int value);
 };
 #endif

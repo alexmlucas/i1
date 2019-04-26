@@ -8,7 +8,7 @@ Menu_Page::Menu_Page(Menu_Controller *menu_controller, Parameter_Container *para
   m_encoder_enabled = true;
 }
 
-void Menu_Page::set_parameter_struct(Parameter *parameter_struct){
+void Menu_Page::set_and_send_parameter_struct(Parameter *parameter_struct){
   m_parameter_struct = parameter_struct; 
 }
 
