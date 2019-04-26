@@ -221,12 +221,7 @@ Shift_Register_Control_Button song_4_button(SONG_4_BTN_BIT, DEBOUNCE_TIME, &menu
 Shift_Register_Menu_Button back_button(BACK_BTN_BIT, DEBOUNCE_TIME, &menu_controller);
 Shift_Register_Menu_Button enter_button(ENTER_BTN_BIT, DEBOUNCE_TIME, &menu_controller);
 
-// *** Create Single_Led instances ***
-/*Single_Led play_led(PL_LED_G);
-Single_Led wristband_connected_led(WB_LED_G);
-Single_Led wristband_not_connected_led(WB_LED_R);
-*/
-// *** Create Rgb_Led instances ***
+// *** Create Led instances ***
 int zone_led_pins[] = {ZN_LED_R, ZN_LED_G, ZN_LED_B};
 int wristband_led_pins[] = {WB_LED_R, WB_LED_G};
 
@@ -244,8 +239,8 @@ int *p_rgb_blue = RGB_BLUE;
 bool FLASH_ALL[] = {true, true, true};
 
 Single_Led play_led;
-Rg_Led wristband_leds;
-Rgb_Led zone_leds;
+//Rg_Led wristband_leds;
+//Rgb_Led zone_leds;
 
 
 
@@ -348,13 +343,13 @@ void setup() {
   
 
   play_led.set_pinout(PL_LED_G);
-  wristband_leds.set_pinout(wristband_led_pins);
-  zone_leds.set_pinout(zone_led_pins);
+  //wristband_leds.set_pinout(wristband_led_pins);
+  //zone_leds.set_pinout(zone_led_pins);
   
   play_led.set_on(false);
-  wristband_leds.set_colour(RG_OFF);
-  zone_leds.set_colour(p_rgb_red);        // A hack until parameter reading is implemented.
-  zone_leds.set_colour(p_rgb_blue);        // A hack until parameter reading is implemented.
+  //wristband_leds.set_colour(RG_OFF);
+  //zone_leds.set_colour(p_rgb_red);        // A hack until parameter reading is implemented.
+  //zone_leds.set_colour(p_rgb_blue);        // A hack until parameter reading is implemented.
 
 
 
@@ -362,7 +357,7 @@ void setup() {
   // *** Configure the buttons ***
   play_button.set_led(&play_led);
   stop_button.set_led(&play_led);
-  stop_button.set_led(&zone_leds);
+  //stop_button.set_led(&zone_leds);
   
   enter_button.set_callback_func(enter_pressed);                                                // Set button callback functions
   back_button.set_callback_func(back_pressed);
@@ -439,9 +434,9 @@ void loop() {
   access_switch.check_button_pressed();
 
   // Process the leds
-  //play_led.update_flashing();
-  wristband_leds.update_flashing();
-  zone_leds.update_flashing();
+  play_led.update_flashing();
+  //wristband_leds.update_flashing();
+  //zone_leds.update_flashing();
  
   if(Serial.available() > 0){
     incoming_byte = Serial.read();
@@ -580,6 +575,8 @@ void play_pressed(Single_Led *led, Parameter_Container *parameter_container, Par
 
   Serial.print("Address is:");
   Serial.println((int)&led);
+  Serial.println((int)parameter_struct->value);
+  
   
   switch(parameter_struct->value){
     case 0:
@@ -589,6 +586,7 @@ void play_pressed(Single_Led *led, Parameter_Container *parameter_container, Par
     case 1:
       parameter_container->set_parameter(parameter_struct, 2);        // Song is playing already, so pause it.
       led->set_flashing(true);                                        // Update the led
+
       break;
     case 2:
       parameter_container->set_parameter(parameter_struct, 1);        // Song is paused, so commence playback.
@@ -602,12 +600,13 @@ void stop_pressed(Single_Led *led, Parameter_Container *parameter_container, Par
   Serial.println((int)&led);
   
   if(parameter_struct->value){
+    Serial.println("Okay great!");
     parameter_container->set_parameter(parameter_struct, 0);          // Currently playing the song, so stop it.
     led->set_on(false);                                               
   }
 }
 
-void access_switch_pressed(Single_Led *led, Parameter_Container *parameter_container, Parameter *parameter_struct){
+/*void access_switch_pressed(Single_Led *led, Parameter_Container *parameter_container, Parameter *parameter_struct){
   Serial.println("function called");
 
   Rgb_Led *rgb_led = (Rgb_Led*)led;        // Create local pointer to the currently selected Menu_Page, via the Menu_Controller pointer.
@@ -618,7 +617,7 @@ void access_switch_pressed(Single_Led *led, Parameter_Container *parameter_conta
   Serial.println(parameter_struct->value);
   rgb_led->set_colour(p_rgb_red); 
   
-  /*switch(parameter_struct->value){
+  switch(parameter_struct->value){
     case 0:
       
       parameter_container->set_parameter(parameter_struct, 1);        // Playback is currently stopped, so start it.
@@ -638,8 +637,8 @@ void access_switch_pressed(Single_Led *led, Parameter_Container *parameter_conta
       parameter_container->set_parameter(parameter_struct, 0);        // Song is paused, so commence playback.
       rgb_led->set_colour(RGB_BLUE);                                      // Update the led
       break;
-  }*/
-}
+  }
+}*/
 
 
 
