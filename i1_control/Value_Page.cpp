@@ -11,7 +11,7 @@ void Value_Page::set_parameter_text(const char *const *parameter_text, int numbe
 
 void Value_Page::draw(Adafruit_SSD1306 &display){
   char string_buffer[16];                                                       // Buffer for reading strings from program memory.
-  int selected_value = m_parameter_struct->value;                                     // The selected item equals the value at the address pointed to by m_target_parameter.          
+  int selected_value = m_parameter_struct->value;                               // The selected item equals the value at the address pointed to by m_target_parameter.          
   
   display.clearDisplay();                                                       // Clear the display.
   display.setTextColor(WHITE);                                                  // Set the text to white.
@@ -28,23 +28,17 @@ void Value_Page::draw(Adafruit_SSD1306 &display){
   strcpy_P(string_buffer, (char *)pgm_read_word(&(m_parameter_text[selected_value])));
   display.println(string_buffer);
   
-  display.display();                                                            // Display the new image.                 
+  display.display();                                                                              // Display the new image.                 
 }
 
 void Value_Page::on_encoder(uint8_t *pin_value){
-  
-  if(*pin_value == LOW){                                                        // If true, a clockwise rotation has occured.
-    Serial.println("pin low");
-    Serial.println(m_parameter_max_value);
-
-    if(m_parameter_struct->value < m_parameter_max_value){                            // If the max parameter value has not yet been reached...
-      Serial.println("increment");
-      (m_parameter_struct->value)++;                                                  // ...increment the target parameter.  
-      m_menu_controller->set_redraw_display_flag(true);                         // Redraw the display.
+  if(*pin_value == LOW){                                                                          // If true, a clockwise rotation has occured.
+    if(m_parameter_struct->value < m_parameter_max_value){                                        // If the max parameter value has not yet been reached...
+      m_parameter_container->set_parameter(m_parameter_struct, (m_parameter_struct->value)+1);    // ...increment the target parameter.  
+      m_menu_controller->set_redraw_display_flag(true);                                           // Redraw the display.
     }
-  } else if (m_parameter_struct->value > 0){                                          // If the code reaches this point, an anti-clockwise rotation has occured...
-      Serial.println("pin high");
-      (m_parameter_struct->value)--;                                                  // ...check to see if the target parameterr is above the minimum allowed and decrement if so.
-      m_menu_controller->set_redraw_display_flag(true);                         // Redraw the display.
+  } else if (m_parameter_struct->value > 0){                                                      // If the code reaches this point, an anti-clockwise rotation has occured...
+      m_parameter_container->set_parameter(m_parameter_struct, (m_parameter_struct->value)-1);    // ...check to see if the target parameterr is above the minimum allowed and decrement if so.
+      m_menu_controller->set_redraw_display_flag(true);                                           // Redraw the display.
   }  
 }

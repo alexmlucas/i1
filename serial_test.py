@@ -40,7 +40,7 @@ while True:
 	if incoming_serial:
 		print(incoming_serial)
 		
-	if incoming_serial == 'o1':
+	"""if incoming_serial == 'o1':
 		print("play")
 		
 		if (playback_state == STOPPED or playback_state == PAUSED):
@@ -76,6 +76,6 @@ while True:
 		
 		
 		
-	#time.sleep(0.1)
+	#time.sleep(0.1)"""
 
 

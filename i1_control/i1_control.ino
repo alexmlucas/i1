@@ -201,7 +201,7 @@ Menu_Page *p_zone_sub_menus[] = {&red_zone_menu, &green_zone_menu, &blue_zone_me
 Menu_Page *p_red_zone_sub_menus[] = {&red_scale_menu, &red_root_menu};
 Menu_Page *p_green_zone_sub_menus[] = {&green_scale_menu, &green_root_menu};
 Menu_Page *p_blue_zone_sub_menus[] = {&blue_scale_menu, &blue_root_menu};    
-Menu_Page *p_mix_levels_sub_menus[] = {&guitar_level_menu, &reconnect_menu, &connection_fail_menu};
+Menu_Page *p_mix_levels_sub_menus[] = {&guitar_level_menu, &backing_level_menu, &master_level_menu};
 
 Menu_Page *p_current_menu_page;                                           // Create a pointer to the currently selected menu page.
 Menu_Page *p_previous_menu_page;                                          // Create a pointer to the previously selected menu page.
@@ -372,9 +372,6 @@ void setup() {
   song_4_button.m_redraw_display = true;
 
   delay(1500);
-  //play_led.set_flashing(true);
-  //wristband_leds.set_flashing(true);
-  //zone_leds.set_flashing(true);
   
   selection_encoder.initialise(ENCODER_PIN_A, ENCODER_PIN_B, DEBOUNCE_TIME, &menu_controller);  // Initialise the encoder
   
@@ -389,11 +386,6 @@ void setup() {
   display.display();
  
   delay(10);                                                                                    // Pause again before we get going.
-  
-  // an array of pointers to constant chars.
-  // unusual that the addresses do not need to be passed in. Perhaps this is a peculiarity...
-  // ...of char arrays and the fact that we're declaring and initialising the array of pointers to const chars at the same time.
-  // const char* test_array[] = {test, test2};
 
 }
 
@@ -408,10 +400,17 @@ void loop() {
   }
   
   if(menu_controller.get_redraw_display_flag() == true){
-    // Change to a pointer to the currently selected menu.
+    // Assign pointer to the currently selected menu.
     p_current_menu_page = (Menu_Page*)menu_controller.get_currently_selected_menu();
+    
+    if(p_current_menu_page != p_previous_menu_page){
+      menu_controller.set_cursor_position(0);           // The menu page has changed so reset the cursor position. 
+    }
+    
     p_current_menu_page->draw(display);
-    menu_controller.set_redraw_display_flag(false);  
+    menu_controller.set_redraw_display_flag(false);
+
+    p_previous_menu_page = p_current_menu_page;           // Update the previous menu page.
   }
   
   // Set the latch pin to 1 to collect parallel data.
@@ -448,25 +447,6 @@ void loop() {
     Serial.println(incoming_byte, DEC);
 
     switch(incoming_byte){
-      case 49: 
-        //wristband_not_connected_led.set_flashing(true);
-        //wristband_connected_led.set_on(false);
-        break;
-      case 50:
-        //wristband_not_connected_led.set_flashing(false);
-        //wristband_not_connected_led.set_on(false);
-        //wristband_connected_led.set_on(true);
-        break;
-      case 51:
-        //play_led.set_flashing(false); // move these functions to the Simple Led class?
-        //play_led.set_on(true);
-        break;
-      case 52:
-        //play_led.set_flashing(false);
-        //play_led.set_on(false);
-        break;
-      case 53:
-        //play_led.set_flashing(true);
       case 54:
         // Attempting to connect to wristband
         p_previous_menu_page = (Menu_Page*)menu_controller.get_currently_selected_menu();       // Store a reference to the currently displayed menu.
@@ -489,13 +469,7 @@ void loop() {
     }
   }
 
-  /*while(Serial.available()) {
-    Serial.readString();
-    Serial.print("done");
-  }*/
-
   // Get the current encoder position
-  // Perhaps split this into two functions, track_position() and get_position()
   current_encoder_position = selection_encoder.track_position();
 
   // Has the value changed?
@@ -559,45 +533,7 @@ void back_pressed(Menu_Controller* p_menu_controller){                          
   }                                                      
 }
 
-
-/*void set_red_zone_on(){
-  analogWrite(ZN_LED_R, 255);
-  analogWrite(ZN_LED_G, 0);
-  analogWrite(ZN_LED_B, 0);
-}
-
-void set_green_zone_on(){
-  analogWrite(ZN_LED_R, 0);
-  analogWrite(ZN_LED_G, 255);
-  analogWrite(ZN_LED_B, 0);
-}
-
-void set_blue_zone_on(){
-  analogWrite(ZN_LED_R, 0);
-  analogWrite(ZN_LED_G, 0);
-  analogWrite(ZN_LED_B, 255);
-}
-
-void set_play_on(){
-  analogWrite(PL_LED_G, 255);
-}
-
-void set_play_off(){
-  analogWrite(PL_LED_G, 0);
-}*/
-
-void play_pressed(Single_Led *led, Parameter_Container *parameter_container, Parameter *parameter_struct){
-
-  Serial.println("There is a callback function.");
-  Serial.print("The address of the led is: ");
-  Serial.println((int)led);
-
-  Serial.print("The address of the parameter_container is: ");
-  Serial.println((int)parameter_container);
-
-  Serial.print("The address of the parameter_struct is: ");
-  Serial.println((int)parameter_struct);
-          
+void play_pressed(Single_Led *led, Parameter_Container *parameter_container, Parameter *parameter_struct){       
   switch(parameter_struct->value){
     case 0:
       parameter_container->set_parameter(parameter_struct, 1);        // Playback is currently stopped, so start it.
@@ -606,7 +542,6 @@ void play_pressed(Single_Led *led, Parameter_Container *parameter_container, Par
     case 1:
       parameter_container->set_parameter(parameter_struct, 2);        // Song is playing already, so pause it.
       led->set_flashing(true);                                        // Update the led
-
       break;
     case 2:
       parameter_container->set_parameter(parameter_struct, 1);        // Song is paused, so commence playback.
@@ -640,11 +575,3 @@ void access_switch_pressed(Single_Led *led, Parameter_Container *parameter_conta
       break;
   }
 }
-
-/*void set_wristband_error(){
-  analogWrite(WB_LED_R, 255);
-}
-
-void set_wristband_good(){
-  analogWrite(WB_LED_G, 255);
-}*/

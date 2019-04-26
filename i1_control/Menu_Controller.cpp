@@ -22,6 +22,10 @@ int Menu_Controller::get_cursor_position(){
   return m_cursor_position;
 }
 
+void Menu_Controller::set_cursor_position(int cursor_position){
+  m_cursor_position = cursor_position;
+}
+
 int Menu_Controller::get_cursor_max_value(){
   return m_cursor_max_value;
 }

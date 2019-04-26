@@ -16,6 +16,7 @@ class Menu_Controller{
     void increment_cursor_position();
     void decrement_cursor_position();
     int get_cursor_position();
+    void set_cursor_position(int cursor_position);
     int get_cursor_max_value();
     int get_cursor_min_value();
     bool get_redraw_display_flag();
