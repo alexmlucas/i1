@@ -3,11 +3,11 @@
 Parameter_Container::Parameter_Container(){
   // Eventually I'll need to load in the saved parameters from the RPi here.
 
+  m_master_level.value = 0;
   m_song.value = 0;
   m_guitar.value = 0;
   m_guitar_level.value = 0;
   m_backing_level.value = 0;
-  m_master_level.value = 0;
   m_red_scale.value = 0;
   m_green_scale.value = 0;
   m_blue_scale.value = 0;
@@ -19,11 +19,11 @@ Parameter_Container::Parameter_Container(){
   m_power.value = 0;
   m_play.value = 0;
 
-  m_song.character = 'a';
-  m_guitar.character = 'b';
-  m_guitar_level.character = 'c';
-  m_backing_level.character = 'd';
-  m_master_level.character = 'e';
+  m_master_level.character = 'a';
+  m_song.character = 'b';
+  m_guitar.character = 'c';
+  m_guitar_level.character = 'd';
+  m_backing_level.character = 'e';
   m_red_scale.character = 'f';
   m_green_scale.character = 'g';
   m_blue_scale.character = 'h';

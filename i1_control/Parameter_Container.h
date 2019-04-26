@@ -5,11 +5,11 @@
 
 class Parameter_Container{
   public:
+    Parameter m_master_level;
     Parameter m_song;
     Parameter m_guitar;
     Parameter m_guitar_level;
     Parameter m_backing_level;
-    Parameter m_master_level;
     Parameter m_red_scale;
     Parameter m_green_scale;
     Parameter m_blue_scale;

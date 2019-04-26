@@ -1,5 +1,6 @@
 import serial
 import time
+import csv
 #import io
 
 # Connect to serial port
@@ -28,6 +29,18 @@ PAUSED = 2
 playback_state = STOPPED
 selected_zone = 0;
 
+incoming_serial = "sausages"
+
+def song_requested(song_number):
+	with open('song_data.txt') as csv_file:
+		song_data = csv.reader(csv_file, delimiter = ',')
+		line_count = 0
+		
+		for row in song_data:
+			print(row[song_number])
+			byte_array = bytes(row[song_number], 'utf-8')
+			control_board.write(byte_array)
+
 while True:
 	
 	
@@ -39,6 +52,9 @@ while True:
 	
 	if incoming_serial:
 		print(incoming_serial)
+	
+		if incoming_serial[0] is 'b':
+			song_requested(int(incoming_serial[1]))
 		
 	"""if incoming_serial == 'o1':
 		print("play")
@@ -78,9 +94,9 @@ while True:
 		
 	#time.sleep(0.1)"""
 	
-	if incoming_serial.charAt(0) == 'l':
-		if incoming_serial.charAt(1) == '1':
-			print("Song 1 selected")
+
+		
+	
 			
 	
 
