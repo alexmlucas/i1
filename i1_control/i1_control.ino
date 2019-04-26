@@ -240,7 +240,7 @@ bool FLASH_ALL[] = {true, true, true};
 
 Single_Led play_led;
 //Rg_Led wristband_leds;
-//Rgb_Led zone_leds;
+Rgb_Led zone_leds;
 
 
 
@@ -339,31 +339,26 @@ void setup() {
 
   Serial.begin(9600);                                                                           // Begin serial
   delay(500);                                                                                   // Wait for the serial stream to get going.
-  
-  
 
   play_led.set_pinout(PL_LED_G);
   //wristband_leds.set_pinout(wristband_led_pins);
-  //zone_leds.set_pinout(zone_led_pins);
+  zone_leds.set_pinout(zone_led_pins);
   
   play_led.set_on(false);
   //wristband_leds.set_colour(RG_OFF);
-  //zone_leds.set_colour(p_rgb_red);        // A hack until parameter reading is implemented.
-  //zone_leds.set_colour(p_rgb_blue);        // A hack until parameter reading is implemented.
-
-
+  zone_leds.set_colour(p_rgb_blue);        // A hack until parameter reading is implemented.
 
 
   // *** Configure the buttons ***
   play_button.set_led(&play_led);
   stop_button.set_led(&play_led);
-  //stop_button.set_led(&zone_leds);
+  access_switch.set_led(&zone_leds);
   
   enter_button.set_callback_func(enter_pressed);                                                // Set button callback functions
   back_button.set_callback_func(back_pressed);
   play_button.set_callback_func(play_pressed);
   stop_button.set_callback_func(stop_pressed);
-  //access_switch.set_callback_func(access_switch_pressed);
+  access_switch.set_callback_func(access_switch_pressed);
 
   song_1_button.m_redraw_display = true;
   song_2_button.m_redraw_display = true;
@@ -573,11 +568,16 @@ void set_play_off(){
 
 void play_pressed(Single_Led *led, Parameter_Container *parameter_container, Parameter *parameter_struct){
 
-  Serial.print("Address is:");
-  Serial.println((int)&led);
-  Serial.println((int)parameter_struct->value);
-  
-  
+  Serial.println("There is a callback function.");
+  Serial.print("The address of the led is: ");
+  Serial.println((int)led);
+
+  Serial.print("The address of the parameter_container is: ");
+  Serial.println((int)parameter_container);
+
+  Serial.print("The address of the parameter_struct is: ");
+  Serial.println((int)parameter_struct);
+          
   switch(parameter_struct->value){
     case 0:
       parameter_container->set_parameter(parameter_struct, 1);        // Playback is currently stopped, so start it.
@@ -596,49 +596,30 @@ void play_pressed(Single_Led *led, Parameter_Container *parameter_container, Par
 }
 
 void stop_pressed(Single_Led *led, Parameter_Container *parameter_container, Parameter *parameter_struct){
-  Serial.print("Address is:");
-  Serial.println((int)&led);
-  
   if(parameter_struct->value){
-    Serial.println("Okay great!");
     parameter_container->set_parameter(parameter_struct, 0);          // Currently playing the song, so stop it.
     led->set_on(false);                                               
   }
 }
 
-/*void access_switch_pressed(Single_Led *led, Parameter_Container *parameter_container, Parameter *parameter_struct){
-  Serial.println("function called");
-
+void access_switch_pressed(Single_Led *led, Parameter_Container *parameter_container, Parameter *parameter_struct){
   Rgb_Led *rgb_led = (Rgb_Led*)led;        // Create local pointer to the currently selected Menu_Page, via the Menu_Controller pointer.
 
-  int red[] = {255, 0, 0};
-  int *p_red = red;
-
-  Serial.println(parameter_struct->value);
-  rgb_led->set_colour(p_rgb_red); 
-  
   switch(parameter_struct->value){
     case 0:
-      
-      parameter_container->set_parameter(parameter_struct, 1);        // Playback is currently stopped, so start it.
-      Serial.println("the value is 0");
-      
-
-      rgb_led->set_colour(p_red);                                   // Update the led
-      Serial.println("the value is 0");
+      parameter_container->set_parameter(parameter_struct, 1);        // Increment parameter value
+      rgb_led->set_colour(RGB_GREEN);                                 // Update the led
       break;
     case 1:
-      Serial.println("the value is 1");
-      parameter_container->set_parameter(parameter_struct, 2);        // Song is playing already, so pause it.
-      rgb_led->set_colour(RGB_GREEN);                                     // Update the led
+      parameter_container->set_parameter(parameter_struct, 2);        // Increment parameter value
+      rgb_led->set_colour(RGB_BLUE);                                  // Update the led
       break;
     case 2:
-      Serial.println("the value is 2");
-      parameter_container->set_parameter(parameter_struct, 0);        // Song is paused, so commence playback.
-      rgb_led->set_colour(RGB_BLUE);                                      // Update the led
+      parameter_container->set_parameter(parameter_struct, 0);        // Reset parameter value to 0
+      rgb_led->set_colour(RGB_RED);                                   // Update the led
       break;
   }
-}*/
+}
 
 
 

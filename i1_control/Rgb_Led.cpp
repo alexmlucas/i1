@@ -13,13 +13,18 @@ void Rgb_Led::set_pinout(int pins[3]){
 }
 
 void Rgb_Led::set_colour(int *colour){
+  Serial.print("The address of the colour array is: ");
   Serial.println((int)colour);
   m_colour = colour;
+
+  Serial.print("The RGB colour is: " ); 
   
   for(int i = 0; i < 3; i++){
     Serial.print(*(m_colour+i));
+    Serial.print(" ");
     analogWrite(m_pins[i], *(m_colour+i));  // Write the colour values to the pins.
   }
+  Serial.println("");
 }
 
 void Rgb_Led::set_flashing(bool _state){

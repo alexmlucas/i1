@@ -20,7 +20,7 @@ class Control_Button: public Simple_Button{
     bool m_redraw_display;
     bool m_update_leds;
     Control_Button(int debounce_milliseconds);                // Present to allow base class to be initialised from shift_register button, which doesn't have a pin.
-    Control_Button(int pin, int debounce_milliseconds, Menu_Controller *menu_controller, Parameter_Container *parameter_container, Parameter *parameter_struct, int parameter_value);    
+    Control_Button(int pin, int debounce_milliseconds, Menu_Controller *menu_controller, Parameter_Container *parameter_container, Parameter *parameter_struct, int parameter_value);   
     void check_button_pressed();
     void set_led(Single_Led *led);
     void set_callback_func(void (*f)(Single_Led *, Parameter_Container *parameter_container, Parameter *parameter_struct));
