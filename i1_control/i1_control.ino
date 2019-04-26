@@ -204,6 +204,7 @@ Menu_Page *p_blue_zone_sub_menus[] = {&blue_scale_menu, &blue_root_menu};
 Menu_Page *p_mix_levels_sub_menus[] = {&guitar_level_menu, &reconnect_menu, &connection_fail_menu};
 
 Menu_Page *p_current_menu_page;                                           // Create a pointer to the currently selected menu page.
+Menu_Page *p_previous_menu_page;                                          // Create a pointer to the previously selected menu page.
 
 // *** Create Simple_Button instances ***
 Control_Button reconnect_button(RECONNECT_BTN_PIN, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_reconnect, 0);
@@ -226,7 +227,7 @@ int zone_led_pins[] = {ZN_LED_R, ZN_LED_G, ZN_LED_B};
 int wristband_led_pins[] = {WB_LED_R, WB_LED_G};
 
 int RG_RED[] = {255, 0};
-int RG_GREEN[] = {255, 0};
+int RG_GREEN[] = {0, 255};
 int RG_OFF[] = {0, 0};
 
 int RGB_RED[] = {255, 0, 0};
@@ -239,10 +240,8 @@ int *p_rgb_blue = RGB_BLUE;
 bool FLASH_ALL[] = {true, true, true};
 
 Single_Led play_led;
-//Rg_Led wristband_leds;
+Rg_Led wristband_leds;
 Rgb_Led zone_leds;
-
-
 
 void setup() {
   // *** Assign menu text to Menu_Page(s) ***
@@ -341,11 +340,12 @@ void setup() {
   delay(500);                                                                                   // Wait for the serial stream to get going.
 
   play_led.set_pinout(PL_LED_G);
-  //wristband_leds.set_pinout(wristband_led_pins);
+  wristband_leds.set_pinout(wristband_led_pins);
   zone_leds.set_pinout(zone_led_pins);
   
   play_led.set_on(false);
-  //wristband_leds.set_colour(RG_OFF);
+  wristband_leds.set_colour(RG_RED);
+  wristband_leds.set_flashing(true);
   zone_leds.set_colour(p_rgb_blue);        // A hack until parameter reading is implemented.
 
 
@@ -365,10 +365,6 @@ void setup() {
   song_3_button.m_redraw_display = true;
   song_4_button.m_redraw_display = true;
 
-
-
-
-  
   delay(1500);
   //play_led.set_flashing(true);
   //wristband_leds.set_flashing(true);
@@ -428,46 +424,52 @@ void loop() {
   power_button.check_button_pressed();
   access_switch.check_button_pressed();
 
-  // Process the leds
+  // Process the leds that need to flash.
   play_led.update_flashing();
-  //wristband_leds.update_flashing();
-  //zone_leds.update_flashing();
+  wristband_leds.update_flashing();
  
   if(Serial.available() > 0){
     incoming_byte = Serial.read();
-    //Serial.print("I received:");
-    //Serial.println(incoming_byte, DEC);
+    Serial.print("I received:");
+    Serial.println(incoming_byte, DEC);
 
-    /*switch(incoming_byte){
+    switch(incoming_byte){
       case 49: 
-        wristband_not_connected_led.set_flashing(true);
-        wristband_connected_led.set_on(false);
+        //wristband_not_connected_led.set_flashing(true);
+        //wristband_connected_led.set_on(false);
         break;
       case 50:
-        wristband_not_connected_led.set_flashing(false);
-        wristband_not_connected_led.set_on(false);
-        wristband_connected_led.set_on(true);
+        //wristband_not_connected_led.set_flashing(false);
+        //wristband_not_connected_led.set_on(false);
+        //wristband_connected_led.set_on(true);
         break;
       case 51:
-        play_led.set_flashing(false); // move these functions to the Simple Led class?
-        play_led.set_on(true);
+        //play_led.set_flashing(false); // move these functions to the Simple Led class?
+        //play_led.set_on(true);
         break;
       case 52:
-        play_led.set_flashing(false);
-        play_led.set_on(false);
+        //play_led.set_flashing(false);
+        //play_led.set_on(false);
         break;
       case 53:
-        play_led.set_flashing(true);
+        //play_led.set_flashing(true);
       case 54:
-        zone_leds.set_colour(RED);
+        // Attempting to connect to wristband
+        p_previous_menu_page = (Menu_Page*)menu_controller.get_currently_selected_menu();       // Store a reference to the currently displayed menu.
+        menu_controller.set_currently_selected_menu(&reconnect_menu);                           // Switch to splash menu.
+        //zone_leds.set_colour(BLUE);
         break; 
       case 55:
-        zone_leds.set_colour(GREEN); 
+        // Successfully connected to wristband.
+        menu_controller.set_currently_selected_menu(p_previous_menu_page);
+        wristband_leds.set_flashing(false);
+        wristband_leds.set_colour(RG_GREEN);
         break;
-      case 56:
-        zone_leds.set_colour(BLUE); 
-        break; 
-    }*/
+      case 57:
+        // Connection to wristband unsuccessful.
+        menu_controller.set_currently_selected_menu(&connection_fail_menu);
+        break;
+    }
   }
 
   /*while(Serial.available()) {
@@ -620,8 +622,6 @@ void access_switch_pressed(Single_Led *led, Parameter_Container *parameter_conta
       break;
   }
 }
-
-
 
 /*void set_wristband_error(){
   analogWrite(WB_LED_R, 255);
