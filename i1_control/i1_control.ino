@@ -454,135 +454,8 @@ void loop() {
   play_led.update_flashing();
   wristband_leds.update_flashing();
  
-  if(Serial.available() > 0){
-    incoming_byte_1 = Serial.read();
-    incoming_byte_2 = Serial.read();
-    incoming_byte_3 = Serial.read();
-    
-    /*Serial.print("I received: ");
-    Serial.print(incoming_byte_1);
-    Serial.print(" and ");
-    Serial.println(incoming_byte_2);*/
-
-    if(incoming_byte_1 == 99){
-      // c character received
-      // *** m_guitar parameter ***
-      parameter_container.m_guitar.value = (incoming_byte_2 + incoming_byte_3) - 96;
-      
-      // if associated page is the current menu page, redraw the display
-      if(menu_controller.get_currently_selected_menu() == &guitar_menu){
-        menu_controller.set_redraw_display_flag(true);
-      }
-    } else if(incoming_byte_1 == 100){
-      // d character received
-      // *** m_guitar_level parameter ***
-      parameter_container.m_guitar_level.value = (incoming_byte_2 + incoming_byte_3) - 96;
-      
-      // if associated page is the current menu page, redraw the display
-      if(menu_controller.get_currently_selected_menu() == &guitar_level_menu){
-        menu_controller.set_redraw_display_flag(true);
-      }
-    } else if(incoming_byte_1 == 101){
-      // e character received
-      // *** m_backing_level parameter ***
-      parameter_container.m_backing_level.value = (incoming_byte_2 + incoming_byte_3) - 96;
-      
-      // if associated page is the current menu page, redraw the display
-      if(menu_controller.get_currently_selected_menu() == &backing_level_menu){
-        menu_controller.set_redraw_display_flag(true);
-      }
-    } else if(incoming_byte_1 == 102){
-      // f character received
-      // *** m_red_scale parameter ***
-      parameter_container.m_red_scale.value = (incoming_byte_2 + incoming_byte_3) - 96;
-      
-      // if associated page is the current menu page, redraw the display
-      if(menu_controller.get_currently_selected_menu() == &red_scale_menu){
-        menu_controller.set_redraw_display_flag(true);
-      }
-    } else if(incoming_byte_1 == 103){
-      // g character received
-      // *** m_green_scale parameter ***
-      parameter_container.m_green_scale.value = (incoming_byte_2 + incoming_byte_3) - 96;
-      
-      // if associated page is the current menu page, redraw the display
-      if(menu_controller.get_currently_selected_menu() == &green_scale_menu){
-        menu_controller.set_redraw_display_flag(true);
-      }
-    } else if(incoming_byte_1 == 104){
-      // h character received
-      // *** m_blue_scale parameter ***
-      parameter_container.m_blue_scale.value = (incoming_byte_2 + incoming_byte_3) - 96;
-      
-      // if associated page is the current menu page, redraw the display
-      if(menu_controller.get_currently_selected_menu() == &blue_scale_menu){
-        menu_controller.set_redraw_display_flag(true);
-      }
-    } else if(incoming_byte_1 == 105){
-      // i character received
-      // *** m_red_root parameter ***
-      parameter_container.m_red_root.value = (incoming_byte_2 + incoming_byte_3) - 96;
-      
-      // if associated page is the current menu page, redraw the display
-      if(menu_controller.get_currently_selected_menu() == &red_root_menu){
-        menu_controller.set_redraw_display_flag(true);
-      }
-    } else if(incoming_byte_1 == 106){
-      // j character received
-      // *** m_green_root parameter ***
-      parameter_container.m_green_root.value = (incoming_byte_2 + incoming_byte_3) - 96;
-      
-      // if associated page is the current menu page, redraw the display
-      if(menu_controller.get_currently_selected_menu() == &green_root_menu){
-        menu_controller.set_redraw_display_flag(true);
-      }
-    } else if(incoming_byte_1 == 106){
-      // k character received
-      // *** m_blue_root parameter ***
-      parameter_container.m_blue_root.value = (incoming_byte_2 + incoming_byte_3) - 96;
-      
-      // if associated page is the current menu page, redraw the display
-      if(menu_controller.get_currently_selected_menu() == &blue_root_menu){
-        menu_controller.set_redraw_display_flag(true);
-      }
-    } else if(incoming_byte_1 == 106){
-      // l character received
-      // *** m_zone parameter ***
-      parameter_container.m_zone.value = (incoming_byte_2 + incoming_byte_3) - 96;
-
-      switch(parameter_container.m_zone.value){
-        case 0:
-          zone_leds.set_colour(RGB_RED);
-          break;
-        case 1:
-          zone_leds.set_colour(RGB_GREEN);
-          break;
-        case 2:
-          zone_leds.set_colour(RGB_BLUE);
-          break;
-      }   
-    }
-
-    /*switch(incoming_byte){
-      case 54:
-        // Attempting to connect to wristband
-        p_previous_menu_page = (Menu_Page*)menu_controller.get_currently_selected_menu();       // Store a reference to the currently displayed menu.
-        menu_controller.set_currently_selected_menu(&reconnect_menu);                           // Switch to splash menu.
-        //zone_leds.set_colour(BLUE);
-        break; 
-      case 55:
-        // Successfully connected to wristband.
-        menu_controller.set_currently_selected_menu(p_previous_menu_page);
-        wristband_leds.set_flashing(false);
-        wristband_leds.set_colour(RG_GREEN);
-        break;
-      case 56:
-        // Connection to wristband unsuccessful.
-        menu_controller.set_currently_selected_menu(&connection_fail_menu);
-        splash_page_loaded = true;
-        time_splash_loaded_ms = millis();
-        break;
-    }*/
+  if(Serial.available() > 0){             // If serial data is available...
+    serial_parser();                      // ...call the parser.
   }
 
   // Get the current encoder position
@@ -799,5 +672,26 @@ void serial_parser(){
         zone_leds.set_colour(RGB_BLUE);
         break;
     }
-  }   
+  }
+
+  /*switch(incoming_byte){
+      case 54:
+        // Attempting to connect to wristband
+        p_previous_menu_page = (Menu_Page*)menu_controller.get_currently_selected_menu();       // Store a reference to the currently displayed menu.
+        menu_controller.set_currently_selected_menu(&reconnect_menu);                           // Switch to splash menu.
+        //zone_leds.set_colour(BLUE);
+        break; 
+      case 55:
+        // Successfully connected to wristband.
+        menu_controller.set_currently_selected_menu(p_previous_menu_page);
+        wristband_leds.set_flashing(false);
+        wristband_leds.set_colour(RG_GREEN);
+        break;
+      case 56:
+        // Connection to wristband unsuccessful.
+        menu_controller.set_currently_selected_menu(&connection_fail_menu);
+        splash_page_loaded = true;
+        time_splash_loaded_ms = millis();
+        break;
+    }*/
 }
