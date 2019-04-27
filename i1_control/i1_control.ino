@@ -343,18 +343,16 @@ void setup() {
   green_root_menu.set_previous_menu(&red_zone_menu);
   blue_scale_menu.set_previous_menu(&red_zone_menu);
   blue_root_menu.set_previous_menu(&red_zone_menu);
-
-  Serial.begin(9600);                                                                           // Begin serial
-  delay(500);                                                                                   // Wait for the serial stream to get going.
-
+  
+  // *** Configure the LEDs ***
   play_led.set_pinout(PL_LED_G);
   wristband_leds.set_pinout(wristband_led_pins);
   zone_leds.set_pinout(zone_led_pins);
   
-  play_led.set_on(false);
-  wristband_leds.set_colour(RG_RED);
-  wristband_leds.set_flashing(true);
-  zone_leds.set_colour(p_rgb_blue);        // A hack until parameter reading is implemented.
+  //play_led.set_on(false);
+  //wristband_leds.set_colour(RG_RED);
+  //wristband_leds.set_flashing(true);
+  //zone_leds.set_colour(p_rgb_blue);        // A hack until parameter reading is implemented.
 
   // *** Configure the buttons ***
   play_button.set_led(&play_led);
@@ -372,21 +370,36 @@ void setup() {
   song_3_button.m_redraw_display = true;
   song_4_button.m_redraw_display = true;
 
-  delay(1500);
-  
-  selection_encoder.initialise(ENCODER_PIN_A, ENCODER_PIN_B, DEBOUNCE_TIME, &menu_controller);  // Initialise the encoder
-  
-  pinMode(SHIFT_REG_LATCH, OUTPUT);                                                             // Set the pins of the shift register
+  // *** Configure the encoder ***
+  selection_encoder.initialise(ENCODER_PIN_A, ENCODER_PIN_B, DEBOUNCE_TIME, &menu_controller);
+
+  // *** Configure the shift register ***
+  pinMode(SHIFT_REG_LATCH, OUTPUT); 
   pinMode(SHIFT_REG_CLOCK, OUTPUT);
   pinMode(SHIFT_REG_DATA, INPUT);
   
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3D);                                                    // Initialise the display with the 12C address 0x3D
+  // *** Configure the display ***
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3D);   
   display.setTextSize(1);
   display.setTextColor(WHITE);
   display.clearDisplay();
   display.display();
- 
-  delay(10);                                                                                    // Pause again before we get going.
+
+  Serial.begin(9600);                         // Begin serial
+  delay(500);                                 // Wait for the serial stream to get going.
+
+  bool data_received_flag = false;
+  
+  while(data_received_flag == false){         // Pause until serial data is available.
+    Serial.println("r00");                    // Send a message to RPi to indicate that it's ready to recieve song data
+
+    if(Serial.available() > 0){               // If there is serial data...
+      serial_parser();                        // ...call the serial parser
+      data_received_flag = true;              // Set the data recieved flag to exit the loop
+    }
+    delay(1000);                                // Slight delay to avoid spamming the serial stream
+  }
+  delay(10);                                  // Pause again before we get going.
 }
 
 void loop() {
@@ -536,6 +549,18 @@ void loop() {
       // l character received
       // *** m_zone parameter ***
       parameter_container.m_zone.value = (incoming_byte_2 + incoming_byte_3) - 96;
+
+      switch(parameter_container.m_zone.value){
+        case 0:
+          zone_leds.set_colour(RGB_RED);
+          break;
+        case 1:
+          zone_leds.set_colour(RGB_GREEN);
+          break;
+        case 2:
+          zone_leds.set_colour(RGB_BLUE);
+          break;
+      }   
     }
 
     /*switch(incoming_byte){
@@ -665,4 +690,114 @@ void access_switch_pressed(Single_Led *led, Parameter_Container *parameter_conta
       rgb_led->set_colour(RGB_RED);                                   // Update the led
       break;
   }
+}
+
+void serial_parser(){
+  incoming_byte_1 = Serial.read();
+  incoming_byte_2 = Serial.read();
+  incoming_byte_3 = Serial.read();
+  
+  /*Serial.print("I received: ");
+  Serial.print(incoming_byte_1);
+  Serial.print(" and ");
+  Serial.println(incoming_byte_2);*/
+
+  if(incoming_byte_1 == 99){
+    // c character received
+    // *** m_guitar parameter ***
+    parameter_container.m_guitar.value = (incoming_byte_2 + incoming_byte_3) - 96;
+    
+    // if associated page is the current menu page, redraw the display
+    if(menu_controller.get_currently_selected_menu() == &guitar_menu){
+      menu_controller.set_redraw_display_flag(true);
+    }
+  } else if(incoming_byte_1 == 100){
+    // d character received
+    // *** m_guitar_level parameter ***
+    parameter_container.m_guitar_level.value = (incoming_byte_2 + incoming_byte_3) - 96;
+    
+    // if associated page is the current menu page, redraw the display
+    if(menu_controller.get_currently_selected_menu() == &guitar_level_menu){
+      menu_controller.set_redraw_display_flag(true);
+    }
+  } else if(incoming_byte_1 == 101){
+    // e character received
+    // *** m_backing_level parameter ***
+    parameter_container.m_backing_level.value = (incoming_byte_2 + incoming_byte_3) - 96;
+    
+    // if associated page is the current menu page, redraw the display
+    if(menu_controller.get_currently_selected_menu() == &backing_level_menu){
+      menu_controller.set_redraw_display_flag(true);
+    }
+  } else if(incoming_byte_1 == 102){
+    // f character received
+    // *** m_red_scale parameter ***
+    parameter_container.m_red_scale.value = (incoming_byte_2 + incoming_byte_3) - 96;
+    
+    // if associated page is the current menu page, redraw the display
+    if(menu_controller.get_currently_selected_menu() == &red_scale_menu){
+      menu_controller.set_redraw_display_flag(true);
+    }
+  } else if(incoming_byte_1 == 103){
+    // g character received
+    // *** m_green_scale parameter ***
+    parameter_container.m_green_scale.value = (incoming_byte_2 + incoming_byte_3) - 96;
+    
+    // if associated page is the current menu page, redraw the display
+    if(menu_controller.get_currently_selected_menu() == &green_scale_menu){
+      menu_controller.set_redraw_display_flag(true);
+    }
+  } else if(incoming_byte_1 == 104){
+    // h character received
+    // *** m_blue_scale parameter ***
+    parameter_container.m_blue_scale.value = (incoming_byte_2 + incoming_byte_3) - 96;
+    
+    // if associated page is the current menu page, redraw the display
+    if(menu_controller.get_currently_selected_menu() == &blue_scale_menu){
+      menu_controller.set_redraw_display_flag(true);
+    }
+  } else if(incoming_byte_1 == 105){
+    // i character received
+    // *** m_red_root parameter ***
+    parameter_container.m_red_root.value = (incoming_byte_2 + incoming_byte_3) - 96;
+    
+    // if associated page is the current menu page, redraw the display
+    if(menu_controller.get_currently_selected_menu() == &red_root_menu){
+      menu_controller.set_redraw_display_flag(true);
+    }
+  } else if(incoming_byte_1 == 106){
+    // j character received
+    // *** m_green_root parameter ***
+    parameter_container.m_green_root.value = (incoming_byte_2 + incoming_byte_3) - 96;
+    
+    // if associated page is the current menu page, redraw the display
+    if(menu_controller.get_currently_selected_menu() == &green_root_menu){
+      menu_controller.set_redraw_display_flag(true);
+    }
+  } else if(incoming_byte_1 == 106){
+    // k character received
+    // *** m_blue_root parameter ***
+    parameter_container.m_blue_root.value = (incoming_byte_2 + incoming_byte_3) - 96;
+    
+    // if associated page is the current menu page, redraw the display
+    if(menu_controller.get_currently_selected_menu() == &blue_root_menu){
+      menu_controller.set_redraw_display_flag(true);
+    }
+  } else if(incoming_byte_1 == 106){
+    // l character received
+    // *** m_zone parameter ***
+    parameter_container.m_zone.value = (incoming_byte_2 + incoming_byte_3) - 96;
+
+    switch(parameter_container.m_zone.value){
+      case 0:
+        zone_leds.set_colour(RGB_RED);
+        break;
+      case 1:
+        zone_leds.set_colour(RGB_GREEN);
+        break;
+      case 2:
+        zone_leds.set_colour(RGB_BLUE);
+        break;
+    }
+  }   
 }

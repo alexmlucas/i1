@@ -43,7 +43,8 @@ def song_requested():
 			control_board.write(byte_array)
 
 def write_parameter(incoming_serial):
-	
+	# Indicates whether or not a parameter has been found in the list.
+	write_flag = False
 	# Creates a list containing 5 lists, each of 8 items, all set to 0
 	w, h = 4, 9;
 	song_data_as_list = [[0 for x in range(w)] for y in range(h)] 
@@ -65,9 +66,11 @@ def write_parameter(incoming_serial):
 		for index, row in enumerate(song_data_as_list):
 			cell_string = row[current_song]
 			if(incoming_serial[0] == cell_string[0]):
+				write_flag = True
 				break
 		
-		song_data_as_list[index][current_song] = incoming_serial
+		if write_flag == True:
+			song_data_as_list[index][current_song] = incoming_serial
 		
 	with open('song_data.txt', mode='w') as csv_file:
 		song_data_writer = csv.writer(csv_file, delimiter = ',')
@@ -79,7 +82,26 @@ def write_parameter(incoming_serial):
 		
 		for row in song_data:
 			print(row[current_song])
+			
 
+initialisation_flag = True
+
+while (initialisation_flag == True):
+	# Read data from serial port.
+	incoming_serial = control_board.readline().rstrip().decode()
+	
+	# Flush the serial input
+	control_board.flushInput()
+	
+	if incoming_serial:
+		print(incoming_serial)
+		
+		if incoming_serial[0] is 'r':
+				song_requested()
+		
+		# Reset the flag to exit initialisation loop		
+		initialisation_flag = False
+	
 while True:
 	# Read data from serial port.
 	incoming_serial = control_board.readline().rstrip().decode()
@@ -94,8 +116,12 @@ while True:
 			current_song = int(incoming_serial[2])
 			song_requested()
 		else:
+			# add additional cases here for each parameter, play, pause, stop etc...
 			write_parameter(incoming_serial)
 			
+	
+	
+	
 			
 	"""if incoming_serial == 'o1':
 		print("play")
