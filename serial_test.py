@@ -33,6 +33,7 @@ incoming_serial = "sausages"
 current_song = 0
 
 def song_requested():
+	print(current_song)
 	with open('song_data.txt') as csv_file:
 		song_data = csv.reader(csv_file, delimiter = ',')
 		
@@ -79,12 +80,6 @@ def write_parameter(incoming_serial):
 		for row in song_data:
 			print(row[current_song])
 
-				
-				
-		
-			
-			
-
 while True:
 	# Read data from serial port.
 	incoming_serial = control_board.readline().rstrip().decode()
@@ -93,17 +88,15 @@ while True:
 	control_board.flushInput()
 	
 	if incoming_serial:
-		#print(incoming_serial)
+		print(incoming_serial)
 	
 		if incoming_serial[0] is 'b':
-			current_song = int(incoming_serial[1])
+			current_song = int(incoming_serial[2])
 			song_requested()
 		else:
 			write_parameter(incoming_serial)
 			
 			
-			
-		
 	"""if incoming_serial == 'o1':
 		print("play")
 		

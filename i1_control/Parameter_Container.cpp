@@ -41,7 +41,27 @@ void Parameter_Container::set_parameter(Parameter *parameter, int value){
 }
 
 void Parameter_Container::set_and_send_parameter(Parameter *parameter, int value){
+  char serial_char[2];
   parameter->value = value;
+
+  // Send the identifying character
   Serial.print(parameter->character);
-  Serial.println(parameter->value);
+
+  // Now, what to do with the parameter value?
+  // If the parameter is < 10...
+  if(parameter->value < 10){
+    // Use serial_char to add a leading 0 to meet the requirement of all serial messages to
+    // be three characters in length.
+    serial_char[0] = '0';
+    serial_char[1] = '0' + parameter->value;    // This statement gives us the char representation of the parameter value
+
+    // Send the message.
+    Serial.print(serial_char[0]);
+    Serial.println(serial_char[1]);
+  } else {
+    // Otherwise just send the parameter value.
+    Serial.println(parameter->value);
+  }
+  
+  
 }
