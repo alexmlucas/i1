@@ -348,11 +348,6 @@ void setup() {
   play_led.set_pinout(PL_LED_G);
   wristband_leds.set_pinout(wristband_led_pins);
   zone_leds.set_pinout(zone_led_pins);
-  
-  //play_led.set_on(false);
-  //wristband_leds.set_colour(RG_RED);
-  //wristband_leds.set_flashing(true);
-  //zone_leds.set_colour(p_rgb_blue);        // A hack until parameter reading is implemented.
 
   // *** Configure the buttons ***
   play_button.set_led(&play_led);
@@ -397,12 +392,31 @@ void setup() {
       serial_parser();                        // ...call the serial parser
       data_received_flag = true;              // Set the data recieved flag to exit the loop
     }
-    delay(1000);                                // Slight delay to avoid spamming the serial stream
+    delay(250);                                // Delay to avoid spamming the serial stream
   }
-  delay(10);                                  // Pause again before we get going.
+
+  // *** Set LEDs based on serial data.
+  switch(parameter_container.m_zone.value){
+    case 0:
+      zone_leds.set_colour(RGB_RED);
+      break;
+    case 1:
+      zone_leds.set_colour(RGB_GREEN);
+      break;
+    case 2:
+      zone_leds.set_colour(RGB_BLUE);
+      break;
+  }
+
+  // Wristband has a default state of not connected until told otherwise by RPi.
+  wristband_leds.set_colour(RG_RED);
+  wristband_leds.set_flashing(true);
+
+  delay(1000);                                  // Pause again before we get going.
 }
 
 void loop() {
+  
   if(splash_page_loaded){
     current_time_ms = millis();
 

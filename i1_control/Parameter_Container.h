@@ -24,6 +24,5 @@ class Parameter_Container{
     Parameter_Container();
     void set_parameter(Parameter *parameter, int value);
     void set_and_send_parameter(Parameter *parameter, int value);
-    void get_parameter_value(Parameter *parameter, int value);
 };
 #endif
