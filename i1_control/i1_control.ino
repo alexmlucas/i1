@@ -380,19 +380,19 @@ void setup() {
   display.clearDisplay();
   display.display();
 
-  Serial.begin(9600);                         // Begin serial
+  Serial1.begin(9600);                         // Begin serial
   delay(500);                                 // Wait for the serial stream to get going.
 
   bool data_received_flag = false;
   
   while(data_received_flag == false){         // Pause until serial data is available.
-    Serial.println("r00");                    // Send a message to RPi to indicate that it's ready to recieve song data
+    Serial1.println("r00");                    // Send a message to RPi to indicate that it's ready to recieve song data
 
-    if(Serial.available() > 0){               // If there is serial data...
+    if(Serial1.available() > 0){               // If there is serial data...
       serial_parser();                        // ...call the serial parser
       data_received_flag = true;              // Set the data recieved flag to exit the loop
     }
-    delay(250);                                // Delay to avoid spamming the serial stream
+    delay(500);                                // Delay to avoid spamming the serial stream
   }
 
   // *** Set LEDs based on serial data.
@@ -468,7 +468,7 @@ void loop() {
   play_led.update_flashing();
   wristband_leds.update_flashing();
  
-  if(Serial.available() > 0){             // If serial data is available...
+  if(Serial1.available() > 0){             // If serial data is available...
     serial_parser();                      // ...call the parser.
   }
 
@@ -478,7 +478,7 @@ void loop() {
   // Has the value changed?
   if(current_encoder_position != last_encoder_position){
     // Print the value.
-    Serial.println(current_encoder_position);
+    Serial1.println(current_encoder_position);
     // Update the last known value.
     last_encoder_position = current_encoder_position;
   }
@@ -515,9 +515,9 @@ byte shift_in(int incoming_data_pin, int incoming_clock_pin){
 
 void print_bits(byte incoming_byte){
   for(int i = 7; i >= 0; i--){
-    Serial.print(bitRead(incoming_byte,i));
+    Serial1.print(bitRead(incoming_byte,i));
   }
-  Serial.println();
+  Serial1.println();
 }
 
 void enter_pressed(Menu_Controller* p_menu_controller){                                // Function expects a pointer to a Menu_Controller.
@@ -580,16 +580,25 @@ void access_switch_pressed(Single_Led *led, Parameter_Container *parameter_conta
 }
 
 void serial_parser(){
-  incoming_byte_1 = Serial.read();
-  incoming_byte_2 = Serial.read();
-  incoming_byte_3 = Serial.read();
+  incoming_byte_1 = Serial1.read();
+  incoming_byte_2 = Serial1.read();
+  incoming_byte_3 = Serial1.read();
   
-  /*Serial.print("I received: ");
-  Serial.print(incoming_byte_1);
-  Serial.print(" and ");
-  Serial.println(incoming_byte_2);*/
+  /*Serial1.print("I received: ");
+  Serial1.print(incoming_byte_1);
+  Serial1.print(" and ");
+  Serial1.println(incoming_byte_2);*/
 
-  if(incoming_byte_1 == 99){
+  if(incoming_byte_1 == 98){ 
+    // b character received
+    // *** m_song parameter **
+    parameter_container.m_song.value = (incoming_byte_2 + incoming_byte_3) - 96;
+
+    // if associated page is the current menu page, redraw the display
+    if(menu_controller.get_currently_selected_menu() == &main_menu){
+      menu_controller.set_redraw_display_flag(true);
+    }
+  } else if(incoming_byte_1 == 99){
     // c character received
     // *** m_guitar parameter ***
     parameter_container.m_guitar.value = (incoming_byte_2 + incoming_byte_3) - 96;
@@ -661,7 +670,7 @@ void serial_parser(){
     if(menu_controller.get_currently_selected_menu() == &green_root_menu){
       menu_controller.set_redraw_display_flag(true);
     }
-  } else if(incoming_byte_1 == 106){
+  } else if(incoming_byte_1 == 107){
     // k character received
     // *** m_blue_root parameter ***
     parameter_container.m_blue_root.value = (incoming_byte_2 + incoming_byte_3) - 96;
@@ -670,7 +679,7 @@ void serial_parser(){
     if(menu_controller.get_currently_selected_menu() == &blue_root_menu){
       menu_controller.set_redraw_display_flag(true);
     }
-  } else if(incoming_byte_1 == 106){
+  } else if(incoming_byte_1 == 108){
     // l character received
     // *** m_zone parameter ***
     parameter_container.m_zone.value = (incoming_byte_2 + incoming_byte_3) - 96;
@@ -686,6 +695,21 @@ void serial_parser(){
         zone_leds.set_colour(RGB_BLUE);
         break;
     }
+  } else if(incoming_byte_1 == 112){
+    // Attempting to connect to wristband
+    p_previous_menu_page = (Menu_Page*)menu_controller.get_currently_selected_menu();       // Store a reference to the currently displayed menu.
+    menu_controller.set_currently_selected_menu(&reconnect_menu);                           // Switch to splash menu.
+     
+  } else if(incoming_byte_1 == 113){
+    // Successfully connected to wristband.
+    menu_controller.set_currently_selected_menu(p_previous_menu_page);
+    wristband_leds.set_flashing(false);
+    wristband_leds.set_colour(RG_GREEN);
+    
+  } else if(incoming_byte_1 == 114){
+     menu_controller.set_currently_selected_menu(&connection_fail_menu);
+     splash_page_loaded = true;
+     time_splash_loaded_ms = millis();
   }
 
   /*switch(incoming_byte){
