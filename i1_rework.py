@@ -8,7 +8,7 @@ import Adafruit_BluefruitLE
 from Adafruit_BluefruitLE.services import UART
 
 # Custom class includes
-from serial_handler import *
+from parameter_manager import *
 from guitar import *
 
 # define in seconds how long to scan for bluetooth UART devices
@@ -22,9 +22,13 @@ MOTOR_CHAR_UUID  = uuid.UUID('14EC9994-4932-4BDA-997A-B3D052CD7421')
 # Get the BLE provider for the current platform.
 ble = Adafruit_BluefruitLE.get_provider()
 
+# Global parameters
+NOTE_VELOCITY = 100
+NOTE_LENGTH = 0.5
+
 # Classes
-serial_handler = Serial_Handler('/dev/serial0', 9600)
-guitar = Guitar(1, 100, 0.5)
+parameter_manager = Parameter_Manager('/dev/serial0', 9600)
+guitar = Guitar(1, NOTE_VELOCITY, NOTE_LENGTH)
 
 guitar.set_zone_notes(0, 0)
 guitar.set_zone_notes(0, 1)
@@ -42,8 +46,11 @@ bno_device = None
 def received(data):
     print('Received: {0}'.format(data))
     
+    # get the current zone
+    current_zone = parameter_manager.get_song_parameter('l')
+    
     if data != "-1.":
-        guitar.play_string(0, int(float(data)))
+        guitar.play_string(current_zone, int(float(data)))
     
 def get_bno_device(incoming_adapter):    
     # get a global reference to the bno_device
@@ -123,7 +130,7 @@ def main():
     while True:
         # This is the main loop
         # Control surface should initialise automatically when in this loop.
-        serial_handler.check_incoming()
+        parameter_manager.check_incoming()
 
 # Initialize the BLE system.  MUST be called before other BLE calls!
 ble.initialize()
