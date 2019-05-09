@@ -10,6 +10,7 @@ from Adafruit_BluefruitLE.services import UART
 # Custom class includes
 from parameter_manager import *
 from guitar import *
+from song_player import *
 
 # define in seconds how long to scan for bluetooth UART devices
 BLUETOOTH_CONNECTION_TIMER = 3
@@ -29,6 +30,10 @@ NOTE_LENGTH = 0.5
 # Classes
 parameter_manager = Parameter_Manager('/dev/serial0', 9600)
 guitar = Guitar(1, NOTE_VELOCITY, NOTE_LENGTH)
+
+current_song = parameter_manager.get_global_parameter('b')
+song_player = Song_Player(current_song)
+song_player.set_play_state(1)
 
 guitar.set_zone_notes(0, 0)
 guitar.set_zone_notes(0, 1)

@@ -352,6 +352,26 @@ class Parameter_Manager:
 					if(cell_string[0] == 'b'):
 						# song parameter found
 						return int(cell_string[2])
+	
+	def get_global_parameter(self, parameter_character):
+		# create a 2 x 1 array
+		w, h = 2, 1;
+		global_data_as_list = [[0 for x in range(w)] for y in range(h)] 
+	
+		with open('global_data.txt') as csv_file:
+			global_data_reader = csv.reader(csv_file, delimiter = ',')
+			
+			global_data_as_list = list(global_data_reader)
+			
+			row_index = 0
+			cell_index = 0
+			
+			for row_index, row in enumerate(global_data_as_list):
+				for cell_index, cell_string in enumerate(row):
+					# If the first character matches...
+					if(parameter_character == cell_string[0]):
+						#... return the value
+						return int(cell_string[2]) + (int(cell_string[1]) * 10)
 						
 	def get_song_parameter(self, parameter_character):
 		# Indicates whether or not a parameter has been found in the list.
@@ -380,7 +400,7 @@ class Parameter_Manager:
 				# Isolate the parameter associated with the currently selected song
 				cell_string = row[self.current_song]
 				
-				# If the first character matches that of the incoming serial...
+				# If the first character matches...
 				if(parameter_character == cell_string[0]):
 					#... return the value
 					return int(cell_string[2]) + (int(cell_string[1]) * 10)
