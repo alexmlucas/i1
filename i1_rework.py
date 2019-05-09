@@ -4,12 +4,12 @@ import time
 import uuid
 import pygame
 
-
 import Adafruit_BluefruitLE
 from Adafruit_BluefruitLE.services import UART
 
 # Custom class includes
 from serial_handler import *
+from guitar import *
 
 # define in seconds how long to scan for bluetooth UART devices
 BLUETOOTH_CONNECTION_TIMER = 3
@@ -24,6 +24,12 @@ ble = Adafruit_BluefruitLE.get_provider()
 
 # Classes
 serial_handler = Serial_Handler('/dev/serial0', 9600)
+guitar = Guitar(1, 100, 0.5)
+
+guitar.set_zone_notes(0, 0)
+guitar.set_zone_notes(0, 1)
+guitar.set_zone_notes(0, 2)
+guitar.set_zone_notes(0, 3)
 
 yaw = None
 initialisation_flag = True
@@ -31,12 +37,13 @@ initialisation_flag = True
 # initialise the BNO device to NULL
 bno_device = None
 
-
 # Function to receive RX characteristic changes.
 # this function is passed to the start_nofify method of the yaw characteristic
 def received(data):
     print('Received: {0}'.format(data))
-
+    
+    if data != "-1.":
+        guitar.play_string(0, int(float(data)))
     
 def get_bno_device(incoming_adapter):    
     # get a global reference to the bno_device
@@ -98,7 +105,6 @@ def get_yaw_characteristic(incoming_device):
     motor = uart.find_characteristic(MOTOR_CHAR_UUID)
     return yaw
 
-
 def main():
     # Clear any cached data.
     ble.clear_cached_data()
@@ -118,7 +124,6 @@ def main():
         # This is the main loop
         # Control surface should initialise automatically when in this loop.
         serial_handler.check_incoming()
-
 
 # Initialize the BLE system.  MUST be called before other BLE calls!
 ble.initialize()
