@@ -352,12 +352,21 @@ void setup() {
   // *** Configure the buttons ***
   play_button.set_led(&play_led);
   stop_button.set_led(&play_led);
+  song_1_button.set_led(&play_led);
+  song_2_button.set_led(&play_led);
+  song_3_button.set_led(&play_led);
+  song_4_button.set_led(&play_led);
+  
   access_switch.set_led(&zone_leds);
   
   enter_button.set_callback_func(enter_pressed);                                                // Set button callback functions
   back_button.set_callback_func(back_pressed);
   play_button.set_callback_func(play_pressed);
   stop_button.set_callback_func(stop_pressed);
+  song_1_button.set_callback_func(song_pressed);
+  song_2_button.set_callback_func(song_pressed);
+  song_3_button.set_callback_func(song_pressed);
+  song_4_button.set_callback_func(song_pressed);
   access_switch.set_callback_func(access_switch_pressed);
 
   song_1_button.m_redraw_display = true;
@@ -536,31 +545,37 @@ void back_pressed(Menu_Controller* p_menu_controller){                          
   }                                                      
 }
 
-void play_pressed(Single_Led *led, Parameter_Container *parameter_container, Parameter *parameter_struct){       
+void play_pressed(Single_Led *led, Parameter_Container *parameter_container, Parameter *parameter_struct, int parameter_value){       
   switch(parameter_struct->value){
     case 0:
-      parameter_container->set_and_send_parameter(parameter_struct, 1);        // Playback is currently stopped, so start it.
-      led->set_on(true);                                              // Update the led
+      parameter_container->set_and_send_parameter(parameter_struct, 1);         // Playback is currently stopped, so start it.
+      led->set_on(true);                                                        // Update the led
       break;
     case 1:
-      parameter_container->set_and_send_parameter(parameter_struct, 2);        // Song is playing already, so pause it.
-      led->set_flashing(true);                                        // Update the led
+      parameter_container->set_and_send_parameter(parameter_struct, 2);         // Song is playing already, so pause it.
+      led->set_flashing(true);                                                  // Update the led
       break;
     case 2:
-      parameter_container->set_and_send_parameter(parameter_struct, 1);        // Song is paused, so commence playback.
-      led->set_on(true);                                              // Update the led
+      parameter_container->set_and_send_parameter(parameter_struct, 1);         // Song is paused, so commence playback.
+      led->set_on(true);                                                        // Update the led
       break;
   }
 }
 
-void stop_pressed(Single_Led *led, Parameter_Container *parameter_container, Parameter *parameter_struct){
+void stop_pressed(Single_Led *led, Parameter_Container *parameter_container, Parameter *parameter_struct, int parameter_value){
   if(parameter_struct->value){
     parameter_container->set_and_send_parameter(parameter_struct, 0);          // Currently playing the song, so stop it.
     led->set_on(false);                                               
   }
 }
 
-void access_switch_pressed(Single_Led *led, Parameter_Container *parameter_container, Parameter *parameter_struct){
+void song_pressed(Single_Led *led, Parameter_Container *parameter_container, Parameter *parameter_struct, int parameter_value){
+  led->set_on(false);                                                                       // switch off the LED, which in this case is the play LED.
+  parameter_container->set_and_send_parameter(&parameter_container->m_play, 0);   // set the play state to off.
+  parameter_container->set_and_send_parameter(parameter_struct, parameter_value);           // update the currently selected song
+}
+
+void access_switch_pressed(Single_Led *led, Parameter_Container *parameter_container, Parameter *parameter_struct, int parameter_value){
   Rgb_Led *rgb_led = (Rgb_Led*)led;        // Create local pointer to the currently selected Menu_Page, via the Menu_Controller pointer.
 
   switch(parameter_struct->value){
@@ -598,6 +613,7 @@ void serial_parser(){
     if(menu_controller.get_currently_selected_menu() == &main_menu){
       menu_controller.set_redraw_display_flag(true);
     }
+    
   } else if(incoming_byte_1 == 99){
     // c character received
     // *** m_guitar parameter ***

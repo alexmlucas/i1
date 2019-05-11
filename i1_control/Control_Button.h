@@ -14,7 +14,7 @@ class Control_Button: public Simple_Button{
     Parameter *m_parameter_struct;
     int m_parameter_value;
     Single_Led *m_led;
-    void (*callback_function)(Single_Led *, Parameter_Container *parameter_container, Parameter *parameter_struct);
+    void (*callback_function)(Single_Led *, Parameter_Container *parameter_container, Parameter *parameter_struct, int parameter_value);
 
   public:
     bool m_redraw_display;
@@ -23,7 +23,7 @@ class Control_Button: public Simple_Button{
     Control_Button(int pin, int debounce_milliseconds, Menu_Controller *menu_controller, Parameter_Container *parameter_container, Parameter *parameter_struct, int parameter_value);   
     void check_button_pressed();
     void set_led(Single_Led *led);
-    void set_callback_func(void (*f)(Single_Led *, Parameter_Container *parameter_container, Parameter *parameter_struct));
+    void set_callback_func(void (*f)(Single_Led *, Parameter_Container *parameter_container, Parameter *parameter_struct, int parameter_value));
                                    
 };
 #endif

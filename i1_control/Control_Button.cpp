@@ -28,7 +28,7 @@ void Control_Button::check_button_pressed(){
       if(button_state == HIGH){                                 // If the button is HIGH...
         
         if(callback_function != NULL){                                                  // ... If there's a callback function...   
-          callback_function(m_led, m_parameter_container, m_parameter_struct);          // ... call it!
+          callback_function(m_led, m_parameter_container, m_parameter_struct, m_parameter_value);          // ... call it!
         } else {
           m_parameter_container->set_and_send_parameter(m_parameter_struct, m_parameter_value);  // ... otherwise, set the parameter value, this will result in the serial cahr being transmitted.
         }
@@ -41,7 +41,7 @@ void Control_Button::check_button_pressed(){
   }
 }
 
-void Control_Button::set_callback_func(void (*f)(Single_Led *, Parameter_Container *parameter_container, Parameter *parameter_struct)){
+void Control_Button::set_callback_func(void (*f)(Single_Led *, Parameter_Container *parameter_container, Parameter *parameter_struct, int parameter_value)){
   callback_function = f;
 }
 
