@@ -8,7 +8,11 @@ class Parameter_Manager:
 		self.baud_rate = baud_rate
 		
 		# current song - does this need to be loaded from the song_data text file?
-		self.current_song = self.get_last_selected_song()
+		# perhaps this can just be changed to get global parameter?
+		self.current_song = self.get_global_parameter('b')
+		self.master_level = self.float_value_generator(self.get_global_parameter('a'))
+		self.backing_level = self.float_value_generator(self.get_song_parameter('e'))
+		self.guitar_level = self.midi_value_generator(self.get_song_parameter('d'))
 		
 		# Intialise serial port
 		self.control_board = serial.Serial(self.port, self.baud_rate, timeout = 0.1)
@@ -19,8 +23,18 @@ class Parameter_Manager:
 		
 	# def intialise_parameters
 	
+	def midi_value_generator(self, value_to_convert):
+		# convert values between 0 - 10 to vaues between 0 - 127
+		return (value_to_convert / 10) * 127
+		
+	def float_value_generator(self, value_to_convert):
+		return value_to_convert / 10
+	
 	def set_song_player(self, song_player):
 		self.song_player = song_player
+		
+	def set_guitar(self, guitar):
+		self.guitar = guitar
 	
 	def check_incoming(self):
 		# Read data from the serial port
@@ -34,8 +48,17 @@ class Parameter_Manager:
 			
 			if incoming_serial[0] is 'a':
 				# Master level (Global Parameter)
-				# Local action
-				self.set_master_level(incoming_serial)
+				# convert incoming string to float value 
+				value_as_float = self.float_value_generator(self.get_number_from_string(incoming_serial))
+				# Set the master level
+				self.master_level = value_as_float
+				
+				# change the level of the song player
+				self.song_player.set_level(self.backing_level * self.master_level)
+				# change the level of the guitar
+				self.guitar.set_level(int(self.guitar_level * self.master_level))
+				
+				
 				# Write the parameter
 				self.write_global_parameter(incoming_serial)
 				
@@ -59,15 +82,27 @@ class Parameter_Manager:
 				
 			elif incoming_serial[0] is 'd':
 				# Guitar Level
-				# Local action
-				self.set_guitar_level(incoming_serial)
+
+				# convert incoming string to midi value 
+				midi_value = self.midi_value_generator(self.get_number_from_string(incoming_serial))
+				# Set the backing level local value
+				self.guitar_level = midi_value
+				# actually change the volume
+				self.guitar.set_level(int(self.guitar_level * self.master_level))
+				
 				# Write the parameter
 				self.write_song_parameter(incoming_serial)
 				
 			elif incoming_serial[0] is 'e':
 				# Backing Level
-				# Local action
-				self.set_backing_level(incoming_serial)
+				
+				# convert incoming string to float value 
+				value_as_float = self.float_value_generator(self.get_number_from_string(incoming_serial))
+				# Set the backing level local value
+				self.backing_level = value_as_float
+				# actually change the volume
+				self.song_player.set_level(self.backing_level * self.master_level)
+				
 				# Write the parameter
 				self.write_song_parameter(incoming_serial)	
 				
@@ -142,26 +177,15 @@ class Parameter_Manager:
 				# Send the song data
 				self.song_data_requested()
 				
-				
 	def set_master_level(self, incoming_serial):
 		# Slice the string to remove the first character and convert to int
 		master_level = int(incoming_serial[1:])
 		print('Master Level = ', master_level)
 
-	def set_guitar(self,incoming_serial):
-		# Slice the string to remove the first character and convert to int
-		guitar = int(incoming_serial[1:])
-		print('Guitar = ', guitar)
-
 	def set_guitar_level(self, incoming_serial):
 		# Slice the string to remove the first character and convert to int
 		guitar_level = int(incoming_serial[1:])
 		print('Guitar Level = ', guitar_level)
-
-	def set_backing_level(self, incoming_serial):
-		# Slice the string to remove the first character and convert to int
-		backing_level = int(incoming_serial[1:])
-		print('Backing Level = ', backing_level)
 
 	def set_red_scale(self, incoming_serial):
 		# Slice the string to remove the first character and convert to int
@@ -330,10 +354,10 @@ class Parameter_Manager:
 			
 			for row in song_data:
 				byte_array = bytes(row[self.current_song], 'utf-8')
-				print(byte_array)
+				#print(byte_array)
 				self.control_board.write(byte_array)
 				
-	def get_last_selected_song(self):
+	'''def get_last_selected_song(self):
 		# create a 2 x 1 array
 		w, h = 2, 1;
 		global_data_as_list = [[0 for x in range(w)] for y in range(h)] 
@@ -350,7 +374,7 @@ class Parameter_Manager:
 				for cell_index, cell_string in enumerate(row):
 					if(cell_string[0] == 'b'):
 						# song parameter found
-						return int(cell_string[2])
+						return int(cell_string[2])'''
 	
 	def get_global_parameter(self, parameter_character):
 		# create a 2 x 1 array
@@ -403,4 +427,8 @@ class Parameter_Manager:
 				if(parameter_character == cell_string[0]):
 					#... return the value
 					return int(cell_string[2]) + (int(cell_string[1]) * 10)
+					
+	def get_number_from_string(self, string_value):
+		return int(string_value[2]) + (int(string_value[1]) * 10)
+		
 	

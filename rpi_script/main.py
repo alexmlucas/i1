@@ -36,6 +36,7 @@ song_player = Song_Player(current_song)
 #song_player.set_play_state(1)
 
 parameter_manager.set_song_player(song_player)
+parameter_manager.set_guitar(guitar)
 
 guitar.set_zone_notes(0, 0)
 guitar.set_zone_notes(0, 1)

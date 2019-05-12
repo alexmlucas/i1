@@ -43,7 +43,7 @@ class Guitar:
 		self.fs.sfload(self.guitar_paths[guitar_index])
 		
 	def set_level(self, level):
-		self.fs.cc(0, 7, (level * 127))
+		self.fs.cc(0, 7, level)
 		
 	def set_zone_notes(self, zone_index, notes_index):
 		# assign the scale/chord from the master note container to the zone note container 
