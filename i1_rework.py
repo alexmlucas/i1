@@ -4,12 +4,13 @@ import time
 import uuid
 import pygame
 
-
 import Adafruit_BluefruitLE
 from Adafruit_BluefruitLE.services import UART
 
 # Custom class includes
-from serial_handler import *
+from parameter_manager import *
+from guitar import *
+from song_player import *
 
 # define in seconds how long to scan for bluetooth UART devices
 BLUETOOTH_CONNECTION_TIMER = 3
@@ -22,8 +23,22 @@ MOTOR_CHAR_UUID  = uuid.UUID('14EC9994-4932-4BDA-997A-B3D052CD7421')
 # Get the BLE provider for the current platform.
 ble = Adafruit_BluefruitLE.get_provider()
 
+# Global parameters
+NOTE_VELOCITY = 100
+NOTE_LENGTH = 0.5
+
 # Classes
-serial_handler = Serial_Handler('/dev/serial0', 9600)
+parameter_manager = Parameter_Manager('/dev/serial0', 9600)
+guitar = Guitar(1, NOTE_VELOCITY, NOTE_LENGTH)
+
+current_song = parameter_manager.get_global_parameter('b')
+song_player = Song_Player(current_song)
+song_player.set_play_state(1)
+
+guitar.set_zone_notes(0, 0)
+guitar.set_zone_notes(0, 1)
+guitar.set_zone_notes(0, 2)
+guitar.set_zone_notes(0, 3)
 
 yaw = None
 initialisation_flag = True
@@ -31,12 +46,16 @@ initialisation_flag = True
 # initialise the BNO device to NULL
 bno_device = None
 
-
 # Function to receive RX characteristic changes.
 # this function is passed to the start_nofify method of the yaw characteristic
 def received(data):
     print('Received: {0}'.format(data))
-
+    
+    # get the current zone
+    current_zone = parameter_manager.get_song_parameter('l')
+    
+    if data != "-1.":
+        guitar.play_string(current_zone, int(float(data)))
     
 def get_bno_device(incoming_adapter):    
     # get a global reference to the bno_device
@@ -98,7 +117,6 @@ def get_yaw_characteristic(incoming_device):
     motor = uart.find_characteristic(MOTOR_CHAR_UUID)
     return yaw
 
-
 def main():
     # Clear any cached data.
     ble.clear_cached_data()
@@ -117,8 +135,7 @@ def main():
     while True:
         # This is the main loop
         # Control surface should initialise automatically when in this loop.
-        serial_handler.check_incoming()
-
+        parameter_manager.check_incoming()
 
 # Initialize the BLE system.  MUST be called before other BLE calls!
 ble.initialize()
