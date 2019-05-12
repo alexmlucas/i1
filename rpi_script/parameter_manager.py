@@ -19,6 +19,9 @@ class Parameter_Manager:
 		
 	# def intialise_parameters
 	
+	def set_song_player(self, song_player):
+		self.song_player = song_player
+	
 	def check_incoming(self):
 		# Read data from the serial port
 		incoming_serial = self.control_board.readline().rstrip().decode()
@@ -27,8 +30,7 @@ class Parameter_Manager:
 		self.control_board.flushInput()
 		
 		if incoming_serial:
-			print(incoming_serial)
-			print(self.current_song)
+			#print(incoming_serial)
 			
 			if incoming_serial[0] is 'a':
 				# Master level (Global Parameter)
@@ -43,7 +45,10 @@ class Parameter_Manager:
 				self.current_song = int(incoming_serial[2])
 				# Write the parameter
 				self.write_global_parameter(incoming_serial)
+				# Transmit the song data
 				self.song_data_requested()
+				# Change song_player path to the mp3 file
+				self.song_player.set_song(self.current_song)
 				
 			elif incoming_serial[0] is 'c':
 				# Guitar
@@ -127,8 +132,7 @@ class Parameter_Manager:
 
 			elif incoming_serial[0] is 'o':
 				# Play
-				# Local action
-				self.set_playback_state(incoming_serial)
+				self.song_player.set_play_state(int(incoming_serial[2]))
 				
 			elif incoming_serial[0] is 'r':
 				# Initial data request.
@@ -203,11 +207,6 @@ class Parameter_Manager:
 		
 	def shutdown_device(self, incoming_serial):
 		print('Shutting down')
-		
-	def set_playback_state(self, incoming_serial):
-		# Slice the string to remove the first character and convert to int
-		playback_state = int(incoming_serial[1:])
-		print('Playback State = ', playback_state)
 		
 	def write_song_parameter(self, incoming_serial):
 		# Indicates whether or not a parameter has been found in the list.
