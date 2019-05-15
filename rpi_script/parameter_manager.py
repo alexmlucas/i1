@@ -14,7 +14,8 @@ class Parameter_Manager:
 		self.guitar_level = self.midi_value_generator(self.get_song_parameter('d'))
 		
 		# Intialise serial port
-		self.control_board = serial.Serial(self.port, self.baud_rate, timeout = 0.1)
+		self.control_board = serial.Serial(self.port, 
+		self.baud_rate, timeout = 0.1)
 		
 		# Flush inputs and outputs
 		self.control_board.flushInput()
@@ -38,7 +39,10 @@ class Parameter_Manager:
 	def set_guitar(self, guitar):
 		# Create a local reference to the guitar.
 		self.guitar = guitar
-		# Now that a reference to the guitar is available, set its level
+		# Now that a reference to the guitar is available, set its path...
+		print(self.get_song_parameter('c'))
+		self.guitar.set_sound_font(self.get_song_parameter('c'))
+		# ... and its level
 		self.guitar.set_level(int(self.guitar_level * self.master_level))
 	
 	def check_incoming(self):
@@ -49,7 +53,7 @@ class Parameter_Manager:
 		self.control_board.flushInput()
 		
 		if incoming_serial:
-			#print(incoming_serial)
+			print(incoming_serial)
 			
 			if incoming_serial[0] is 'a':
 				# Master level (Global Parameter)
@@ -81,22 +85,20 @@ class Parameter_Manager:
 				self.guitar_level = self.midi_value_generator(self.get_song_parameter('d'))
 				
 				# Act on changes to parameter values
-				print("Backing level = ", self.backing_level)
-				print("Guitar level = ", self.guitar_level)
-				print("Master level = ", self.master_level)
-				
-				
 				self.song_player.set_song(self.current_song)
 				self.song_player.set_level(self.backing_level * self.master_level)
 				self.guitar.set_level(int(self.guitar_level * self.master_level))
+				
+				print("The soundfont index is: ", self.get_song_parameter('c'))
+				self.guitar.set_sound_font(self.get_song_parameter('c'))
 				
 				# Transmit the song data
 				self.song_data_requested()
 				
 			elif incoming_serial[0] is 'c':
 				# Guitar
-				# Local action
-				self.set_guitar(incoming_serial)
+				# Set the sound font by removing the first two characters from the incoming serial string and converting to int
+				self.guitar.set_sound_font(int(incoming_serial[1:]))
 				# Write the parameter
 				self.write_song_parameter(incoming_serial)
 				
@@ -198,7 +200,7 @@ class Parameter_Manager:
 				self.song_data_requested()
 				
 	def set_master_level(self, incoming_serial):
-		# Slice the string to remove the first character and convert to int
+		# Slice the string to remove the first two characters and convert to int
 		master_level = int(incoming_serial[1:])
 		print('Master Level = ', master_level)
 
@@ -374,8 +376,9 @@ class Parameter_Manager:
 			
 			for row in song_data:
 				byte_array = bytes(row[self.current_song], 'utf-8')
-				#print(byte_array)
-				self.control_board.write(byte_array)
+				byte_array1 = row[self.current_song]				
+				print(byte_array1)
+				self.control_board.write(byte_array1.encode())
 				
 	'''def get_last_selected_song(self):
 		# create a 2 x 1 array

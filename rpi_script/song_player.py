@@ -11,7 +11,6 @@ class Song_Player:
 		pygame.mixer.music.load(self.song_paths[song_index])
 
 	def set_level(self, level_as_float):
-		print("leve set to... ", level_as_float)
 		pygame.mixer.music.set_volume(level_as_float)
 		
 	def set_play_state(self, play_state):

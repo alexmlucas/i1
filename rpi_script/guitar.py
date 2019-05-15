@@ -27,20 +27,25 @@ class Guitar:
 		self.fs.start(driver="alsa")
 		
 		# set the file path of each soundfont
-		self.guitar_paths = ["/usr/share/sounds/sf2/FT-EGuitarClean-20170222/FT-EGuitarClean.sfz", "/usr/share/sounds/sf2/FT-EGuitarDirect-20161019/FT-EGuitarDirect-20161019.sf2", "/usr/share/sounds/sf2/FT-EGuitarMutedClean-20161202FT-EGuitarMutedClean-20161202.sf2", "/usr/share/sounds/sf2/FluidR3_GM.sf2"]
+		self.guitar_paths = ["/usr/share/sounds/sf2/acoustic_g.sf2", "/usr/share/sounds/sf2/electric_g.sf2", "/usr/share/sounds/sf2/rhodes.sf2", "/usr/share/sounds/sf2/FluidR3_GM.sf2"]
+		
+		#/usr/share/sounds/sf2/FT-EGuitarMutedClean-20161202/FT-EGuitarMutedClean-20161202.sf2
 		
 		#self.guitar_paths = {"test_1", "test_2", "test_3"}
 		
 		# load a soundfont and initialise parameters
-		sfid = self.fs.sfload(self.guitar_paths[guitar_tone_index])		
+		self.sfid = self.fs.sfload(self.guitar_paths[3])		
 		self.velocity = velocity
 		self.note_length = note_length
 
 		# the following is perhaps not needed.
-		self.fs.program_select(0, sfid, 0, 0)
+		self.fs.program_select(0, self.sfid, 0, guitar_tone_index)
 
-	def set_guitar(self, guitar_index):
-		self.fs.sfload(self.guitar_paths[guitar_index])
+	def set_sound_font(self, sound_font_index):
+		#print("Loading: ", self.guitar_paths[sound_font_index])
+		#sfid = self.fs.sfload(self.guitar_paths[sound_font_index])
+		
+		self.fs.program_select(0, self.sfid, 0, sound_font_index+1)
 		
 	def set_level(self, level):
 		self.fs.cc(0, 7, level)
