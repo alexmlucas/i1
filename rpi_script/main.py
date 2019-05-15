@@ -31,8 +31,7 @@ NOTE_LENGTH = 0.5
 parameter_manager = Parameter_Manager('/dev/serial0', 9600)
 guitar = Guitar(1, NOTE_VELOCITY, NOTE_LENGTH)
 
-current_song = parameter_manager.get_global_parameter('b')
-song_player = Song_Player(current_song)
+song_player = Song_Player()
 #song_player.set_play_state(1)
 
 parameter_manager.set_song_player(song_player)

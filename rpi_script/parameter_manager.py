@@ -7,8 +7,7 @@ class Parameter_Manager:
 		self.port = port
 		self.baud_rate = baud_rate
 		
-		# current song - does this need to be loaded from the song_data text file?
-		# perhaps this can just be changed to get global parameter?
+		# Initalise class variables from saved parameter values
 		self.current_song = self.get_global_parameter('b')
 		self.master_level = self.float_value_generator(self.get_global_parameter('a'))
 		self.backing_level = self.float_value_generator(self.get_song_parameter('e'))
@@ -20,8 +19,6 @@ class Parameter_Manager:
 		# Flush inputs and outputs
 		self.control_board.flushInput()
 		self.control_board.flushOutput()
-		
-	# def intialise_parameters
 	
 	def midi_value_generator(self, value_to_convert):
 		# convert values between 0 - 10 to vaues between 0 - 127
@@ -31,10 +28,18 @@ class Parameter_Manager:
 		return value_to_convert / 10
 	
 	def set_song_player(self, song_player):
+		# Create a local reference to the song player.
 		self.song_player = song_player
+		# Now that a reference to the song player is available, set the song...
+		self.song_player.set_song(self.get_global_parameter('b'))
+		# ...and set its level
+		self.song_player.set_level(self.backing_level * self.master_level)
 		
 	def set_guitar(self, guitar):
+		# Create a local reference to the guitar.
 		self.guitar = guitar
+		# Now that a reference to the guitar is available, set its level
+		self.guitar.set_level(int(self.guitar_level * self.master_level))
 	
 	def check_incoming(self):
 		# Read data from the serial port
@@ -48,30 +53,45 @@ class Parameter_Manager:
 			
 			if incoming_serial[0] is 'a':
 				# Master level (Global Parameter)
-				# convert incoming string to float value 
+				
+				# Convert incoming string to a float value 
 				value_as_float = self.float_value_generator(self.get_number_from_string(incoming_serial))
+				
 				# Set the master level
 				self.master_level = value_as_float
-				
-				# change the level of the song player
+				# Change the level of the song player
 				self.song_player.set_level(self.backing_level * self.master_level)
-				# change the level of the guitar
+				# Change the level of the guitar
 				self.guitar.set_level(int(self.guitar_level * self.master_level))
-				
 				
 				# Write the parameter
 				self.write_global_parameter(incoming_serial)
 				
 			elif incoming_serial[0] is 'b':
 				# Song (Global Parameter)
-				# Local action
-				self.current_song = int(incoming_serial[2])
+				
 				# Write the parameter
 				self.write_global_parameter(incoming_serial)
+				
+				# Update the current song
+				self.current_song = int(incoming_serial[2])
+				
+				# Update local variables
+				self.backing_level = self.float_value_generator(self.get_song_parameter('e'))
+				self.guitar_level = self.midi_value_generator(self.get_song_parameter('d'))
+				
+				# Act on changes to parameter values
+				print("Backing level = ", self.backing_level)
+				print("Guitar level = ", self.guitar_level)
+				print("Master level = ", self.master_level)
+				
+				
+				self.song_player.set_song(self.current_song)
+				self.song_player.set_level(self.backing_level * self.master_level)
+				self.guitar.set_level(int(self.guitar_level * self.master_level))
+				
 				# Transmit the song data
 				self.song_data_requested()
-				# Change song_player path to the mp3 file
-				self.song_player.set_song(self.current_song)
 				
 			elif incoming_serial[0] is 'c':
 				# Guitar

@@ -1,13 +1,9 @@
 import pygame
 
 class Song_Player:
-	def __init__(self, current_song):
-		
+	def __init__(self):
 		self.song_paths = ["/boot/songs/1.wav", "/boot/songs/2.wav", "/boot/songs/3.mp3", "/boot/songs/4.mp3"]
-		self.current_song = current_song
 		pygame.mixer.init()
-		pygame.mixer.music.load(self.song_paths[self.current_song])
-
 		# A variable to track when we need to unpause rather than simply play
 		self.currently_paused = False
 		
@@ -15,10 +11,10 @@ class Song_Player:
 		pygame.mixer.music.load(self.song_paths[song_index])
 
 	def set_level(self, level_as_float):
+		print("leve set to... ", level_as_float)
 		pygame.mixer.music.set_volume(level_as_float)
 		
 	def set_play_state(self, play_state):
-		print(play_state)
 		if play_state == 0:
 			pygame.mixer.music.stop()
 		elif play_state == 1:
