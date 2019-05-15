@@ -389,8 +389,9 @@ void setup() {
   display.clearDisplay();
   display.display();
 
-  Serial1.begin(9600);                         // Begin serial
-  delay(500);                                 // Wait for the serial stream to get going.
+  Serial1.begin(9600);                         // Begin serial1
+  Serial.begin(9600);                          // Serial for debugging.
+  delay(500);                                  // Wait for the serial stream to get going.
 
   bool data_received_flag = false;
   
@@ -596,19 +597,35 @@ void access_switch_pressed(Single_Led *led, Parameter_Container *parameter_conta
 
 void serial_parser(){
   incoming_byte_1 = Serial1.read();
+  delay(2);
   incoming_byte_2 = Serial1.read();
+  delay(2);
   incoming_byte_3 = Serial1.read();
-  
-  /*Serial1.print("I received: ");
-  Serial1.print(incoming_byte_1);
-  Serial1.print(" and ");
-  Serial1.println(incoming_byte_2);*/
+  delay(2);
+  /*Serial.print(incoming_byte_1);
+  Serial.print(incoming_byte_2);
+  Serial.println(incoming_byte_3);*/
+  Serial.print("I received: ");
+  Serial.print(incoming_byte_1);
+  Serial.print(",");
+  Serial.print(incoming_byte_2);
+  Serial.print(",");
+  Serial.println(incoming_byte_3);
 
-  if(incoming_byte_1 == 98){ 
+  if(incoming_byte_1 == 97){
+    // a character received
+    parameter_container.m_master_level.value = (incoming_byte_2 + incoming_byte_3) - 96;
+    
+    // if associated page is the current menu page, redraw the display
+    if(menu_controller.get_currently_selected_menu() == &master_level_menu){
+      menu_controller.set_redraw_display_flag(true);
+    }
+    
+  } else if(incoming_byte_1 == 98){ 
     // b character received
     // *** m_song parameter **
     parameter_container.m_song.value = (incoming_byte_2 + incoming_byte_3) - 96;
-
+    
     // if associated page is the current menu page, redraw the display
     if(menu_controller.get_currently_selected_menu() == &main_menu){
       menu_controller.set_redraw_display_flag(true);
@@ -617,8 +634,10 @@ void serial_parser(){
   } else if(incoming_byte_1 == 99){
     // c character received
     // *** m_guitar parameter ***
+  
     parameter_container.m_guitar.value = (incoming_byte_2 + incoming_byte_3) - 96;
-    
+    //Serial.print("guitar value is: ");
+    //Serial.println(parameter_container.m_guitar.value);
     // if associated page is the current menu page, redraw the display
     if(menu_controller.get_currently_selected_menu() == &guitar_menu){
       menu_controller.set_redraw_display_flag(true);
