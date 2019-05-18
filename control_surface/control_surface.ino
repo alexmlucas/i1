@@ -147,8 +147,8 @@ const char *const connection_fail_menu_txt[] PROGMEM = {sorry, not_connect, the_
 // const char* const my_array[] = a constant pointer to an array of constant chars (Nothing can be changed after declaration, therefore it can sit in program memory)
 
 const char* const mix_levels_param_txt[] PROGMEM = {"0", "0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1"};
-const char* const scales_param_txt[] PROGMEM = {"Major", "Minor", "Blues", "Pent. Major", "Pent. Minor", "Major Chord", "Minor Chord"};
-const char* const root_param_txt[] PROGMEM = {"A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"};
+const char* const scales_param_txt[] PROGMEM = {"Pent. Major", "Pent. Minor", "Blues", "Major Chord", "Minor Chord"};
+const char* const root_param_txt[] PROGMEM = {"E", "F", "F#", "G", "G#", "A", "A#", "B", "C", "C#", "D", "D#"};
 
 // Define a variable to hold the data from the shift register
 byte shift_reg_byte = 0;
