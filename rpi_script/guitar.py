@@ -10,14 +10,17 @@ class Guitar:
 		major_pentatonic_scale = [0, 2, 4, 7, 9, 12]
 		minor_pentatonic_scale = [0, 2, 3, 7, 9, 12]
 		blues_scale = [0, 3, 5, 6, 7, 10]
-		major_chord = [0, 4, 7, 12, 16, 19]
-		minor_chord = [0, 3, 7, 12, 16, 18]
-		self.transposition = 48
+		
+		major_chord = [0, 7, 12, 16, 19, 24]
+		minor_chord = [0, 7, 12, 15, 19, 24]
+		
+		self.transposition_offset = 40 # A standard offset to place the lowest chord in E position
+		self.transposition = [0, 0, 0]
 		
 		self.master_note_container = [major_pentatonic_scale, minor_pentatonic_scale, blues_scale, major_chord, minor_chord]
 		
 		# create a two dimensional array of values 0
-		self.zone_note_container = [[0 for i in range(6)] for i in range(4)]
+		self.zone_note_container = [[0 for i in range(6)] for i in range(3)]
 		
 		for item in self.zone_note_container:
 			print(item)
@@ -54,7 +57,11 @@ class Guitar:
 		# assign the scale/chord from the master note container to the zone note container 
 		self.zone_note_container[zone_index] = self.master_note_container[notes_index]
 		
+	def set_transposition(self, zone_index, transposition_value):
+		self.transposition[zone_index] = transposition_value
+		
 	def play_string(self, zone_index, string_index):
+		print("zone: ", zone_index, "string", string_index)
 		
 		def note_event(self, note):
 			print(note)
@@ -63,7 +70,9 @@ class Guitar:
 			self.fs.noteoff(0, note)
 		
 		# get the note to play
-		note_to_play = self.zone_note_container[zone_index][string_index] + self.transposition
+		note_to_play = self.zone_note_container[zone_index][string_index] + self.transposition_offset + self.transposition[zone_index]
+		
+		
 		# call note_event in a separate thread
 		threading.Thread(target = note_event, args=(self, note_to_play)).start()
 		

@@ -51,7 +51,7 @@ bno_device = None
 # Function to receive RX characteristic changes.
 # this function is passed to the start_nofify method of the yaw characteristic
 def received(data):
-    print('Received: {0}'.format(data))
+    #print('Received: {0}'.format(data))
     
     # get the current zone
     current_zone = parameter_manager.get_song_parameter('l')
