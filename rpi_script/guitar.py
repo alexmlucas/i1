@@ -18,12 +18,9 @@ class Guitar:
 		self.transposition = [0, 0, 0]
 		
 		self.master_note_container = [major_pentatonic_scale, minor_pentatonic_scale, blues_scale, major_chord, minor_chord]
-		
 		# create a two dimensional array of values 0
 		self.zone_note_container = [[0 for i in range(6)] for i in range(3)]
-		
-		for item in self.zone_note_container:
-			print(item)
+		self.note_on_tracker = [None]
 		
 		# intialise fluidsynth
 		self.fs = fluidsynth.Synth()
@@ -67,11 +64,19 @@ class Guitar:
 			print(note)
 			self.fs.noteon(0, note, self.velocity)
 			time.sleep(self.note_length)
-			self.fs.noteoff(0, note)
+			print("before", self.note_on_tracker.count(note))
+			# count if this note has only been triggered once since the note on event, send the note off message
+			if self.note_on_tracker.count(note) == 1:
+				self.fs.noteoff(0, note)
+			# remove the note from the tracker
+			self.note_on_tracker.remove(note)
+			print("after", self.note_on_tracker.count(note))
 		
 		# get the note to play
 		note_to_play = self.zone_note_container[zone_index][string_index] + self.transposition_offset + self.transposition[zone_index]
 		
+		# track the note value
+		self.note_on_tracker.append(note_to_play)
 		
 		# call note_event in a separate thread
 		threading.Thread(target = note_event, args=(self, note_to_play)).start()
