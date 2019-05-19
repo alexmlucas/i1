@@ -57,20 +57,16 @@ class Guitar:
 	def set_transposition(self, zone_index, transposition_value):
 		self.transposition[zone_index] = transposition_value
 		
-	def play_string(self, zone_index, string_index):
-		print("zone: ", zone_index, "string", string_index)
-		
+	def play_string(self, zone_index, string_index):		
 		def note_event(self, note):
 			print(note)
 			self.fs.noteon(0, note, self.velocity)
 			time.sleep(self.note_length)
-			print("before", self.note_on_tracker.count(note))
 			# count if this note has only been triggered once since the note on event, send the note off message
 			if self.note_on_tracker.count(note) == 1:
 				self.fs.noteoff(0, note)
 			# remove the note from the tracker
 			self.note_on_tracker.remove(note)
-			print("after", self.note_on_tracker.count(note))
 		
 		# get the note to play
 		note_to_play = self.zone_note_container[zone_index][string_index] + self.transposition_offset + self.transposition[zone_index]

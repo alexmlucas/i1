@@ -20,6 +20,9 @@ class Parameter_Manager:
 		# Flush inputs and outputs
 		self.control_board.flushInput()
 		self.control_board.flushOutput()
+		
+		# Flag for indicating that bluetooth reconnection has been requested.
+		self.reconnect_wristband_flag = False
 	
 	def midi_value_generator(self, value_to_convert):
 		# convert values between 0 - 10 to vaues between 0 - 127
@@ -220,8 +223,7 @@ class Parameter_Manager:
 			
 			elif incoming_serial[0] is 'm':
 				# Reconnect Request
-				# Local action
-				self.reconnect_wristband(incoming_serial)
+				self.reconnect_wristband_flag = True
 			
 			elif incoming_serial[0] is 'n':
 				# Power
@@ -240,23 +242,6 @@ class Parameter_Manager:
 				# Send the song data
 				self.song_data_requested()
 				
-	def set_master_level(self, incoming_serial):
-		# Slice the string to remove the first two characters and convert to int
-		master_level = int(incoming_serial[1:])
-		print('Master Level = ', master_level)
-
-	def set_guitar_level(self, incoming_serial):
-		# Slice the string to remove the first character and convert to int
-		guitar_level = int(incoming_serial[1:])
-		print('Guitar Level = ', guitar_level)
-		
-	def reconnect_wristband(self, incoming_serial):
-		print('Reconnecting to wristband')
-		
-	def wristband_connection_failure(self):
-		print('Cannot connect')
-		# Send serial message here.
-		
 	def shutdown_device(self, incoming_serial):
 		print('Shutting down')
 		
@@ -456,8 +441,20 @@ class Parameter_Manager:
 				if(parameter_character == cell_string[0]):
 					#... return the value
 					return int(cell_string[2]) + (int(cell_string[1]) * 10)
-					
+	
 	def get_number_from_string(self, string_value):
 		return int(string_value[2]) + (int(string_value[1]) * 10)
 		
+	def tx_wristband_connection_attempt(self):
+		character_to_transmit = 'p00'
+		self.control_board.write(character_to_transmit.encode())
+		
+	def tx_wristband_success(self):
+		character_to_transmit = 'q00'
+		self.control_board.write(character_to_transmit.encode())
+		
+	def tx_wristband_failure(self):
+		character_to_transmit = 'r00'
+		self.control_board.write(character_to_transmit.encode())
 	
+
