@@ -10,37 +10,42 @@ class Guitar:
 		major_pentatonic_scale = [0, 2, 4, 7, 9, 12]
 		minor_pentatonic_scale = [0, 2, 3, 7, 9, 12]
 		blues_scale = [0, 3, 5, 6, 7, 10]
-		major_chord = [0, 4, 7, 12, 16, 19]
-		minor_chord = [0, 3, 7, 12, 16, 18]
-		self.transposition = 48
+		
+		major_chord = [0, 7, 12, 16, 19, 24]
+		minor_chord = [0, 7, 12, 15, 19, 24]
+		
+		self.transposition_offset = 40 # A standard offset to place the lowest chord in E position
+		self.transposition = [0, 0, 0]
 		
 		self.master_note_container = [major_pentatonic_scale, minor_pentatonic_scale, blues_scale, major_chord, minor_chord]
-		
 		# create a two dimensional array of values 0
-		self.zone_note_container = [[0 for i in range(6)] for i in range(4)]
-		
-		for item in self.zone_note_container:
-			print(item)
+		self.zone_note_container = [[0 for i in range(6)] for i in range(3)]
+		self.note_on_tracker = [None]
 		
 		# intialise fluidsynth
 		self.fs = fluidsynth.Synth()
 		self.fs.start(driver="alsa")
 		
 		# set the file path of each soundfont
-		self.guitar_paths = ["/usr/share/sounds/sf2/FT-EGuitarClean-20170222/FT-EGuitarClean.sfz", "/usr/share/sounds/sf2/FT-EGuitarDirect-20161019/FT-EGuitarDirect-20161019.sf2", "/usr/share/sounds/sf2/FT-EGuitarMutedClean-20161202FT-EGuitarMutedClean-20161202.sf2", "/usr/share/sounds/sf2/FluidR3_GM.sf2"]
+		self.guitar_paths = ["/usr/share/sounds/sf2/acoustic_g.sf2", "/usr/share/sounds/sf2/electric_g.sf2", "/usr/share/sounds/sf2/rhodes.sf2", "/usr/share/sounds/sf2/FluidR3_GM.sf2"]
+		
+		#/usr/share/sounds/sf2/FT-EGuitarMutedClean-20161202/FT-EGuitarMutedClean-20161202.sf2
 		
 		#self.guitar_paths = {"test_1", "test_2", "test_3"}
 		
 		# load a soundfont and initialise parameters
-		sfid = self.fs.sfload(self.guitar_paths[guitar_tone_index])		
+		self.sfid = self.fs.sfload(self.guitar_paths[3])		
 		self.velocity = velocity
 		self.note_length = note_length
 
 		# the following is perhaps not needed.
-		self.fs.program_select(0, sfid, 0, 0)
+		self.fs.program_select(0, self.sfid, 0, guitar_tone_index)
 
-	def set_guitar(self, guitar_index):
-		self.fs.sfload(self.guitar_paths[guitar_index])
+	def set_sound_font(self, sound_font_index):
+		#print("Loading: ", self.guitar_paths[sound_font_index])
+		#sfid = self.fs.sfload(self.guitar_paths[sound_font_index])
+		
+		self.fs.program_select(0, self.sfid, 0, sound_font_index+1)
 		
 	def set_level(self, level):
 		self.fs.cc(0, 7, level)
@@ -49,16 +54,26 @@ class Guitar:
 		# assign the scale/chord from the master note container to the zone note container 
 		self.zone_note_container[zone_index] = self.master_note_container[notes_index]
 		
-	def play_string(self, zone_index, string_index):
+	def set_transposition(self, zone_index, transposition_value):
+		self.transposition[zone_index] = transposition_value
 		
+	def play_string(self, zone_index, string_index):		
 		def note_event(self, note):
 			print(note)
 			self.fs.noteon(0, note, self.velocity)
 			time.sleep(self.note_length)
-			self.fs.noteoff(0, note)
+			# count if this note has only been triggered once since the note on event, send the note off message
+			if self.note_on_tracker.count(note) == 1:
+				self.fs.noteoff(0, note)
+			# remove the note from the tracker
+			self.note_on_tracker.remove(note)
 		
 		# get the note to play
-		note_to_play = self.zone_note_container[zone_index][string_index] + self.transposition
+		note_to_play = self.zone_note_container[zone_index][string_index] + self.transposition_offset + self.transposition[zone_index]
+		
+		# track the note value
+		self.note_on_tracker.append(note_to_play)
+		
 		# call note_event in a separate thread
 		threading.Thread(target = note_event, args=(self, note_to_play)).start()
 		

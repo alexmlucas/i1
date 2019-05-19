@@ -7,21 +7,22 @@ class Parameter_Manager:
 		self.port = port
 		self.baud_rate = baud_rate
 		
-		# current song - does this need to be loaded from the song_data text file?
-		# perhaps this can just be changed to get global parameter?
+		# Initalise class variables from saved parameter values
 		self.current_song = self.get_global_parameter('b')
 		self.master_level = self.float_value_generator(self.get_global_parameter('a'))
 		self.backing_level = self.float_value_generator(self.get_song_parameter('e'))
 		self.guitar_level = self.midi_value_generator(self.get_song_parameter('d'))
 		
 		# Intialise serial port
-		self.control_board = serial.Serial(self.port, self.baud_rate, timeout = 0.1)
+		self.control_board = serial.Serial(self.port, 
+		self.baud_rate, timeout = 0.1)
 		
 		# Flush inputs and outputs
 		self.control_board.flushInput()
 		self.control_board.flushOutput()
 		
-	# def intialise_parameters
+		# Flag for indicating that bluetooth reconnection has been requested.
+		self.reconnect_wristband_flag = False
 	
 	def midi_value_generator(self, value_to_convert):
 		# convert values between 0 - 10 to vaues between 0 - 127
@@ -31,10 +32,36 @@ class Parameter_Manager:
 		return value_to_convert / 10
 	
 	def set_song_player(self, song_player):
+		# Create a local reference to the song player.
 		self.song_player = song_player
+		# Now that a reference to the song player is available, set the song...
+		self.song_player.set_song(self.get_global_parameter('b'))
+		# ...and set its level
+		self.song_player.set_level(self.backing_level * self.master_level)
 		
 	def set_guitar(self, guitar):
+		# Create a local reference to the guitar.
 		self.guitar = guitar
+		# Now that a reference to the guitar is available, set its path...
+		self.guitar.set_sound_font(self.get_song_parameter('c'))
+		# ... and its level
+		self.guitar.set_level(int(self.guitar_level * self.master_level))
+		
+		#### Set scales ####
+		# Red scale
+		self.guitar.set_zone_notes(0, self.get_song_parameter('f'))
+		# Green scale
+		self.guitar.set_zone_notes(1, self.get_song_parameter('g'))
+		# Blue scale
+		self.guitar.set_zone_notes(2, self.get_song_parameter('h'))
+		
+		#### Set transpositions ####
+		# Red transposition
+		self.guitar.set_transposition(0, self.get_song_parameter('f'))
+		# Green transposition
+		self.guitar.set_transposition(1, self.get_song_parameter('g'))
+		# Blue transposition
+		self.guitar.set_transposition(2, self.get_song_parameter('h'))
 	
 	def check_incoming(self):
 		# Read data from the serial port
@@ -44,39 +71,56 @@ class Parameter_Manager:
 		self.control_board.flushInput()
 		
 		if incoming_serial:
-			#print(incoming_serial)
+			print(incoming_serial)
 			
 			if incoming_serial[0] is 'a':
 				# Master level (Global Parameter)
-				# convert incoming string to float value 
+				
+				# Convert incoming string to a float value 
 				value_as_float = self.float_value_generator(self.get_number_from_string(incoming_serial))
+				
 				# Set the master level
 				self.master_level = value_as_float
-				
-				# change the level of the song player
+				# Change the level of the song player
 				self.song_player.set_level(self.backing_level * self.master_level)
-				# change the level of the guitar
+				# Change the level of the guitar
 				self.guitar.set_level(int(self.guitar_level * self.master_level))
-				
 				
 				# Write the parameter
 				self.write_global_parameter(incoming_serial)
 				
 			elif incoming_serial[0] is 'b':
 				# Song (Global Parameter)
-				# Local action
-				self.current_song = int(incoming_serial[2])
+				
 				# Write the parameter
 				self.write_global_parameter(incoming_serial)
+				
+				# Update the current song
+				self.current_song = int(incoming_serial[2])
+				
+				# Update local variables
+				self.backing_level = self.float_value_generator(self.get_song_parameter('e'))
+				self.guitar_level = self.midi_value_generator(self.get_song_parameter('d'))
+				
+				# Act on changes to parameter values
+				self.song_player.set_song(self.current_song)
+				self.song_player.set_level(self.backing_level * self.master_level)
+				self.guitar.set_level(int(self.guitar_level * self.master_level))
+				self.guitar.set_sound_font(self.get_song_parameter('c'))
+				self.guitar.set_zone_notes(0, self.get_song_parameter('f'))
+				self.guitar.set_zone_notes(1, self.get_song_parameter('g'))
+				self.guitar.set_zone_notes(2, self.get_song_parameter('h'))
+				self.guitar.set_transposition(0, self.get_song_parameter('f'))
+				self.guitar.set_transposition(1, self.get_song_parameter('g'))
+				self.guitar.set_transposition(2, self.get_song_parameter('h'))
+				
 				# Transmit the song data
 				self.song_data_requested()
-				# Change song_player path to the mp3 file
-				self.song_player.set_song(self.current_song)
 				
 			elif incoming_serial[0] is 'c':
 				# Guitar
-				# Local action
-				self.set_guitar(incoming_serial)
+				# Set the sound font by removing the first two characters from the incoming serial string and converting to int
+				self.guitar.set_sound_font(int(incoming_serial[1:]))
 				# Write the parameter
 				self.write_song_parameter(incoming_serial)
 				
@@ -108,57 +152,78 @@ class Parameter_Manager:
 				
 			elif incoming_serial[0] is 'f':
 				# Red Scale
-				# Local action
-				self.set_red_scale(incoming_serial)
+				
+				# Get the scale value
+				scale_value = int(incoming_serial[2]) + (int(incoming_serial[1]) * 10)
+				# Set the scale
+				self.guitar.set_zone_notes(0, scale_value)
+
 				# Write the parameter
 				self.write_song_parameter(incoming_serial)	
 					
 			elif incoming_serial[0] is 'g':
 				# Green Scale
-				# Local action
-				self.set_green_scale(incoming_serial)
+				
+				# Get the scale value
+				scale_value = int(incoming_serial[2]) + (int(incoming_serial[1]) * 10)
+				# Set the scale
+				self.guitar.set_zone_notes(1, scale_value)
+
 				# Write the parameter
-				self.write_song_parameter(incoming_serial)		
+				self.write_song_parameter(incoming_serial)			
 				
 			elif incoming_serial[0] is 'h':
 				# Blue Scale
-				# Local action
-				self.set_blue_scale(incoming_serial)
+				
+				# Get the scale value
+				scale_value = int(incoming_serial[2]) + (int(incoming_serial[1]) * 10)
+				# Set the scale
+				self.guitar.set_zone_notes(2, scale_value)
+
 				# Write the parameter
 				self.write_song_parameter(incoming_serial)	
 			
 			elif incoming_serial[0] is 'i':
 				# Red Root
-				# Local action
-				self.set_red_root(incoming_serial)
+				
+				# Get the value
+				transposition_value = int(incoming_serial[2]) + (int(incoming_serial[1]) * 10)
+				# Set the scale
+				self.guitar.set_transposition(0, transposition_value)
+
 				# Write the parameter
 				self.write_song_parameter(incoming_serial)	
-			
+
 			elif incoming_serial[0] is 'j':
-				# Blue Root
-				# Local action
-				self.set_blue_root(incoming_serial)
+				# Green Root
+				
+				# Get the value
+				transposition_value = int(incoming_serial[2]) + (int(incoming_serial[1]) * 10)
+				# Set the scale
+				self.guitar.set_transposition(1, transposition_value)
+
 				# Write the parameter
-				self.write_song_parameter(incoming_serial)	
+				self.write_song_parameter(incoming_serial)		
 				
 			elif incoming_serial[0] is 'k':
-				# Green Root
-				# Local action
-				self.set_green_root(incoming_serial)
+				# Blue Root
+				
+				# Get the value
+				transposition_value = int(incoming_serial[2]) + (int(incoming_serial[1]) * 10)
+				# Set the scale
+				self.guitar.set_transposition(2, transposition_value)
+
 				# Write the parameter
-				self.write_song_parameter(incoming_serial)	
+				self.write_song_parameter(incoming_serial)		
 			
 			elif incoming_serial[0] is 'l':
 				# Zone
-				# Local action
-				self.set_zone(incoming_serial)
 				# Write the parameter
 				self.write_song_parameter(incoming_serial)	
 			
 			elif incoming_serial[0] is 'm':
 				# Reconnect Request
-				# Local action
-				self.reconnect_wristband(incoming_serial)
+				self.reconnect_wristband_flag = True
 			
 			elif incoming_serial[0] is 'n':
 				# Power
@@ -177,58 +242,6 @@ class Parameter_Manager:
 				# Send the song data
 				self.song_data_requested()
 				
-	def set_master_level(self, incoming_serial):
-		# Slice the string to remove the first character and convert to int
-		master_level = int(incoming_serial[1:])
-		print('Master Level = ', master_level)
-
-	def set_guitar_level(self, incoming_serial):
-		# Slice the string to remove the first character and convert to int
-		guitar_level = int(incoming_serial[1:])
-		print('Guitar Level = ', guitar_level)
-
-	def set_red_scale(self, incoming_serial):
-		# Slice the string to remove the first character and convert to int
-		red_scale = int(incoming_serial[1:])
-		print('Red Scale = ', red_scale)
-
-	def set_green_scale(self, incoming_serial):
-		# Slice the string to remove the first character and convert to int
-		green_scale = int(incoming_serial[1:])
-		print('Green Scale = ', green_scale)
-
-	def set_blue_scale(self, incoming_serial):
-		# Slice the string to remove the first character and convert to int
-		blue_scale = int(incoming_serial[1:])
-		print('Blue Scale = ', blue_scale)
-
-	def set_red_root(self, incoming_serial):
-		# Slice the string to remove the first character and convert to int
-		red_root = int(incoming_serial[1:])
-		print('Red Root = ', red_root)
-
-	def set_blue_root(self, incoming_serial):
-		# Slice the string to remove the first character and convert to int
-		blue_root = int(incoming_serial[1:])
-		print('Blue Root = ', blue_root)
-		
-	def set_green_root(self, incoming_serial):
-		# Slice the string to remove the first character and convert to int
-		blue_root = int(incoming_serial[1:])
-		print('Green Root = ', blue_root)
-
-	def set_zone(self, incoming_serial):
-		# Slice the string to remove the first character and convert to int
-		zone = int(incoming_serial[1:])
-		print('Zone = ', zone)
-		
-	def reconnect_wristband(self, incoming_serial):
-		print('Reconnecting to wristband')
-		
-	def wristband_connection_failure(self):
-		print('Cannot connect')
-		# Send serial message here.
-		
 	def shutdown_device(self, incoming_serial):
 		print('Shutting down')
 		
@@ -354,8 +367,9 @@ class Parameter_Manager:
 			
 			for row in song_data:
 				byte_array = bytes(row[self.current_song], 'utf-8')
-				#print(byte_array)
-				self.control_board.write(byte_array)
+				byte_array1 = row[self.current_song]				
+				print(byte_array1)
+				self.control_board.write(byte_array1.encode())
 				
 	'''def get_last_selected_song(self):
 		# create a 2 x 1 array
@@ -427,8 +441,20 @@ class Parameter_Manager:
 				if(parameter_character == cell_string[0]):
 					#... return the value
 					return int(cell_string[2]) + (int(cell_string[1]) * 10)
-					
+	
 	def get_number_from_string(self, string_value):
 		return int(string_value[2]) + (int(string_value[1]) * 10)
 		
+	def tx_wristband_connection_attempt(self):
+		character_to_transmit = 'p00'
+		self.control_board.write(character_to_transmit.encode())
+		
+	def tx_wristband_success(self):
+		character_to_transmit = 'q00'
+		self.control_board.write(character_to_transmit.encode())
+		
+	def tx_wristband_failure(self):
+		character_to_transmit = 'r00'
+		self.control_board.write(character_to_transmit.encode())
 	
+
