@@ -42,11 +42,7 @@ guitar.set_zone_notes(0, 1)
 guitar.set_zone_notes(0, 2)
 guitar.set_zone_notes(0, 3)
 
-yaw = None
-initialisation_flag = True
 
-# initialise the BNO device to NULL
-bno_device = None
 
 # Function to receive RX characteristic changes.
 # this function is passed to the start_nofify method of the yaw characteristic
@@ -62,13 +58,7 @@ def received(data):
 def get_bno_device(incoming_adapter, incoming_parameter_manager):
     # Send message to control surface here
     incoming_parameter_manager.tx_wristband_connection_attempt()
-       
-    # get a global reference to the bno_device
-    global bno_device
-
-    # start from a fresh state - disconnect all bluetooth UART devices.
-    UART.disconnect_devices()
-    
+ 
     # start scanning with the bluetooth adapter
     incoming_adapter.start_scan()
     
@@ -78,27 +68,16 @@ def get_bno_device(incoming_adapter, incoming_parameter_manager):
     # intialise a set to contain known UARTs
     known_uart_devices = set()
     
-    # keep track of whether or not the connection was successful
-    connection_success = False
-    
-    # keep track of whether or not subscription to the yaw characteristic was successful
-    subscription_success = False
-    
     print('Searching for UART devices...')
-    
     
     while bluetooth_counter <= BLUETOOTH_CONNECTION_TIMER:
         # create a set of all UART devices currently visable
-        print("Creating a set of all UART devices currently visable")
         found_uart_devices = set(UART.find_devices())
         # identify any new devices by subtracting previously known devices from those just found
-        print("Identifying new devices")
         new_uart_devices = found_uart_devices - known_uart_devices
         # add any new devices to the known device list
-        print("Adding new devices to the list")
         known_uart_devices.update(new_uart_devices)
         # pause for one second prior to the next interation of the loop
-        print("Pausing for one second")
         time.sleep(1)
         print("{} seconds elasped".format(bluetooth_counter))
         bluetooth_counter += 1
@@ -110,8 +89,19 @@ def get_bno_device(incoming_adapter, incoming_parameter_manager):
     for device in known_uart_devices:
         if device.name == 'BNO':
             # the bno device has been found, now connect to it.
+            return device
+            
+'''            
+            
             try:
-                device.connect()
+                device.disconnect(2)
+            except:
+                print("couldn't disconnect")
+            
+            time.sleep(1)
+            
+            try:
+                device.connect(2)
                 connection_success = True
                 # assign the bno_device
                 bno_device = device
@@ -119,14 +109,20 @@ def get_bno_device(incoming_adapter, incoming_parameter_manager):
                 print("I could not connect to the BNO device")
                 
             if connection_success == True:
+                
+                # get the yaw characteristic from the bno device
+                yaw = get_yaw_characteristic(bno_device)
+                
                 try:
-                    # get the yaw characteristic from the bno device
-                    yaw = get_yaw_characteristic(bno_device)
-                    # subscribe to changes in yaw charcteristic
-                    yaw.start_notify(received)
-                    subscription_success = True
+                    # try to unsubscribe first, just in case a subscription is currently in place.
+                    yaw.stop_notify()
                 except:
-                    print("I could not subscribe to the BNO Yaw characteristic")
+                    print("not currently notifying")
+                
+                # subscribe to changes in yaw charcteristic
+                yaw.start_notify(received)
+                subscription_success = True
+                
                     
             if connection_success == True and subscription_success == True:
                 print("Sending success message to control surface")
@@ -134,6 +130,8 @@ def get_bno_device(incoming_adapter, incoming_parameter_manager):
             else:
                 print("Sending failure message to control surface")
                 incoming_parameter_manager.tx_wristband_failure()
+
+'''
 
 def get_yaw_characteristic(incoming_device):
     print(incoming_device)
@@ -147,30 +145,78 @@ def get_yaw_characteristic(incoming_device):
     return yaw
 
 def main():
-    # Clear any cached data.
-    ble.clear_cached_data()
-    
-    # Get the first available BLE network adapter
-    adapter = ble.get_default_adapter()
-    
-    # power on the bluetooth adapter
-    adapter.power_on()
-    
-    # get the bno device
-    get_bno_device(adapter, parameter_manager)
-   
-    print("entering the main loop")
+    initialisation_flag = True
+    bno_device = None
+    yaw = None
+    yaw_subscription_success = False
     
     while True:
-        # This is the main loop
-        # Control surface should initialise automatically when in this loop.
-        parameter_manager.check_incoming()
         
-        if parameter_manager.reconnect_wristband_flag == True:
-            print("flag success")
+        while initialisation_flag == True:
+            print("initialising")
+            # Clear any cached data.
+            ble.clear_cached_data()
+            # Get the first available BLE network adapter
+            adapter = ble.get_default_adapter()
+            # power on the bluetooth adapter
+            adapter.power_on()
+            initialisation_flag = False
+        
+        while parameter_manager.reconnect_wristband_flag == True:
+            
+            '''if yaw is not None:
+                try:
+                    yaw.stop_notify()
+                    print("stopping notifications")
+                except:
+                    print("can't stop notifications")
+            
+            if bno_device is not None:
+                if bno_device.is_connected:
+                    print("disconnecting bno")
+                    bno_device.disconnect()'''
+             
+            '''print("power off")
+            adapter.power_off()
+            time.sleep(4)
+            
+            # Clear any cached data.
+            print("ble initialize")
+            ble.disconnect_devices()'''
+            
+            # start from a fresh state - disconnect all bluetooth UART devices.
+            UART.disconnect_devices()
+                    
             # get the bno device
-            get_bno_device(adapter, parameter_manager)
+            bno_device = get_bno_device(adapter, parameter_manager)
+            
+            # connect to the BNO device
+            if bno_device is not None:
+                print("connecting to BNO device.")
+                bno_device.connect()
+                
+                # get the yaw characteristic
+                yaw = get_yaw_characteristic(bno_device)
+                
+                if yaw_subscription_success == False:
+                    try:
+                        # subscribe to changes in yaw charcteristic
+                        yaw.start_notify(received)
+                        yaw_subscription_success = True
+                    except:
+                        print("couldn't subscribe")
+            
+            print("entering the main loop")
             parameter_manager.reconnect_wristband_flag = False
+            run_main_loop_flag = True
+            
+        while run_main_loop_flag == True:
+            # This is the main loop
+            # Control surface should initialise automatically when in this loop.
+            parameter_manager.check_incoming()
+            
+            if parameter_manager.reconnect_wristband_flag == True:
+                run_main_loop_flag = False
 
 # Initialize the BLE system.  MUST be called before other BLE calls!
 ble.initialize()

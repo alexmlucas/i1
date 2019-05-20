@@ -20,9 +20,10 @@ class Parameter_Manager:
 		# Flush inputs and outputs
 		self.control_board.flushInput()
 		self.control_board.flushOutput()
-		
+		 
 		# Flag for indicating that bluetooth reconnection has been requested.
-		self.reconnect_wristband_flag = False
+		# Initialise with a value of True to ensure wristband connection is attempted on program start.
+		self.reconnect_wristband_flag = True
 	
 	def midi_value_generator(self, value_to_convert):
 		# convert values between 0 - 10 to vaues between 0 - 127
