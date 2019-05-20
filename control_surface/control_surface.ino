@@ -147,8 +147,8 @@ const char *const connection_fail_menu_txt[] PROGMEM = {sorry, not_connect, the_
 // const char* const my_array[] = a constant pointer to an array of constant chars (Nothing can be changed after declaration, therefore it can sit in program memory)
 
 const char* const mix_levels_param_txt[] PROGMEM = {"0", "0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1"};
-const char* const scales_param_txt[] PROGMEM = {"Major", "Minor", "Blues", "Pent. Major", "Pent. Minor", "Major Chord", "Minor Chord"};
-const char* const root_param_txt[] PROGMEM = {"A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"};
+const char* const scales_param_txt[] PROGMEM = {"Pent. Major", "Pent. Minor", "Blues", "Major Chord", "Minor Chord"};
+const char* const root_param_txt[] PROGMEM = {"E", "F", "F#", "G", "G#", "A", "A#", "B", "C", "C#", "D", "D#"};
 
 // Define a variable to hold the data from the shift register
 byte shift_reg_byte = 0;
@@ -207,6 +207,7 @@ Menu_Page *p_mix_levels_sub_menus[] = {&guitar_level_menu, &backing_level_menu, 
 
 Menu_Page *p_current_menu_page;                                           // Create a pointer to the currently selected menu page.
 Menu_Page *p_previous_menu_page;                                          // Create a pointer to the previously selected menu page.
+Menu_Page *p_wristband_return_page;                                       // Creat a pointer to the page to retrn to after wristabnd conneciton messages have been displayed.
 
 // *** Create Simple_Button instances ***
 Control_Button reconnect_button(RECONNECT_BTN_PIN, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_reconnect, 0);
@@ -319,7 +320,7 @@ void setup() {
   master_level_menu.set_and_send_parameter_struct(&parameter_container.m_master_level);
 
   menu_controller.set_currently_selected_menu(&main_menu);                // Setting the main_menu as the Menu_Page currently selected
-
+ 
   // *** Build the menu system ***
   main_menu.set_sub_menus(p_main_sub_menus);                              // Add sub Menu_Page(s) to Menu_Page(s)
   zone_menu.set_sub_menus(p_zone_sub_menus);
@@ -393,6 +394,16 @@ void setup() {
   Serial.begin(9600);                          // Serial for debugging.
   delay(500);                                  // Wait for the serial stream to get going.
 
+  Serial.print("Address of main menu is: ");
+  Serial.println((int)&main_menu); 
+
+  Serial.print("Address of wristband connection menu is: ");
+  Serial.println((int)&reconnect_menu); 
+
+  Serial.print("Address of wristband failure menu is: ");
+  Serial.println((int)&connection_fail_menu); 
+
+
   bool data_received_flag = false;
   
   while(data_received_flag == false){         // Pause until serial data is available.
@@ -428,10 +439,14 @@ void setup() {
 void loop() {
   
   if(splash_page_loaded){
+    Serial.println("Splash page is loaded");
     current_time_ms = millis();
 
     if((current_time_ms - time_splash_loaded_ms) > splash_display_time){
-      menu_controller.set_currently_selected_menu(p_previous_menu_page);
+      Serial.print("Splash time exceeded, setting menu to: ");
+      Serial.println((int)p_wristband_return_page);
+      // This method will also set the redraw display flag.
+      menu_controller.set_currently_selected_menu(p_wristband_return_page);
       splash_page_loaded = false;
     }
   }
@@ -597,11 +612,11 @@ void access_switch_pressed(Single_Led *led, Parameter_Container *parameter_conta
 
 void serial_parser(){
   incoming_byte_1 = Serial1.read();
-  delay(2);
+  delay(5);
   incoming_byte_2 = Serial1.read();
-  delay(2);
+  delay(5);
   incoming_byte_3 = Serial1.read();
-  delay(2);
+  delay(5);
   /*Serial.print(incoming_byte_1);
   Serial.print(incoming_byte_2);
   Serial.println(incoming_byte_3);*/
@@ -732,14 +747,21 @@ void serial_parser(){
     }
   } else if(incoming_byte_1 == 112){
     // Attempting to connect to wristband
-    p_previous_menu_page = (Menu_Page*)menu_controller.get_currently_selected_menu();       // Store a reference to the currently displayed menu.
+    Serial.println("attempting connection");
+    p_wristband_return_page = (Menu_Page*)menu_controller.get_currently_selected_menu();       // Store a reference to the currently displayed menu.
+    Serial.print("WB return menu address stored is: ");
+    Serial.println((int)p_wristband_return_page); 
     menu_controller.set_currently_selected_menu(&reconnect_menu);                           // Switch to splash menu.
      
   } else if(incoming_byte_1 == 113){
     // Successfully connected to wristband.
-    menu_controller.set_currently_selected_menu(p_previous_menu_page);
+    Serial.println("connection successful");
+    Serial.print("WB return menu address recalled is: ");
+    Serial.println((int)p_wristband_return_page);
+    menu_controller.set_currently_selected_menu(p_wristband_return_page);
     wristband_leds.set_flashing(false);
     wristband_leds.set_colour(RG_GREEN);
+  
     
   } else if(incoming_byte_1 == 114){
      menu_controller.set_currently_selected_menu(&connection_fail_menu);
