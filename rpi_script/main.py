@@ -42,8 +42,6 @@ guitar.set_zone_notes(0, 1)
 guitar.set_zone_notes(0, 2)
 guitar.set_zone_notes(0, 3)
 
-
-
 # Function to receive RX characteristic changes.
 # this function is passed to the start_nofify method of the yaw characteristic
 def received(data):
@@ -55,10 +53,7 @@ def received(data):
     if data != "-1.":
         guitar.play_string(current_zone, int(float(data)))
     
-def get_bno_device(incoming_adapter, incoming_parameter_manager):
-    # Send message to control surface here
-    incoming_parameter_manager.tx_wristband_connection_attempt()
- 
+def get_bno_device(incoming_adapter):
     # start scanning with the bluetooth adapter
     incoming_adapter.start_scan()
     
@@ -90,48 +85,6 @@ def get_bno_device(incoming_adapter, incoming_parameter_manager):
         if device.name == 'BNO':
             # the bno device has been found, now connect to it.
             return device
-            
-'''            
-            
-            try:
-                device.disconnect(2)
-            except:
-                print("couldn't disconnect")
-            
-            time.sleep(1)
-            
-            try:
-                device.connect(2)
-                connection_success = True
-                # assign the bno_device
-                bno_device = device
-            except:
-                print("I could not connect to the BNO device")
-                
-            if connection_success == True:
-                
-                # get the yaw characteristic from the bno device
-                yaw = get_yaw_characteristic(bno_device)
-                
-                try:
-                    # try to unsubscribe first, just in case a subscription is currently in place.
-                    yaw.stop_notify()
-                except:
-                    print("not currently notifying")
-                
-                # subscribe to changes in yaw charcteristic
-                yaw.start_notify(received)
-                subscription_success = True
-                
-                    
-            if connection_success == True and subscription_success == True:
-                print("Sending success message to control surface")
-                incoming_parameter_manager.tx_wristband_success()
-            else:
-                print("Sending failure message to control surface")
-                incoming_parameter_manager.tx_wristband_failure()
-
-'''
 
 def get_yaw_characteristic(incoming_device):
     print(incoming_device)
@@ -151,7 +104,6 @@ def main():
     yaw_subscription_success = False
     
     while True:
-        
         while initialisation_flag == True:
             print("initialising")
             # Clear any cached data.
@@ -163,32 +115,14 @@ def main():
             initialisation_flag = False
         
         while parameter_manager.reconnect_wristband_flag == True:
-            
-            '''if yaw is not None:
-                try:
-                    yaw.stop_notify()
-                    print("stopping notifications")
-                except:
-                    print("can't stop notifications")
-            
-            if bno_device is not None:
-                if bno_device.is_connected:
-                    print("disconnecting bno")
-                    bno_device.disconnect()'''
-             
-            '''print("power off")
-            adapter.power_off()
-            time.sleep(4)
-            
-            # Clear any cached data.
-            print("ble initialize")
-            ble.disconnect_devices()'''
-            
             # start from a fresh state - disconnect all bluetooth UART devices.
             UART.disconnect_devices()
-                    
+            
+            # Send message to control surface here
+            parameter_manager.tx_wristband_connection_attempt()
+            
             # get the bno device
-            bno_device = get_bno_device(adapter, parameter_manager)
+            bno_device = get_bno_device(adapter)
             
             # connect to the BNO device
             if bno_device is not None:
@@ -207,6 +141,12 @@ def main():
                         print("couldn't subscribe")
             
             print("entering the main loop")
+            
+            if yaw_subscription_success == True:
+                parameter_manager.tx_wristband_success()
+            else:
+                parameter_manager.tx_wristband_failure()
+            
             parameter_manager.reconnect_wristband_flag = False
             run_main_loop_flag = True
             

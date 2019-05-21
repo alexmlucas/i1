@@ -6,6 +6,8 @@ class Parameter_Manager:
 	def __init__(self, port, baud_rate):
 		self.port = port
 		self.baud_rate = baud_rate
+		self.song_data_path = "/home/pi/i1/rpi_script/song_data.txt"
+		self.global_data_path = "/home/pi/i1/rpi_script/global_data.txt"
 		
 		# Initalise class variables from saved parameter values
 		self.current_song = self.get_global_parameter('b')
@@ -260,7 +262,7 @@ class Parameter_Manager:
 			for row in song_data:
 				print(row[current_song])'''
 		
-		with open('song_data.txt') as csv_file:
+		with open(self.song_data_path) as csv_file:
 			song_data_reader = csv.reader(csv_file, delimiter = ',')
 			# Convert the song data to a list so that we can easily work with it.
 			song_data_as_list = list(song_data_reader)
@@ -285,7 +287,7 @@ class Parameter_Manager:
 				song_data_as_list[index][self.current_song] = incoming_serial
 			
 				# and write the data to the song data text file.
-				with open('song_data.txt', mode='w') as csv_file:
+				with open(self.song_data_path, mode='w') as csv_file:
 					song_data_writer = csv.writer(csv_file, delimiter = ',')
 					song_data_writer.writerows(song_data_as_list)
 			
@@ -309,7 +311,7 @@ class Parameter_Manager:
 			global_data_as_list = list(global_data_reader)
 			print(global_data_as_list)'''
 		
-		with open('global_data.txt') as csv_file:
+		with open(self.global_data_path) as csv_file:
 			global_data_reader = csv.reader(csv_file, delimiter = ',')
 			# Convert the global data to a list so that we can easily work with it.
 			global_data_as_list = list(global_data_reader)
@@ -337,7 +339,7 @@ class Parameter_Manager:
 				global_data_as_list[row_index][cell_index] = incoming_serial
 				
 			# and write the data to the song data text file.	
-			with open('global_data.txt', mode='w') as csv_file:
+			with open(self.global_data_path, mode='w') as csv_file:
 				global_data_writer = csv.writer(csv_file, delimiter = ',')
 				global_data_writer.writerows(global_data_as_list)
 			
@@ -348,7 +350,7 @@ class Parameter_Manager:
 				print(global_data_as_list)'''
 	
 	def global_data_requested(self):
-		with open('global_data.txt') as csv_file:
+		with open(self.global_data_path) as csv_file:
 			global_data = csv.reader(csv_file, delimiter = ',')
 			
 			# Nasty hack to get global data sent.
@@ -363,7 +365,7 @@ class Parameter_Manager:
 	
 	
 	def song_data_requested(self):
-		with open('song_data.txt') as csv_file:
+		with open(self.song_data_path) as csv_file:
 			song_data = csv.reader(csv_file, delimiter = ',')
 			
 			for row in song_data:
@@ -396,7 +398,7 @@ class Parameter_Manager:
 		w, h = 2, 1;
 		global_data_as_list = [[0 for x in range(w)] for y in range(h)] 
 	
-		with open('global_data.txt') as csv_file:
+		with open(self.global_data_path) as csv_file:
 			global_data_reader = csv.reader(csv_file, delimiter = ',')
 			
 			global_data_as_list = list(global_data_reader)
@@ -425,7 +427,7 @@ class Parameter_Manager:
 			for row in song_data:
 				print(row[current_song])'''
 		
-		with open('song_data.txt') as csv_file:
+		with open(self.song_data_path) as csv_file:
 			song_data_reader = csv.reader(csv_file, delimiter = ',')
 			# Convert the song data to a list so that we can easily work with it.
 			song_data_as_list = list(song_data_reader)
