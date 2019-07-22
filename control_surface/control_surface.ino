@@ -36,19 +36,19 @@ Adafruit_SSD1306 display(OLED_RESET);
 #define ENCODER_PIN_B 6
 
 // Define the button/switch pins
-#define RECONNECT_BTN_PIN 20
-#define POWER_BTN_PIN 14
 #define ACCESS_SWT_PIN 11
+#define PLAY_BTN_PIN 20
+#define STOP_BTN_PIN 14
+#define BACK_BTN_PIN 13
+#define ENTER_BTN_PIN 12
 
 // Define button bits
-#define PLAY_BTN_BIT 0
-#define STOP_BTN_BIT 1
+#define RECONNECT_BTN_BIT 0
+#define POWER_BTN_BIT 1
 #define SONG_1_BTN_BIT 2
 #define SONG_2_BTN_BIT 3
 #define SONG_3_BTN_BIT 4
 #define SONG_4_BTN_BIT 5
-#define BACK_BTN_BIT 6
-#define ENTER_BTN_BIT 7
 
 // Define the shift register pins.
 #define SHIFT_REG_LATCH 8
@@ -210,20 +210,19 @@ Menu_Page *p_previous_menu_page;                                          // Cre
 Menu_Page *p_wristband_return_page;                                       // Creat a pointer to the page to retrn to after wristabnd conneciton messages have been displayed.
 
 // *** Create Simple_Button instances ***
-Control_Button reconnect_button(RECONNECT_BTN_PIN, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_reconnect, 0);
-Control_Button power_button(POWER_BTN_PIN, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_power, 0);
 Control_Button access_switch(ACCESS_SWT_PIN, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_zone, 0);
+Control_Button play_button(PLAY_BTN_PIN, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_play, 1);
+Control_Button stop_button(STOP_BTN_PIN, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_play, 0);
+Menu_Button back_button(BACK_BTN_PIN, DEBOUNCE_TIME, &menu_controller);
+Menu_Button enter_button(ENTER_BTN_PIN, DEBOUNCE_TIME, &menu_controller);
 
 // *** Create Shift_Register_Button instances ***
-Shift_Register_Control_Button play_button(PLAY_BTN_BIT, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_play, 1);
-Shift_Register_Control_Button stop_button(STOP_BTN_BIT, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_play, 0);
+Shift_Register_Control_Button reconnect_button(RECONNECT_BTN_BIT, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_reconnect, 0);
+Shift_Register_Control_Button power_button(POWER_BTN_BIT, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_power, 0);
 Shift_Register_Control_Button song_1_button(SONG_1_BTN_BIT, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_song, 0);
 Shift_Register_Control_Button song_2_button(SONG_2_BTN_BIT, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_song, 1);
 Shift_Register_Control_Button song_3_button(SONG_3_BTN_BIT, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_song, 2);
 Shift_Register_Control_Button song_4_button(SONG_4_BTN_BIT, DEBOUNCE_TIME, &menu_controller, &parameter_container, &parameter_container.m_song, 3);
-
-Shift_Register_Menu_Button back_button(BACK_BTN_BIT, DEBOUNCE_TIME, &menu_controller);
-Shift_Register_Menu_Button enter_button(ENTER_BTN_BIT, DEBOUNCE_TIME, &menu_controller);
 
 // *** Create Led instances ***
 int zone_led_pins[] = {ZN_LED_R, ZN_LED_G, ZN_LED_B};
@@ -474,21 +473,20 @@ void loop() {
   shift_reg_byte = shift_in(SHIFT_REG_DATA, SHIFT_REG_CLOCK);
 
   // Process the shift register buttons
-  play_button.check_button_pressed(shift_reg_byte);
-  stop_button.check_button_pressed(shift_reg_byte);
+  reconnect_button.check_button_pressed(shift_reg_byte);
+  power_button.check_button_pressed(shift_reg_byte);
   song_1_button.check_button_pressed(shift_reg_byte);
   song_2_button.check_button_pressed(shift_reg_byte);
   song_3_button.check_button_pressed(shift_reg_byte);
   song_4_button.check_button_pressed(shift_reg_byte);
-  back_button.check_button_pressed(shift_reg_byte);
-  
-  enter_button.check_button_pressed(shift_reg_byte);
   
   // Process the buttons connected directly to the microcontroller
-  reconnect_button.check_button_pressed();
-  power_button.check_button_pressed();
   access_switch.check_button_pressed();
-
+  play_button.check_button_pressed();
+  stop_button.check_button_pressed();
+  back_button.check_button_pressed();
+  enter_button.check_button_pressed();
+  
   // Process the leds that need to flash.
   play_led.update_flashing();
   wristband_leds.update_flashing();
