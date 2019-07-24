@@ -6,7 +6,7 @@
 <setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="0.5" unitdist="mm" unit="mm" style="lines" multiple="1" display="no" altdistance="0.5" altunitdist="mil" altunit="mm"/>
+<grid distance="1" unitdist="mm" unit="mm" style="lines" multiple="1" display="no" altdistance="0.5" altunitdist="mil" altunit="mil"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
 <layer number="2" name="Route2" color="16" fill="1" visible="no" active="no"/>
@@ -52,7 +52,7 @@
 <layer number="42" name="bRestrict" color="1" fill="10" visible="yes" active="yes"/>
 <layer number="43" name="vRestrict" color="2" fill="10" visible="yes" active="yes"/>
 <layer number="44" name="Drills" color="7" fill="1" visible="no" active="yes"/>
-<layer number="45" name="Holes" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="45" name="Holes" color="7" fill="1" visible="no" active="yes"/>
 <layer number="46" name="Milling" color="3" fill="1" visible="no" active="yes"/>
 <layer number="47" name="Measures" color="7" fill="1" visible="no" active="yes"/>
 <layer number="48" name="Document" color="7" fill="1" visible="yes" active="yes"/>
@@ -173,10 +173,6 @@
 <wire x1="28.4001" y1="67.2794" x2="179.4453" y2="67.2921" width="0.1524" layer="20"/>
 <wire x1="179.4453" y1="67.2921" x2="179.4469" y2="-0.978" width="0.1524" layer="20"/>
 <wire x1="179.4469" y1="-0.978" x2="28.3985" y2="-0.9828" width="0.1524" layer="20"/>
-<hole x="31" y="65" drill="1"/>
-<hole x="31" y="2" drill="1"/>
-<hole x="177" y="2" drill="1"/>
-<hole x="177" y="65" drill="1"/>
 </plain>
 <libraries>
 <library name="SparkFun-Capacitors" urn="urn:adsk.eagle:library:510">
@@ -1650,10 +1646,10 @@ design rules under a new name.</description>
 <wire x1="51.0996" y1="14" x2="58.1137" y2="6.9859" width="0.8128" layer="16"/>
 <wire x1="58.1137" y1="6.9859" x2="75.7641" y2="6.9859" width="0.8128" layer="16"/>
 <polygon width="0.15" layer="16">
-<vertex x="28.5" y="67.5"/>
-<vertex x="28.5" y="-1"/>
-<vertex x="179.5" y="-1"/>
-<vertex x="179.5" y="67.5"/>
+<vertex x="28" y="67"/>
+<vertex x="28" y="-1"/>
+<vertex x="179" y="-1"/>
+<vertex x="179" y="67"/>
 </polygon>
 </signal>
 <signal name="N$2">
