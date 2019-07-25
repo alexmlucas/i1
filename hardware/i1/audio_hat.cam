@@ -18,11 +18,11 @@
             "outputs": [
                 {
                     "advanced_options": {
-                        "mirror": true,
+                        "mirror": false,
                         "offset_x": 0,
                         "offset_y": 0,
-                        "rotate": true,
-                        "upside_down": true
+                        "rotate": false,
+                        "upside_down": false
                     },
                     "drills": {
                         "NPTH": true,
@@ -76,11 +76,11 @@
                 },
                 {
                     "advanced_options": {
-                        "mirror": true,
+                        "mirror": false,
                         "offset_x": 0,
                         "offset_y": 0,
-                        "rotate": true,
-                        "upside_down": true
+                        "rotate": false,
+                        "upside_down": false
                     },
                     "board_outline": false,
                     "config": {
@@ -268,7 +268,7 @@
             ]
         }
     ],
-    "timestamp": "2019-07-24T10:34:08",
+    "timestamp": "2019-07-25T11:39:15",
     "type": "EAGLE CAM job",
     "units": "imperial",
     "version": "9.2.0"

@@ -246,12 +246,12 @@
 <pad name="5V_B" x="8.5" y="-2.46" drill="0.6" diameter="1.9304"/>
 <hole x="3.5" y="-3.5" drill="1"/>
 <wire x1="0" y1="0" x2="65" y2="0" width="0.127" layer="21"/>
-<wire x1="0" y1="-52.5" x2="65" y2="-52.5" width="0.127" layer="21"/>
+<wire x1="0" y1="-56" x2="65" y2="-56" width="0.127" layer="21"/>
 <hole x="61.5" y="-3.5" drill="1"/>
-<hole x="3.5" y="-49" drill="1"/>
-<hole x="61.5" y="-49" drill="1"/>
-<wire x1="0" y1="0" x2="0" y2="-52.5" width="0.127" layer="21"/>
-<wire x1="65" y1="0" x2="65" y2="-52.5" width="0.127" layer="21"/>
+<hole x="3.5" y="-52.5" drill="1"/>
+<hole x="61.5" y="-52.5" drill="1"/>
+<wire x1="0" y1="0" x2="0" y2="-56" width="0.127" layer="21"/>
+<wire x1="65" y1="0" x2="65" y2="-56" width="0.127" layer="21"/>
 </package>
 </packages>
 <symbols>
