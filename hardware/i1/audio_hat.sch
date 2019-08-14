@@ -3225,13 +3225,19 @@ CONN_06
 <wire x1="76.2" y1="58.42" x2="76.2" y2="48.26" width="0.1524" layer="91"/>
 <wire x1="76.2" y1="48.26" x2="25.4" y2="48.26" width="0.1524" layer="91"/>
 <wire x1="25.4" y1="48.26" x2="25.4" y2="104.14" width="0.1524" layer="91"/>
-<wire x1="25.4" y1="104.14" x2="-20.32" y2="104.14" width="0.1524" layer="91"/>
-<wire x1="-20.32" y1="104.14" x2="-20.32" y2="99.06" width="0.1524" layer="91"/>
+<wire x1="25.4" y1="104.14" x2="-17.78" y2="104.14" width="0.1524" layer="91"/>
 <pinref part="RPI_3A+1" gate="G$1" pin="3.3V_A"/>
+<wire x1="-17.78" y1="104.14" x2="-20.32" y2="104.14" width="0.1524" layer="91"/>
+<wire x1="-20.32" y1="104.14" x2="-20.32" y2="99.06" width="0.1524" layer="91"/>
 <wire x1="-20.32" y1="99.06" x2="-12.7" y2="99.06" width="0.1524" layer="91"/>
 <pinref part="POWER" gate="G$1" pin="2"/>
 <wire x1="-22.86" y1="99.06" x2="-20.32" y2="99.06" width="0.1524" layer="91"/>
 <junction x="-20.32" y="99.06"/>
+<pinref part="MAX1" gate="G$1" pin="VDD"/>
+<wire x1="111.76" y1="78.74" x2="111.76" y2="111.76" width="0.1524" layer="91"/>
+<wire x1="111.76" y1="111.76" x2="-17.78" y2="111.76" width="0.1524" layer="91"/>
+<wire x1="-17.78" y1="111.76" x2="-17.78" y2="104.14" width="0.1524" layer="91"/>
+<junction x="-17.78" y="104.14"/>
 </segment>
 </net>
 <net name="N$4" class="0">
@@ -3326,20 +3332,6 @@ CONN_06
 <wire x1="27.94" y1="88.9" x2="17.78" y2="88.9" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="GND" class="0">
-<segment>
-<wire x1="-17.78" y1="45.72" x2="78.74" y2="45.72" width="0.1524" layer="91"/>
-<wire x1="78.74" y1="45.72" x2="78.74" y2="63.5" width="0.1524" layer="91"/>
-<pinref part="UDA1" gate="G$1" pin="GND"/>
-<wire x1="78.74" y1="63.5" x2="68.58" y2="63.5" width="0.1524" layer="91"/>
-<wire x1="-17.78" y1="45.72" x2="-17.78" y2="50.8" width="0.1524" layer="91"/>
-<pinref part="RPI_3A+1" gate="G$1" pin="GND_C"/>
-<wire x1="-17.78" y1="50.8" x2="-12.7" y2="50.8" width="0.1524" layer="91"/>
-<wire x1="-17.78" y1="50.8" x2="-22.86" y2="50.8" width="0.1524" layer="91"/>
-<junction x="-17.78" y="50.8"/>
-<label x="-27.94" y="50.8" size="1.778" layer="95"/>
-</segment>
-</net>
 <net name="N$2" class="0">
 <segment>
 <pinref part="POWER" gate="G$1" pin="1"/>
@@ -3347,6 +3339,12 @@ CONN_06
 <wire x1="-20.32" y1="96.52" x2="-20.32" y2="88.9" width="0.1524" layer="91"/>
 <pinref part="RPI_3A+1" gate="G$1" pin="GND_A"/>
 <wire x1="-20.32" y1="88.9" x2="-12.7" y2="88.9" width="0.1524" layer="91"/>
+<pinref part="UDA1" gate="G$1" pin="GND"/>
+<wire x1="68.58" y1="63.5" x2="78.74" y2="63.5" width="0.1524" layer="91"/>
+<wire x1="78.74" y1="63.5" x2="78.74" y2="106.68" width="0.1524" layer="91"/>
+<wire x1="78.74" y1="106.68" x2="-22.86" y2="106.68" width="0.1524" layer="91"/>
+<wire x1="-22.86" y1="106.68" x2="-22.86" y2="96.52" width="0.1524" layer="91"/>
+<junction x="-22.86" y="96.52"/>
 </segment>
 </net>
 </nets>

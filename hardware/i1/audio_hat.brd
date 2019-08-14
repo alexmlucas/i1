@@ -566,41 +566,36 @@ design rules under a new name.</description>
 <signal name="N$1">
 <contactref element="UDA1" pad="WSEL"/>
 <contactref element="RPI_3A+1" pad="19"/>
-<wire x1="59.76" y1="86.25" x2="54.91" y2="81.4" width="0.8128" layer="1"/>
-<wire x1="54.91" y1="81.4" x2="33.2" y2="81.4" width="0.8128" layer="1"/>
-<via x="33.2" y="81.4" extent="1-16" drill="0.55" diameter="1.9"/>
-<wire x1="33.2" y1="81.4" x2="33.15" y2="81.35" width="0.8128" layer="16"/>
-<wire x1="33.15" y1="81.35" x2="33.15" y2="71.85" width="0.8128" layer="16"/>
-<wire x1="33.15" y1="71.85" x2="32.96" y2="71.66" width="0.8128" layer="16"/>
+<wire x1="32.96" y1="71.66" x2="43.3" y2="82" width="0.8128" layer="16"/>
+<wire x1="43.3" y1="82" x2="56" y2="82" width="0.8128" layer="16"/>
+<wire x1="56" y1="82" x2="59.76" y2="85.76" width="0.8128" layer="16"/>
+<wire x1="59.76" y1="85.76" x2="59.76" y2="86.25" width="0.8128" layer="16"/>
 </signal>
 <signal name="N$3">
 <contactref element="UDA1" pad="VIN"/>
 <contactref element="RPI_3A+1" pad="3.3V_A"/>
 <contactref element="POWER" pad="2"/>
-<wire x1="16.58" y1="86.25" x2="16.58" y2="83.48" width="0.8128" layer="1"/>
-<wire x1="16.58" y1="83.48" x2="16.5" y2="83.4" width="0.8128" layer="1"/>
-<via x="16.5" y="83.4" extent="1-16" drill="0.55" diameter="1.9"/>
-<wire x1="16.5" y1="83.4" x2="16.466" y2="83.4" width="0.8128" layer="16"/>
-<wire x1="16.466" y1="83.4" x2="16.466" y2="80.603" width="0.8128" layer="16"/>
-<wire x1="34.7596" y1="78.2404" x2="37" y2="76" width="0.8128" layer="16"/>
-<wire x1="34.7596" y1="82.0460125" x2="34.7596" y2="78.2404" width="0.8128" layer="16"/>
-<wire x1="33.4056125" y1="83.4" x2="34.7596" y2="82.0460125" width="0.8128" layer="16"/>
-<wire x1="16.5" y1="83.4" x2="33.4056125" y2="83.4" width="0.8128" layer="16"/>
-<wire x1="37" y1="76" x2="39" y2="76" width="0.8128" layer="16"/>
-<wire x1="39" y1="76" x2="40.58" y2="74.42" width="0.8128" layer="16"/>
-<wire x1="40.58" y1="74.42" x2="40.58" y2="71.66" width="0.8128" layer="16"/>
+<wire x1="16.466" y1="80.603" x2="16.466" y2="86.136" width="0.8128" layer="16"/>
+<wire x1="16.466" y1="86.136" x2="16.58" y2="86.25" width="0.8128" layer="16"/>
+<wire x1="40.58" y1="71.66" x2="31.637" y2="80.603" width="0.8128" layer="1"/>
+<wire x1="31.637" y1="80.603" x2="16.466" y2="80.603" width="0.8128" layer="1"/>
+<contactref element="MAX1" pad="VDD"/>
+<wire x1="53.8" y1="71.67" x2="49.33" y2="71.67" width="0.8128" layer="16"/>
+<wire x1="49.33" y1="71.67" x2="47" y2="74" width="0.8128" layer="16"/>
+<wire x1="47" y1="74" x2="42.92" y2="74" width="0.8128" layer="16"/>
+<wire x1="42.92" y1="74" x2="40.58" y2="71.66" width="0.8128" layer="16"/>
 </signal>
 <signal name="N$4">
 <contactref element="UDA1" pad="DIN"/>
 <contactref element="RPI_3A+1" pad="21"/>
-<via x="30.25" y="79.65" extent="1-16" drill="0.55" diameter="1.9"/>
-<wire x1="66.4148" y1="86.90230625" x2="66.4148" y2="85.59769375" width="0.8128" layer="1"/>
-<wire x1="66.4148" y1="85.59769375" x2="60.46710625" y2="79.65" width="0.8128" layer="1"/>
-<wire x1="64.84" y1="88.79" x2="64.84" y2="88.47710625" width="0.8128" layer="1"/>
-<wire x1="64.84" y1="88.47710625" x2="66.4148" y2="86.90230625" width="0.8128" layer="1"/>
-<wire x1="60.46710625" y1="79.65" x2="30.25" y2="79.65" width="0.8128" layer="1"/>
-<wire x1="30.25" y1="79.65" x2="30.25" y2="71.83" width="0.8128" layer="16"/>
-<wire x1="30.25" y1="71.83" x2="30.42" y2="71.66" width="0.8128" layer="16"/>
+<wire x1="30.42" y1="71.66" x2="42.76" y2="84" width="0.8128" layer="16"/>
+<wire x1="42.76" y1="84" x2="55" y2="84" width="0.8128" layer="16"/>
+<via x="55" y="84" extent="1-16" drill="0.6" diameter="1.9"/>
+<wire x1="66.4148" y1="85.59769375" x2="66.4148" y2="86.90230625" width="0.8128" layer="1"/>
+<wire x1="64.81710625" y1="84" x2="66.4148" y2="85.59769375" width="0.8128" layer="1"/>
+<wire x1="64.84" y1="88.47710625" x2="64.84" y2="88.79" width="0.8128" layer="1"/>
+<wire x1="66.4148" y1="86.90230625" x2="64.84" y2="88.47710625" width="0.8128" layer="1"/>
+<wire x1="55" y1="84" x2="64.81710625" y2="84" width="0.8128" layer="1"/>
 </signal>
 <signal name="N$5">
 <contactref element="UDA1" pad="ROUT"/>
@@ -670,46 +665,39 @@ design rules under a new name.</description>
 <signal name="N$12">
 <contactref element="UDA1" pad="BCLK"/>
 <contactref element="RPI_3A+1" pad="18"/>
-<wire x1="31.16769375" y1="90.3648" x2="65.49230625" y2="90.3648" width="0.8128" layer="1"/>
-<wire x1="65.49230625" y1="90.3648" x2="67.4308" y2="88.42630625" width="0.8128" layer="1"/>
-<wire x1="67.4308" y1="88.42630625" x2="67.4308" y2="85.17685" width="0.8128" layer="1"/>
-<wire x1="29.28" y1="88.79" x2="29.59289375" y2="88.79" width="0.8128" layer="1"/>
-<wire x1="29.59289375" y1="88.79" x2="31.16769375" y2="90.3648" width="0.8128" layer="1"/>
-<wire x1="60.30395" y1="78.05" x2="27.8" y2="78.05" width="0.8128" layer="1"/>
-<via x="27.8" y="78.05" extent="1-16" drill="0.55" diameter="1.9"/>
-<wire x1="27.8" y1="78.05" x2="27.8" y2="71.74" width="0.8128" layer="16"/>
-<wire x1="27.8" y1="71.74" x2="27.88" y2="71.66" width="0.8128" layer="16"/>
-<wire x1="67.4308" y1="85.17685" x2="60.30395" y2="78.05" width="0.8128" layer="1"/>
+<wire x1="27.88" y1="71.66" x2="27.88" y2="83.32" width="0.8128" layer="16"/>
+<wire x1="27.88" y1="83.32" x2="27.85" y2="83.35" width="0.8128" layer="16"/>
+<via x="27.85" y="83.35" extent="1-16" drill="0.6" diameter="1.9"/>
+<wire x1="15.92769375" y1="84.6752" x2="15.0052" y2="85.59769375" width="0.8128" layer="1"/>
+<wire x1="15.0052" y1="89.44230625" x2="15.92769375" y2="90.3648" width="0.8128" layer="1"/>
+<wire x1="27.85" y1="83.35" x2="26.5248" y2="84.6752" width="0.8128" layer="1"/>
+<wire x1="26.5248" y1="84.6752" x2="15.92769375" y2="84.6752" width="0.8128" layer="1"/>
+<wire x1="15.0052" y1="85.59769375" x2="15.0052" y2="89.44230625" width="0.8128" layer="1"/>
+<wire x1="15.92769375" y1="90.3648" x2="27.39230625" y2="90.3648" width="0.8128" layer="1"/>
+<wire x1="28.96710625" y1="88.79" x2="29.28" y2="88.79" width="0.8128" layer="1"/>
+<wire x1="27.39230625" y1="90.3648" x2="28.96710625" y2="88.79" width="0.8128" layer="1"/>
 </signal>
 <signal name="N$9">
 <contactref element="SERIAL" pad="2"/>
 <contactref element="RPI_3A+1" pad="14"/>
-<via x="14.1" y="83.4" extent="1-16" drill="0.55" diameter="1.9"/>
-<wire x1="15.92769375" y1="90.3648" x2="15.0052" y2="89.44230625" width="0.8128" layer="1"/>
-<wire x1="24.2" y1="88.79" x2="23.88710625" y2="88.79" width="0.8128" layer="1"/>
-<wire x1="23.88710625" y1="88.79" x2="22.31230625" y2="90.3648" width="0.8128" layer="1"/>
-<wire x1="22.31230625" y1="90.3648" x2="15.92769375" y2="90.3648" width="0.8128" layer="1"/>
-<wire x1="15.0052" y1="84.3052" x2="14.1" y2="83.4" width="0.8128" layer="1"/>
-<wire x1="15.0052" y1="89.44230625" x2="15.0052" y2="84.3052" width="0.8128" layer="1"/>
-<wire x1="14.1" y1="83.4" x2="14.1" y2="80.943" width="0.8128" layer="16"/>
-<wire x1="14.1" y1="80.943" x2="11.226" y2="78.069" width="0.8128" layer="16"/>
+<wire x1="11.226" y1="78.069" x2="14.9404" y2="81.7834" width="0.8128" layer="16"/>
+<wire x1="23.88710625" y1="88.79" x2="24.2" y2="88.79" width="0.8128" layer="16"/>
+<wire x1="15.92769375" y1="90.3648" x2="22.31230625" y2="90.3648" width="0.8128" layer="16"/>
+<wire x1="22.31230625" y1="90.3648" x2="23.88710625" y2="88.79" width="0.8128" layer="16"/>
+<wire x1="14.9404" y1="81.7834" x2="14.9404" y2="89.37750625" width="0.8128" layer="16"/>
+<wire x1="14.9404" y1="89.37750625" x2="15.92769375" y2="90.3648" width="0.8128" layer="16"/>
 </signal>
 <signal name="N$11">
 <contactref element="SERIAL" pad="1"/>
 <contactref element="RPI_3A+1" pad="15"/>
-<via x="11.7" y="83.4" extent="1-16" drill="0.55" diameter="1.9"/>
-<wire x1="13.9892" y1="85.6892" x2="11.7" y2="83.4" width="0.8128" layer="1"/>
-<wire x1="15.50685" y1="91.3808" x2="13.9892" y2="89.86315" width="0.8128" layer="1"/>
-<wire x1="13.9892" y1="89.86315" x2="13.9892" y2="85.6892" width="0.8128" layer="1"/>
-<wire x1="26.74" y1="88.79" x2="26.42710625" y2="88.79" width="0.8128" layer="1"/>
-<wire x1="26.42710625" y1="88.79" x2="23.83630625" y2="91.3808" width="0.8128" layer="1"/>
-<wire x1="23.83630625" y1="91.3808" x2="15.50685" y2="91.3808" width="0.8128" layer="1"/>
-<wire x1="11.7" y1="83.4" x2="11.7" y2="81.083" width="0.8128" layer="16"/>
-<wire x1="11.7" y1="81.083" x2="11.226" y2="80.609" width="0.8128" layer="16"/>
+<wire x1="11.226" y1="80.609" x2="13.9244" y2="83.3074" width="0.8128" layer="16"/>
+<wire x1="13.9244" y1="89.79835" x2="15.50685" y2="91.3808" width="0.8128" layer="16"/>
+<wire x1="26.42710625" y1="88.79" x2="26.74" y2="88.79" width="0.8128" layer="16"/>
+<wire x1="15.50685" y1="91.3808" x2="23.83630625" y2="91.3808" width="0.8128" layer="16"/>
+<wire x1="23.83630625" y1="91.3808" x2="26.42710625" y2="88.79" width="0.8128" layer="16"/>
+<wire x1="13.9244" y1="83.3074" x2="13.9244" y2="89.79835" width="0.8128" layer="16"/>
 </signal>
 <signal name="GND">
-<contactref element="UDA1" pad="GND"/>
-<contactref element="RPI_3A+1" pad="GND_C"/>
 <polygon width="0.1524" layer="16">
 <vertex x="8.05" y="92.15"/>
 <vertex x="8.05" y="35.15"/>
@@ -726,11 +714,17 @@ design rules under a new name.</description>
 <signal name="N$2">
 <contactref element="POWER" pad="1"/>
 <contactref element="RPI_3A+1" pad="GND_A"/>
-<wire x1="26.74" y1="86.25" x2="22" y2="81.51" width="0.8128" layer="1"/>
-<wire x1="22" y1="81.51" x2="22" y2="78.1626" width="0.8128" layer="1"/>
-<via x="22" y="78.1626" extent="1-16" drill="0.55" diameter="1.9"/>
-<wire x1="22" y1="78.1626" x2="21.9004" y2="78.063" width="0.8128" layer="16"/>
-<wire x1="21.9004" y1="78.063" x2="16.466" y2="78.063" width="0.8128" layer="16"/>
+<contactref element="UDA1" pad="GND"/>
+<wire x1="16.466" y1="78.063" x2="21.403" y2="83" width="0.8128" layer="16"/>
+<wire x1="21.403" y1="83" x2="23" y2="83" width="0.8128" layer="16"/>
+<wire x1="23" y1="83" x2="25" y2="83" width="0.8128" layer="16"/>
+<wire x1="25" y1="83" x2="26.74" y2="84.74" width="0.8128" layer="16"/>
+<wire x1="26.74" y1="84.74" x2="26.74" y2="86.25" width="0.8128" layer="16"/>
+<wire x1="35.5" y1="71.66" x2="28.16" y2="79" width="0.8128" layer="1"/>
+<wire x1="28.16" y1="79" x2="25" y2="79" width="0.8128" layer="1"/>
+<via x="25" y="79" extent="1-16" drill="0.6" diameter="1.9"/>
+<wire x1="25" y1="79" x2="25" y2="81" width="0.8128" layer="16"/>
+<wire x1="25" y1="81" x2="23" y2="83" width="0.8128" layer="16"/>
 </signal>
 </signals>
 <mfgpreviewcolors>

@@ -1,7 +1,7 @@
 {
     "author": {
-        "email": "alexmlucas82@gmail.com",
-        "name": "Alexmlucas82 Alexmlucas82"
+        "email": "support.eagle@autodesk.com",
+        "name": "Autodesk EAGLE"
     },
     "description": {
         "EN": "EAGLE default 2 layer CAM job."
@@ -11,8 +11,8 @@
         {
             "filename_prefix": "CAMOutputs/DrillFiles",
             "format_specifier": {
-                "decimal": 4,
-                "integer": 2
+                "decimal": 3,
+                "integer": 3
             },
             "output_type": "drill",
             "outputs": [
@@ -22,7 +22,7 @@
                         "offset_x": 0,
                         "offset_y": 0,
                         "rotate": true,
-                        "upside_down": true
+                        "upside_down": false
                     },
                     "drills": {
                         "NPTH": true,
@@ -80,7 +80,7 @@
                         "offset_x": 0,
                         "offset_y": 0,
                         "rotate": true,
-                        "upside_down": true
+                        "upside_down": false
                     },
                     "board_outline": false,
                     "config": {
@@ -268,8 +268,8 @@
             ]
         }
     ],
-    "timestamp": "2019-07-24T10:34:08",
+    "timestamp": "2018-12-05T11:02:34",
     "type": "EAGLE CAM job",
-    "units": "imperial",
+    "units": "metric",
     "version": "9.2.0"
 }
