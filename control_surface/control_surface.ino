@@ -31,6 +31,9 @@ Adafruit_SSD1306 display(OLED_RESET);
 // Define the debounce time in milliseconds
 #define DEBOUNCE_TIME 50
 
+// Define the USB MIDI Note Velocity
+#define NOTE_VELOCITY 100
+
 // Define the encoder pins
 #define ENCODER_PIN_A 5
 #define ENCODER_PIN_B 6
@@ -759,12 +762,23 @@ void serial_parser(){
     menu_controller.set_currently_selected_menu(p_wristband_return_page);
     wristband_leds.set_flashing(false);
     wristband_leds.set_colour(RG_GREEN);
-  
     
   } else if(incoming_byte_1 == 114){
      menu_controller.set_currently_selected_menu(&connection_fail_menu);
      splash_page_loaded = true;
      time_splash_loaded_ms = millis();
+     
+  } else if(incoming_byte_1 == 121){
+    Serial.println("transmitting usb midi note on message");
+    // Convert ascii characters to int note value.
+    int note_number = (int)((incoming_byte_2 - 48) * 10) + (int)(incoming_byte_3 - 48);
+    usbMIDI.sendNoteOn(note_number, NOTE_VELOCITY, 0);
+    
+  }  else if(incoming_byte_1 == 122){
+    Serial.println("transmitting usb midi note off message");
+    // Convert ascii characters to int note value.
+    int note_number = (int)((incoming_byte_2 - 48) * 10) + (int)(incoming_byte_3 - 48);
+    usbMIDI.sendNoteOff(note_number, NOTE_VELOCITY, 0);
   }
 
   /*switch(incoming_byte){
@@ -787,4 +801,6 @@ void serial_parser(){
         time_splash_loaded_ms = millis();
         break;
     }*/
+
+    
 }
