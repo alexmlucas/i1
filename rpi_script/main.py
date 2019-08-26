@@ -37,6 +37,8 @@ song_player = Song_Player()
 #song_player.set_play_state(1)
 
 parameter_manager.set_song_player(song_player)
+print("got past the issue")
+
 parameter_manager.set_guitar(guitar)
 
 guitar.set_zone_notes(0, 0)
@@ -100,6 +102,7 @@ def get_yaw_characteristic(incoming_device):
     return yaw
 
 def main():
+    print("starting")
     initialisation_flag = True
     bno_device = None
     yaw = None

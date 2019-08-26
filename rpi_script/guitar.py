@@ -3,6 +3,7 @@ import time
 import fluidsynth
 import threading
 #from threading import Thread
+import serial
 
 class Guitar:
 	def __init__(self, guitar_tone_index, velocity, note_length):
@@ -40,6 +41,12 @@ class Guitar:
 
 		# the following is perhaps not needed.
 		self.fs.program_select(0, self.sfid, 0, guitar_tone_index)
+		
+		# serial test
+		self.port = '/dev/serial0'
+		self.baud_rate = 9600
+		# Intialise serial port
+		self.control_board = serial.Serial(self.port, self.baud_rate, timeout = 0.1)
 
 	def set_sound_font(self, sound_font_index):
 		#print("Loading: ", self.guitar_paths[sound_font_index])
@@ -60,10 +67,12 @@ class Guitar:
 	def play_string(self, zone_index, string_index):		
 		def note_event(self, note):
 			print(note)
+			self.tx_usb_midi_note_on_request(note)
 			self.fs.noteon(0, note, self.velocity)
 			time.sleep(self.note_length)
 			# count if this note has only been triggered once since the note on event, send the note off message
 			if self.note_on_tracker.count(note) == 1:
+				self.tx_usb_midi_note_off_request(note)
 				self.fs.noteoff(0, note)
 			# remove the note from the tracker
 			self.note_on_tracker.remove(note)
@@ -76,7 +85,15 @@ class Guitar:
 		
 		# call note_event in a separate thread
 		threading.Thread(target = note_event, args=(self, note_to_play)).start()
+	
+	# test serial transmission	
+	def tx_usb_midi_note_on_request(self, note_number):
+		character_to_transmit = 'y' + str(note_number)
+		self.control_board.write(character_to_transmit.encode())
+		
+	def tx_usb_midi_note_off_request(self, note_number):
+		character_to_transmit = 'z' + str(note_number)
+		self.control_board.write(character_to_transmit.encode())
 		
 	def __del__(self):
 		self.fs.delete()
-
