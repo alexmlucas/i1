@@ -42,10 +42,9 @@ class Guitar:
 		# the following is perhaps not needed.
 		self.fs.program_select(0, self.sfid, 0, guitar_tone_index)
 		
-		# serial test
+		# Intialise serial port
 		self.port = '/dev/serial0'
 		self.baud_rate = 9600
-		# Intialise serial port
 		self.control_board = serial.Serial(self.port, self.baud_rate, timeout = 0.1)
 
 	def set_sound_font(self, sound_font_index):
