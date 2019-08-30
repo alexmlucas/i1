@@ -18,6 +18,7 @@ Parameter_Container::Parameter_Container(){
   m_reconnect.value = 0;
   m_power.value = 0;
   m_play.value = 0;
+  m_song_loaded.value = 0;
 
   m_master_level.character = 'a';
   m_song.character = 'b';
@@ -34,6 +35,7 @@ Parameter_Container::Parameter_Container(){
   m_reconnect.character = 'm';
   m_power.character = 'n';
   m_play.character = 'o';
+  m_song_loaded.character = 't';
 }
 
 void Parameter_Container::set_parameter(Parameter *parameter, int value){

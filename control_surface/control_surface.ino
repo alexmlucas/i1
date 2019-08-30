@@ -109,12 +109,15 @@ const char root[] PROGMEM = "Root";
 const char red_root[] PROGMEM = "Red Root";
 const char green_root[] PROGMEM = "Green Root";
 const char blue_root[] PROGMEM = "Blue Root";
-const static char reconnecting[] PROGMEM = "Reconnecting";
-const static char wristband[] PROGMEM = "wristband";
+const static char connecting[] PROGMEM = "Connecting";
+const static char to_wristband[] PROGMEM = "to wristband";
 const static char please_wait[] PROGMEM = "please wait...";
 const char sorry[] PROGMEM = "Sorry, I could";
 const char not_connect[] PROGMEM = "not connect to";
 const char the_wristband[] PROGMEM = "the wristband.";
+const char not_load_song[] PROGMEM = "not load the song";
+const char check_memory[] PROGMEM = "check memory stick.";
+
 
 //const char scale_param[] PROGMEM = "Major, Minor, Blues, Pent. Major, Pent. Minor, Major Chord, Minor Chord";
 //const char root_param[] PROGMEM = "A, A#, B, C, C#, D, D#, E, F, F#, G, G#";
@@ -141,8 +144,9 @@ const char *const guitar_level_menu_txt[] PROGMEM = {guitar};
 const char *const backing_level_menu_txt[] PROGMEM = {backing}; 
 const char *const master_level_menu_txt[] PROGMEM = {master};
 
-const static char *const reconnect_menu_txt[] PROGMEM = {reconnecting, wristband, please_wait};
+const static char *const reconnect_menu_txt[] PROGMEM = {connecting, to_wristband, please_wait};
 const char *const connection_fail_menu_txt[] PROGMEM = {sorry, not_connect, the_wristband};
+const char *const song_fail_menu_txt[] PROGMEM = {sorry, not_load_song, check_memory};
 
 // const char* = a pointer to a constant char.
 // char* const = a constant pointer to a char. (This pointer cannot be changed)
@@ -199,6 +203,7 @@ Value_Page backing_level_menu(&menu_controller, &parameter_container);
 Value_Page master_level_menu(&menu_controller, &parameter_container);
 Splash_Page reconnect_menu(&menu_controller, &parameter_container);
 Splash_Page connection_fail_menu(&menu_controller, &parameter_container);
+Splash_Page song_fail_menu(&menu_controller, &parameter_container);
 
 // *** Initialise Pointers to Sub Menu_Page(s) ***  
 Menu_Page *p_main_sub_menus[] = {&guitar_menu, &zone_menu, &mix_levels_menu};                        
@@ -250,9 +255,12 @@ Rgb_Led zone_leds;
 
 // Timer variables for deactivating Splash Pages
 int time_splash_loaded_ms;
-int splash_display_time = 2000;
+int SPLASH_DISPLAY_TIME = 3000;
 int current_time_ms;
 bool splash_page_loaded;
+
+// Variable for tracking whether or not a song is loaded.
+bool song_loaded = false;
 
 void setup() {
   // *** Assign menu text to Menu_Page(s) ***
@@ -293,6 +301,8 @@ void setup() {
   reconnect_menu.set_menu_text(reconnect_menu_txt, text_size);
   text_size = sizeof(connection_fail_menu_txt)/sizeof(connection_fail_menu_txt[0]); // Connection Fail Menu
   connection_fail_menu.set_menu_text(connection_fail_menu_txt, text_size);
+  text_size = sizeof(song_fail_menu_txt)/sizeof(song_fail_menu_txt[0]); // Connection Fail Menu
+  song_fail_menu.set_menu_text(song_fail_menu_txt, text_size);
 
   // *** Assign parameter text to Menu_Page(s) ***
   text_size = sizeof(scales_param_txt)/sizeof(scales_param_txt[0]);                 // Scales parameter text
@@ -444,7 +454,7 @@ void loop() {
     Serial.println("Splash page is loaded");
     current_time_ms = millis();
 
-    if((current_time_ms - time_splash_loaded_ms) > splash_display_time){
+    if((current_time_ms - time_splash_loaded_ms) > SPLASH_DISPLAY_TIME){
       Serial.print("Splash time exceeded, setting menu to: ");
       Serial.println((int)p_wristband_return_page);
       // This method will also set the redraw display flag.
@@ -562,33 +572,39 @@ void back_pressed(Menu_Controller* p_menu_controller){                          
   }                                                      
 }
 
-void play_pressed(Single_Led *led, Parameter_Container *parameter_container, Parameter *parameter_struct, int parameter_value){       
-  switch(parameter_struct->value){
-    case 0:
-      parameter_container->set_and_send_parameter(parameter_struct, 1);         // Playback is currently stopped, so start it.
-      led->set_on(true);                                                        // Update the led
-      break;
-    case 1:
-      parameter_container->set_and_send_parameter(parameter_struct, 2);         // Song is playing already, so pause it.
-      led->set_flashing(true);                                                  // Update the led
-      break;
-    case 2:
-      parameter_container->set_and_send_parameter(parameter_struct, 1);         // Song is paused, so commence playback.
-      led->set_on(true);                                                        // Update the led
-      break;
+void play_pressed(Single_Led *led, Parameter_Container *parameter_container, Parameter *parameter_struct, int parameter_value){
+  // check to see if song is loaded before acting on play button events
+  if(parameter_container->m_song_loaded.value == 1){
+    switch(parameter_struct->value){
+      case 0:
+        parameter_container->set_and_send_parameter(parameter_struct, 1);         // Playback is currently stopped, so start it.
+        led->set_on(true);                                                        // Update the led
+        break;
+      case 1:
+        parameter_container->set_and_send_parameter(parameter_struct, 2);         // Song is playing already, so pause it.
+        led->set_flashing(true);                                                  // Update the led
+        break;
+      case 2:
+        parameter_container->set_and_send_parameter(parameter_struct, 1);         // Song is paused, so commence playback.
+        led->set_on(true);                                                        // Update the led
+        break;
+    }
   }
 }
 
 void stop_pressed(Single_Led *led, Parameter_Container *parameter_container, Parameter *parameter_struct, int parameter_value){
-  if(parameter_struct->value){
-    parameter_container->set_and_send_parameter(parameter_struct, 0);          // Currently playing the song, so stop it.
-    led->set_on(false);                                               
+  // check to see if song is loaded before acting on play button events
+  if(parameter_container->m_song_loaded.value == 1){
+    if(parameter_struct->value){
+      parameter_container->set_and_send_parameter(parameter_struct, 0);          // Currently playing the song, so stop it.
+      led->set_on(false);                                               
+    }
   }
 }
 
 void song_pressed(Single_Led *led, Parameter_Container *parameter_container, Parameter *parameter_struct, int parameter_value){
   led->set_on(false);                                                                       // switch off the LED, which in this case is the play LED.
-  parameter_container->set_and_send_parameter(&parameter_container->m_play, 0);   // set the play state to off.
+  parameter_container->set_and_send_parameter(&parameter_container->m_play, 0);             // set the play state to off.
   parameter_container->set_and_send_parameter(parameter_struct, parameter_value);           // update the currently selected song
 }
 
@@ -597,16 +613,16 @@ void access_switch_pressed(Single_Led *led, Parameter_Container *parameter_conta
 
   switch(parameter_struct->value){
     case 0:
-      parameter_container->set_and_send_parameter(parameter_struct, 1);        // Increment parameter value
-      rgb_led->set_colour(RGB_GREEN);                                 // Update the led
+      parameter_container->set_and_send_parameter(parameter_struct, 1);         // Increment parameter value
+      rgb_led->set_colour(RGB_GREEN);                                           // Update the led
       break;
     case 1:
-      parameter_container->set_and_send_parameter(parameter_struct, 2);        // Increment parameter value
-      rgb_led->set_colour(RGB_BLUE);                                  // Update the led
+      parameter_container->set_and_send_parameter(parameter_struct, 2);         // Increment parameter value
+      rgb_led->set_colour(RGB_BLUE);                                            // Update the led
       break;
     case 2:
-      parameter_container->set_and_send_parameter(parameter_struct, 0);        // Reset parameter value to 0
-      rgb_led->set_colour(RGB_RED);                                   // Update the led
+      parameter_container->set_and_send_parameter(parameter_struct, 0);         // Reset parameter value to 0
+      rgb_led->set_colour(RGB_RED);                                             // Update the led
       break;
   }
 }
@@ -746,7 +762,15 @@ void serial_parser(){
         zone_leds.set_colour(RGB_BLUE);
         break;
     }
-  } else if(incoming_byte_1 == 112){
+  } else if(incoming_byte_1 == 111){
+    // o character received
+    // *** m_play parameter ***
+    play_led.set_flashing(false);
+    play_led.set_on(false);
+    parameter_container.m_play.value = 0;
+    
+  }
+    else if(incoming_byte_1 == 112){
     // Attempting to connect to wristband
     Serial.println("attempting connection");
     p_wristband_return_page = (Menu_Page*)menu_controller.get_currently_selected_menu();       // Store a reference to the currently displayed menu.
@@ -767,6 +791,17 @@ void serial_parser(){
      menu_controller.set_currently_selected_menu(&connection_fail_menu);
      splash_page_loaded = true;
      time_splash_loaded_ms = millis();
+     
+  } else if(incoming_byte_1 == 116){
+    // song_loaded parameter received (i.e. 't')
+    parameter_container.m_song_loaded.value = (int)incoming_byte_3 - 48;
+
+    // display notification onscreen if song couldn't be loaded
+    if(parameter_container.m_song_loaded.value == 0){
+      menu_controller.set_currently_selected_menu(&song_fail_menu);
+      splash_page_loaded = true;
+      time_splash_loaded_ms = millis();
+    }
      
   } else if(incoming_byte_1 == 121){
     Serial.println("transmitting usb midi note on message");

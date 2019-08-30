@@ -20,6 +20,7 @@ class Parameter_Container{
     Parameter m_reconnect;
     Parameter m_power;
     Parameter m_play;
+    Parameter m_song_loaded;
     
     Parameter_Container();
     void set_parameter(Parameter *parameter, int value);
