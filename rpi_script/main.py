@@ -32,17 +32,7 @@ NOTE_LENGTH = 0.5
 # Classes
 parameter_manager = Parameter_Manager('/dev/serial0', 9600)
 guitar = Guitar(1, NOTE_VELOCITY, NOTE_LENGTH)
-
 song_player = Song_Player()
-#song_player.set_play_state(1)
-
-parameter_manager.set_song_player(song_player)
-parameter_manager.set_guitar(guitar)
-
-guitar.set_zone_notes(0, 0)
-guitar.set_zone_notes(0, 1)
-guitar.set_zone_notes(0, 2)
-guitar.set_zone_notes(0, 3)
 
 # Function to receive RX characteristic changes.
 # this function is passed to the start_nofify method of the yaw characteristic
@@ -98,8 +88,10 @@ def get_yaw_characteristic(incoming_device):
     yaw = uart.find_characteristic(YAW_CHAR_UUID)
     motor = uart.find_characteristic(MOTOR_CHAR_UUID)
     return yaw
+    
 
 def main():
+    print("starting")
     initialisation_flag = True
     bno_device = None
     yaw = None
@@ -152,13 +144,28 @@ def main():
             parameter_manager.reconnect_wristband_flag = False
             run_main_loop_flag = True
             
+        # Final initialisations before main loop
+        parameter_manager.set_song_player(song_player)
+        parameter_manager.set_guitar(guitar)
+        guitar.set_zone_notes(0, 0)
+        guitar.set_zone_notes(0, 1)
+        guitar.set_zone_notes(0, 2)
+        guitar.set_zone_notes(0, 3)
+            
         while run_main_loop_flag == True:
             # This is the main loop
             # Control surface should initialise automatically when in this loop.
             parameter_manager.check_incoming()
             
+            # check to see if a song has recently stopped playing
+            song_player.check_song_end()
+            
+            # check for bluetooth connectivity
+            #print(bno_device)
+            
             if parameter_manager.reconnect_wristband_flag == True:
                 run_main_loop_flag = False
+                
 
 # Initialize the BLE system.  MUST be called before other BLE calls!
 ble.initialize()

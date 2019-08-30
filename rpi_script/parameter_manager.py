@@ -16,8 +16,7 @@ class Parameter_Manager:
 		self.guitar_level = self.midi_value_generator(self.get_song_parameter('d'))
 		
 		# Intialise serial port
-		self.control_board = serial.Serial(self.port, 
-		self.baud_rate, timeout = 0.1)
+		self.control_board = serial.Serial(self.port, self.baud_rate, timeout = 0.1)
 		
 		# Flush inputs and outputs
 		self.control_board.flushInput()
@@ -412,6 +411,7 @@ class Parameter_Manager:
 					if(parameter_character == cell_string[0]):
 						#... return the value
 						return int(cell_string[2]) + (int(cell_string[1]) * 10)
+						
 						
 	def get_song_parameter(self, parameter_character):
 		# Indicates whether or not a parameter has been found in the list.
