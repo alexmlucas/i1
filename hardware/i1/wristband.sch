@@ -1187,8 +1187,13 @@ Warning: This is the KIT version of the AXIAL-0.3 package. This package has a sm
 <pad name="USB" x="21.24" y="21.82" drill="0.6" diameter="1.9304"/>
 <pad name="EN" x="18.7" y="21.82" drill="0.6" diameter="1.9304"/>
 <pad name="BAT" x="16.16" y="21.82" drill="0.6" diameter="1.9304"/>
-<text x="20.32" y="17.78" size="1.27" layer="25">&gt;NAME</text>
-<text x="20.32" y="5.08" size="1.27" layer="27">&gt;VALUE</text>
+<text x="20.32" y="19.28" size="1.27" layer="25">&gt;NAME</text>
+<text x="20.32" y="3.08" size="1.27" layer="27">&gt;VALUE</text>
+<hole x="48.22" y="20.58" drill="2.54"/>
+<wire x1="0" y1="17.8" x2="-0.05" y2="17.8" width="0.05" layer="21"/>
+<hole x="48.26" y="2.75" drill="2.54"/>
+<hole x="2.51" y="20.64" drill="2.54"/>
+<hole x="2.47" y="2.79" drill="2.54"/>
 </package>
 <package name="ADA_BNO055">
 <wire x1="0" y1="0" x2="27" y2="0" width="0.127" layer="21"/>
@@ -1207,6 +1212,23 @@ Warning: This is the KIT version of the AXIAL-0.3 package. This package has a sm
 <pad name="PS0" x="9.54" y="19.28" drill="0.6" diameter="1.9304"/>
 <text x="9.5" y="21.5" size="1.27" layer="25">&gt;NAME</text>
 <text x="9" y="-2" size="1.27" layer="27">&gt;VALUE</text>
+</package>
+<package name="VIBRATION_MOTOR" urn="urn:adsk.eagle:footprint:38542/1" locally_modified="yes">
+<description>&lt;h3&gt;Vibration Motor&lt;/h3&gt;
+&lt;p&gt;10mm vibration motor terminated with tinned wires.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://cdn.sparkfun.com/datasheets/Robotics/B1034.FL45-00-015.pdf"&gt;Datasheet&lt;/a&gt;&lt;/p&gt;
+&lt;h4&gt;Devices Using&lt;/h4&gt;
+&lt;ul&gt;&lt;li&gt;MOTOR&lt;/li&gt;&lt;/ul&gt;</description>
+<wire x1="-1.5" y1="-4.8" x2="-1.5" y2="-7.8" width="0.127" layer="51"/>
+<wire x1="-1.5" y1="-7.8" x2="1.5" y2="-7.8" width="0.127" layer="51"/>
+<wire x1="1.5" y1="-7.8" x2="1.5" y2="-4.8" width="0.127" layer="51"/>
+<circle x="0" y="0" radius="5.0009" width="0.127" layer="51"/>
+<text x="-7.562" y="-2" size="1.27" layer="21">-</text>
+<text x="-4.446" y="-5.554" size="1.27" layer="21">+</text>
+<text x="-5.207" y="0" size="0.6096" layer="25" font="vector" ratio="20" rot="R90" align="bottom-center">&gt;NAME</text>
+<text x="-4.699" y="0" size="0.6096" layer="27" font="vector" ratio="20" rot="R90" align="top-center">&gt;VALUE</text>
+<pad name="-" x="-6.5" y="-2.5" drill="0.6" diameter="1.9304"/>
+<pad name="+" x="-5.5" y="-4.5" drill="0.6" diameter="1.9304"/>
 </package>
 </packages>
 <symbols>
@@ -1275,6 +1297,27 @@ Warning: This is the KIT version of the AXIAL-0.3 package. This package has a sm
 <wire x1="17.78" y1="15.24" x2="0" y2="15.24" width="0.254" layer="94"/>
 <text x="5.08" y="22.86" size="1.27" layer="95">&gt;NAME</text>
 <text x="5.08" y="-10.16" size="1.27" layer="96">&gt;VALUE</text>
+</symbol>
+<symbol name="VIBRATION_MOTOR">
+<description>&lt;h3&gt;Motor (Single-Phase, Two-Terminal)&lt;/h3&gt;</description>
+<wire x1="-1.27" y1="3.81" x2="-1.27" y2="1.778" width="0.2032" layer="94"/>
+<wire x1="-1.27" y1="3.81" x2="0" y2="3.81" width="0.2032" layer="94"/>
+<wire x1="0" y1="3.81" x2="1.27" y2="3.81" width="0.2032" layer="94"/>
+<wire x1="1.27" y1="3.81" x2="1.27" y2="1.778" width="0.2032" layer="94"/>
+<wire x1="1.27" y1="-3.81" x2="1.27" y2="-1.778" width="0.2032" layer="94"/>
+<wire x1="1.27" y1="-3.81" x2="0" y2="-3.81" width="0.2032" layer="94"/>
+<wire x1="0" y1="-3.81" x2="-1.27" y2="-3.81" width="0.2032" layer="94"/>
+<wire x1="-1.27" y1="-3.81" x2="-1.27" y2="-1.778" width="0.2032" layer="94"/>
+<wire x1="0" y1="5.08" x2="0" y2="3.81" width="0.1524" layer="94"/>
+<wire x1="0" y1="-5.08" x2="0" y2="-3.81" width="0.1524" layer="94"/>
+<wire x1="0.254" y1="3.302" x2="-0.254" y2="3.302" width="0.1524" layer="94"/>
+<wire x1="0" y1="3.556" x2="0" y2="3.048" width="0.1524" layer="94"/>
+<wire x1="0.254" y1="-3.302" x2="-0.254" y2="-3.302" width="0.1524" layer="94"/>
+<circle x="0" y="0" radius="2.032" width="0.254" layer="94"/>
+<text x="2.54" y="0" size="1.778" layer="95" font="vector">&gt;NAME</text>
+<text x="2.54" y="-2.54" size="1.778" layer="96" font="vector">&gt;VALUE</text>
+<pin name="+" x="0" y="5.08" visible="off" length="point" rot="R270"/>
+<pin name="-" x="0" y="-5.08" visible="off" length="point" rot="R270"/>
 </symbol>
 </symbols>
 <devicesets>
@@ -1362,100 +1405,18 @@ Warning: This is the KIT version of the AXIAL-0.3 package. This package has a sm
 </device>
 </devices>
 </deviceset>
-</devicesets>
-</library>
-<library name="SparkFun-Electromechanical" urn="urn:adsk.eagle:library:516">
-<description>&lt;h3&gt;SparkFun Electromechanical Parts&lt;/h3&gt;
-This library contains electromechanical devices, like motors, speakers,servos, and relays.
-&lt;br&gt;
-&lt;br&gt;
-We've spent an enormous amount of time creating and checking these footprints and parts, but it is &lt;b&gt; the end user's responsibility&lt;/b&gt; to ensure correctness and suitablity for a given componet or application. 
-&lt;br&gt;
-&lt;br&gt;If you enjoy using this library, please buy one of our products at &lt;a href=" www.sparkfun.com"&gt;SparkFun.com&lt;/a&gt;.
-&lt;br&gt;
-&lt;br&gt;
-&lt;b&gt;Licensing:&lt;/b&gt; Creative Commons ShareAlike 4.0 International - https://creativecommons.org/licenses/by-sa/4.0/ 
-&lt;br&gt;
-&lt;br&gt;
-You are welcome to use this library for commercial purposes. For attribution, we ask that when you begin to sell your device using our footprint, you email us with a link to the product being sold. We want bragging rights that we helped (in a very small part) to create your 8th world wonder. We would like the opportunity to feature your device on our homepage.</description>
-<packages>
-<package name="VIBE-MOTOR-10MM" urn="urn:adsk.eagle:footprint:38542/1" library_version="1">
-<description>&lt;h3&gt;Vibration Motor&lt;/h3&gt;
-&lt;p&gt;10mm vibration motor terminated with tinned wires.&lt;/p&gt;
-&lt;p&gt;&lt;a href="https://cdn.sparkfun.com/datasheets/Robotics/B1034.FL45-00-015.pdf"&gt;Datasheet&lt;/a&gt;&lt;/p&gt;
-&lt;h4&gt;Devices Using&lt;/h4&gt;
-&lt;ul&gt;&lt;li&gt;MOTOR&lt;/li&gt;&lt;/ul&gt;</description>
-<wire x1="-1.5" y1="-4.8" x2="-1.5" y2="-7.8" width="0.127" layer="51"/>
-<wire x1="-1.5" y1="-7.8" x2="1.5" y2="-7.8" width="0.127" layer="51"/>
-<wire x1="1.5" y1="-7.8" x2="1.5" y2="-4.8" width="0.127" layer="51"/>
-<circle x="0" y="0" radius="5.0009" width="0.127" layer="51"/>
-<pad name="+" x="-5" y="-3.9" drill="0.8" diameter="1.6764"/>
-<pad name="-" x="-6.35" y="-2.54" drill="0.8" diameter="1.6764"/>
-<text x="-7.562" y="-2" size="1.27" layer="21">-</text>
-<text x="-4.446" y="-5.554" size="1.27" layer="21">+</text>
-<text x="-5.207" y="0" size="0.6096" layer="25" font="vector" ratio="20" rot="R90" align="bottom-center">&gt;NAME</text>
-<text x="-4.699" y="0" size="0.6096" layer="27" font="vector" ratio="20" rot="R90" align="top-center">&gt;VALUE</text>
-</package>
-</packages>
-<packages3d>
-<package3d name="VIBE-MOTOR-10MM" urn="urn:adsk.eagle:package:38555/1" type="box" library_version="1">
-<description>Vibration Motor
-10mm vibration motor terminated with tinned wires.
-Datasheet
-Devices Using
-MOTOR</description>
-<packageinstances>
-<packageinstance name="VIBE-MOTOR-10MM"/>
-</packageinstances>
-</package3d>
-</packages3d>
-<symbols>
-<symbol name="MOTOR" urn="urn:adsk.eagle:symbol:38541/1" library_version="1">
-<description>&lt;h3&gt;Motor (Single-Phase, Two-Terminal)&lt;/h3&gt;</description>
-<wire x1="-1.27" y1="3.81" x2="-1.27" y2="1.778" width="0.2032" layer="94"/>
-<wire x1="-1.27" y1="3.81" x2="0" y2="3.81" width="0.2032" layer="94"/>
-<wire x1="0" y1="3.81" x2="1.27" y2="3.81" width="0.2032" layer="94"/>
-<wire x1="1.27" y1="3.81" x2="1.27" y2="1.778" width="0.2032" layer="94"/>
-<wire x1="1.27" y1="-3.81" x2="1.27" y2="-1.778" width="0.2032" layer="94"/>
-<wire x1="1.27" y1="-3.81" x2="0" y2="-3.81" width="0.2032" layer="94"/>
-<wire x1="0" y1="-3.81" x2="-1.27" y2="-3.81" width="0.2032" layer="94"/>
-<wire x1="-1.27" y1="-3.81" x2="-1.27" y2="-1.778" width="0.2032" layer="94"/>
-<wire x1="0" y1="5.08" x2="0" y2="3.81" width="0.1524" layer="94"/>
-<wire x1="0" y1="-5.08" x2="0" y2="-3.81" width="0.1524" layer="94"/>
-<wire x1="0.254" y1="3.302" x2="-0.254" y2="3.302" width="0.1524" layer="94"/>
-<wire x1="0" y1="3.556" x2="0" y2="3.048" width="0.1524" layer="94"/>
-<wire x1="0.254" y1="-3.302" x2="-0.254" y2="-3.302" width="0.1524" layer="94"/>
-<circle x="0" y="0" radius="2.032" width="0.254" layer="94"/>
-<text x="2.54" y="0" size="1.778" layer="95" font="vector">&gt;NAME</text>
-<text x="2.54" y="-2.54" size="1.778" layer="96" font="vector">&gt;VALUE</text>
-<pin name="+" x="0" y="5.08" visible="off" length="point" rot="R270"/>
-<pin name="-" x="0" y="-5.08" visible="off" length="point" rot="R270"/>
-</symbol>
-</symbols>
-<devicesets>
-<deviceset name="MOTOR" urn="urn:adsk.eagle:component:38564/1" prefix="M" library_version="1">
-<description>&lt;h3&gt;Motor (Single-Phase)&lt;/h3&gt;
-&lt;p&gt;Two-terminal, single-phase motors.&lt;/p&gt;
-&lt;h4&gt;SparkFun Products&lt;/h4&gt;
-&lt;ul&gt;&lt;li&gt;&lt;a href="https://www.sparkfun.com/products/8449"&gt;Vibration Motor&lt;/a&gt; (ROB-08449)
-&lt;br&gt;Physical dimension and wire connections for this powerful vibration motor. Motor has a self adhesive backing.&lt;/li&gt;&lt;/ul&gt;</description>
+<deviceset name="VIBRATION_MOTOR">
 <gates>
-<gate name="G$1" symbol="MOTOR" x="0" y="0"/>
+<gate name="G$1" symbol="VIBRATION_MOTOR" x="0" y="0"/>
 </gates>
 <devices>
-<device name="10MM" package="VIBE-MOTOR-10MM">
+<device name="" package="VIBRATION_MOTOR">
 <connects>
 <connect gate="G$1" pin="+" pad="+"/>
 <connect gate="G$1" pin="-" pad="-"/>
 </connects>
-<package3dinstances>
-<package3dinstance package3d_urn="urn:adsk.eagle:package:38555/1"/>
-</package3dinstances>
 <technologies>
-<technology name="">
-<attribute name="PROD_ID" value="COMP-08572"/>
-<attribute name="SF_SKU" value="ROB-08449"/>
-</technology>
+<technology name=""/>
 </technologies>
 </device>
 </devices>
@@ -1480,7 +1441,7 @@ MOTOR</description>
 <part name="R2" library="SparkFun-Resistors" library_urn="urn:adsk.eagle:library:532" deviceset="1KOHM" device="-HORIZ-1/4W-1%" package3d_urn="urn:adsk.eagle:package:39658/1" value="47R"/>
 <part name="BF1" library="my_library" deviceset="ADA_BLUEFRUIT_M0" device=""/>
 <part name="BNO1" library="my_library" deviceset="ADA_BNO055" device=""/>
-<part name="M1" library="SparkFun-Electromechanical" library_urn="urn:adsk.eagle:library:516" deviceset="MOTOR" device="10MM" package3d_urn="urn:adsk.eagle:package:38555/1"/>
+<part name="U$1" library="my_library" deviceset="VIBRATION_MOTOR" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -1488,8 +1449,8 @@ MOTOR</description>
 </plain>
 <instances>
 <instance part="Q1" gate="G$1" x="43.18" y="35.56" smashed="yes" rot="MR90">
-<attribute name="NAME" x="43.18" y="38.1" size="1.778" layer="95" font="vector" rot="MR90"/>
-<attribute name="VALUE" x="40.894" y="38.1" size="1.778" layer="96" font="vector" rot="MR90"/>
+<attribute name="NAME" x="44.196" y="34.29" size="1.778" layer="95" font="vector" rot="MR180"/>
+<attribute name="VALUE" x="54.356" y="39.37" size="1.778" layer="96" font="vector" rot="MR0"/>
 </instance>
 <instance part="D1" gate="G$1" x="30.48" y="38.1" smashed="yes" rot="R180">
 <attribute name="NAME" x="33.02" y="36.068" size="1.778" layer="95" font="vector" rot="R180"/>
@@ -1516,8 +1477,8 @@ MOTOR</description>
 <instance part="BNO1" gate="G$1" x="124.46" y="63.5" smashed="yes">
 <attribute name="VALUE" x="142.24" y="60.96" size="1.27" layer="96"/>
 </instance>
-<instance part="M1" gate="G$1" x="30.48" y="48.26" smashed="yes" rot="R270">
-<attribute name="VALUE" x="33.02" y="53.34" size="1.778" layer="96" font="vector" rot="R180"/>
+<instance part="U$1" gate="G$1" x="30.48" y="48.26" smashed="yes" rot="R90">
+<attribute name="VALUE" x="45.72" y="53.34" size="1.778" layer="96" font="vector" rot="R180"/>
 </instance>
 </instances>
 <busses>
@@ -1543,24 +1504,26 @@ MOTOR</description>
 <segment>
 <pinref part="BF1" gate="G$1" pin="3V"/>
 <wire x1="73.66" y1="78.74" x2="68.58" y2="78.74" width="0.1524" layer="91"/>
-<wire x1="68.58" y1="78.74" x2="68.58" y2="88.9" width="0.1524" layer="91"/>
-<wire x1="68.58" y1="88.9" x2="116.84" y2="88.9" width="0.1524" layer="91"/>
-<wire x1="116.84" y1="88.9" x2="116.84" y2="53.34" width="0.1524" layer="91"/>
+<wire x1="68.58" y1="78.74" x2="68.58" y2="93.98" width="0.1524" layer="91"/>
+<wire x1="68.58" y1="93.98" x2="116.84" y2="93.98" width="0.1524" layer="91"/>
+<wire x1="116.84" y1="93.98" x2="116.84" y2="53.34" width="0.1524" layer="91"/>
 <wire x1="116.84" y1="53.34" x2="127" y2="53.34" width="0.1524" layer="91"/>
 <pinref part="BNO1" gate="G$1" pin="VIN"/>
 <wire x1="127" y1="53.34" x2="127" y2="58.42" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$4" class="0">
-<segment>
-<pinref part="BF1" gate="G$1" pin="ARF"/>
-<wire x1="73.66" y1="76.2" x2="66.04" y2="76.2" width="0.1524" layer="91"/>
-<wire x1="66.04" y1="76.2" x2="66.04" y2="91.44" width="0.1524" layer="91"/>
-<wire x1="66.04" y1="91.44" x2="119.38" y2="91.44" width="0.1524" layer="91"/>
-<wire x1="119.38" y1="91.44" x2="119.38" y2="48.26" width="0.1524" layer="91"/>
-<wire x1="119.38" y1="48.26" x2="132.08" y2="48.26" width="0.1524" layer="91"/>
-<pinref part="BNO1" gate="G$1" pin="GND"/>
-<wire x1="132.08" y1="48.26" x2="132.08" y2="58.42" width="0.1524" layer="91"/>
+<pinref part="C1" gate="G$1" pin="1"/>
+<wire x1="26.924" y1="25.654" x2="26.924" y2="25.4" width="0.1524" layer="91"/>
+<wire x1="26.924" y1="25.4" x2="22.86" y2="25.4" width="0.1524" layer="91"/>
+<wire x1="22.86" y1="25.4" x2="22.86" y2="38.1" width="0.1524" layer="91"/>
+<pinref part="D1" gate="G$1" pin="C"/>
+<wire x1="22.86" y1="38.1" x2="27.94" y2="38.1" width="0.1524" layer="91"/>
+<junction x="22.86" y="38.1"/>
+<wire x1="68.58" y1="93.98" x2="22.86" y2="93.98" width="0.1524" layer="91"/>
+<wire x1="22.86" y1="93.98" x2="22.86" y2="48.26" width="0.1524" layer="91"/>
+<junction x="68.58" y="93.98"/>
+<wire x1="22.86" y1="48.26" x2="22.86" y2="38.1" width="0.1524" layer="91"/>
+<wire x1="25.4" y1="48.26" x2="22.86" y2="48.26" width="0.1524" layer="91"/>
+<junction x="22.86" y="48.26"/>
+<pinref part="U$1" gate="G$1" pin="+"/>
 </segment>
 </net>
 <net name="N$5" class="0">
@@ -1574,16 +1537,28 @@ MOTOR</description>
 <wire x1="129.54" y1="50.8" x2="129.54" y2="58.42" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$6" class="0">
+<net name="GND" class="0">
 <segment>
 <pinref part="RGB_LED1" gate="G$1" pin="GND"/>
 <pinref part="BF1" gate="G$1" pin="GND"/>
 <wire x1="55.88" y1="73.66" x2="63.5" y2="73.66" width="0.1524" layer="91"/>
-<wire x1="63.5" y1="73.66" x2="73.66" y2="73.66" width="0.1524" layer="91"/>
+<wire x1="63.5" y1="73.66" x2="66.04" y2="73.66" width="0.1524" layer="91"/>
+<wire x1="66.04" y1="73.66" x2="68.58" y2="73.66" width="0.1524" layer="91"/>
+<wire x1="68.58" y1="73.66" x2="73.66" y2="73.66" width="0.1524" layer="91"/>
 <wire x1="63.5" y1="38.1" x2="63.5" y2="73.66" width="0.1524" layer="91"/>
 <junction x="63.5" y="73.66"/>
 <pinref part="Q1" gate="G$1" pin="C"/>
 <wire x1="48.26" y1="38.1" x2="63.5" y2="38.1" width="0.1524" layer="91"/>
+<wire x1="68.58" y1="73.66" x2="68.58" y2="66.04" width="0.1524" layer="91"/>
+<junction x="68.58" y="73.66"/>
+<label x="66.04" y="63.5" size="1.778" layer="95"/>
+<wire x1="66.04" y1="73.66" x2="66.04" y2="96.52" width="0.1524" layer="91"/>
+<wire x1="66.04" y1="96.52" x2="119.38" y2="96.52" width="0.1524" layer="91"/>
+<wire x1="119.38" y1="96.52" x2="119.38" y2="48.26" width="0.1524" layer="91"/>
+<wire x1="119.38" y1="48.26" x2="132.08" y2="48.26" width="0.1524" layer="91"/>
+<pinref part="BNO1" gate="G$1" pin="GND"/>
+<wire x1="132.08" y1="48.26" x2="132.08" y2="58.42" width="0.1524" layer="91"/>
+<junction x="66.04" y="73.66"/>
 </segment>
 </net>
 <net name="N$7" class="0">
@@ -1596,9 +1571,9 @@ MOTOR</description>
 <net name="N$8" class="0">
 <segment>
 <pinref part="R2" gate="G$1" pin="2"/>
-<wire x1="27.94" y1="88.9" x2="27.94" y2="93.98" width="0.1524" layer="91"/>
-<wire x1="27.94" y1="93.98" x2="106.68" y2="93.98" width="0.1524" layer="91"/>
-<wire x1="106.68" y1="93.98" x2="106.68" y2="53.34" width="0.1524" layer="91"/>
+<wire x1="27.94" y1="88.9" x2="27.94" y2="99.06" width="0.1524" layer="91"/>
+<wire x1="27.94" y1="99.06" x2="106.68" y2="99.06" width="0.1524" layer="91"/>
+<wire x1="106.68" y1="99.06" x2="106.68" y2="53.34" width="0.1524" layer="91"/>
 <pinref part="BF1" gate="G$1" pin="~9"/>
 <wire x1="106.68" y1="53.34" x2="101.6" y2="53.34" width="0.1524" layer="91"/>
 </segment>
@@ -1613,9 +1588,9 @@ MOTOR</description>
 <wire x1="33.02" y1="38.1" x2="38.1" y2="38.1" width="0.1524" layer="91"/>
 <wire x1="38.1" y1="25.654" x2="38.1" y2="38.1" width="0.1524" layer="91"/>
 <junction x="38.1" y="38.1"/>
-<pinref part="M1" gate="G$1" pin="+"/>
-<wire x1="35.56" y1="48.26" x2="38.1" y2="48.26" width="0.1524" layer="91"/>
 <wire x1="38.1" y1="48.26" x2="38.1" y2="38.1" width="0.1524" layer="91"/>
+<wire x1="35.56" y1="48.26" x2="38.1" y2="48.26" width="0.1524" layer="91"/>
+<pinref part="U$1" gate="G$1" pin="-"/>
 </segment>
 </net>
 <net name="N$11" class="0">
@@ -1632,20 +1607,6 @@ MOTOR</description>
 <pinref part="R1" gate="G$1" pin="1"/>
 <pinref part="Q1" gate="G$1" pin="B"/>
 <wire x1="43.18" y1="25.4" x2="43.18" y2="33.02" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$12" class="0">
-<segment>
-<pinref part="C1" gate="G$1" pin="1"/>
-<wire x1="26.924" y1="25.654" x2="26.924" y2="25.4" width="0.1524" layer="91"/>
-<wire x1="26.924" y1="25.4" x2="22.86" y2="25.4" width="0.1524" layer="91"/>
-<wire x1="22.86" y1="25.4" x2="22.86" y2="38.1" width="0.1524" layer="91"/>
-<pinref part="D1" gate="G$1" pin="C"/>
-<wire x1="22.86" y1="38.1" x2="27.94" y2="38.1" width="0.1524" layer="91"/>
-<pinref part="M1" gate="G$1" pin="-"/>
-<wire x1="25.4" y1="48.26" x2="22.86" y2="48.26" width="0.1524" layer="91"/>
-<wire x1="22.86" y1="48.26" x2="22.86" y2="38.1" width="0.1524" layer="91"/>
-<junction x="22.86" y="38.1"/>
 </segment>
 </net>
 </nets>
