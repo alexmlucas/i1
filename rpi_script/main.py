@@ -88,6 +88,7 @@ def get_yaw_characteristic(incoming_device):
     yaw = uart.find_characteristic(YAW_CHAR_UUID)
     motor = uart.find_characteristic(MOTOR_CHAR_UUID)
     return yaw
+    
 
 def main():
     print("starting")
@@ -156,7 +157,11 @@ def main():
             # Control surface should initialise automatically when in this loop.
             parameter_manager.check_incoming()
             
+            # check to see if a song has recently stopped playing
             song_player.check_song_end()
+            
+            # check for bluetooth connectivity
+            #print(bno_device)
             
             if parameter_manager.reconnect_wristband_flag == True:
                 run_main_loop_flag = False

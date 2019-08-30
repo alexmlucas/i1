@@ -28,19 +28,12 @@ class Guitar:
 		self.fs.start(driver="alsa")
 		
 		# set the file path of each soundfont
-		self.guitar_paths = ["/usr/share/sounds/sf2/acoustic_g.sf2", "/usr/share/sounds/sf2/electric_g.sf2", "/usr/share/sounds/sf2/rhodes.sf2", "/usr/share/sounds/sf2/FluidR3_GM.sf2"]
-		
-		#/usr/share/sounds/sf2/FT-EGuitarMutedClean-20161202/FT-EGuitarMutedClean-20161202.sf2
-		
-		#self.guitar_paths = {"test_1", "test_2", "test_3"}
+		self.guitar_path = "/usr/share/sounds/sf2/Guitars-Universal-V1.5.sf2"
 		
 		# load a soundfont and initialise parameters
-		self.sfid = self.fs.sfload(self.guitar_paths[3])		
+		self.sfid = self.fs.sfload(self.guitar_path)		
 		self.velocity = velocity
 		self.note_length = note_length
-
-		# the following is perhaps not needed.
-		self.fs.program_select(0, self.sfid, 0, guitar_tone_index)
 		
 		# Intialise serial port
 		self.port = '/dev/serial0'
@@ -48,10 +41,15 @@ class Guitar:
 		self.control_board = serial.Serial(self.port, self.baud_rate, timeout = 0.1)
 
 	def set_sound_font(self, sound_font_index):
-		#print("Loading: ", self.guitar_paths[sound_font_index])
-		#sfid = self.fs.sfload(self.guitar_paths[sound_font_index])
-		
-		self.fs.program_select(0, self.sfid, 0, sound_font_index+1)
+		if sound_font_index == 0:
+			# Classic Rock
+			self.fs.program_select(0, self.sfid, 1, 32)
+		elif sound_font_index == 1:
+			# Hard Rock
+			self.fs.program_select(0, self.sfid, 0, 62)
+		elif sound_font_index == 2:
+			# Acoustic
+			self.fs.program_select(0, self.sfid, 0, 3)
 		
 	def set_level(self, level):
 		self.fs.cc(0, 7, level)

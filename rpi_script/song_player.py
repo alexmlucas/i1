@@ -5,7 +5,7 @@ SONG_END = pygame.USEREVENT + 1
 
 class Song_Player:
 	def __init__(self):
-		self.song_paths = ["/media/pi/NIME2019/songs/1.wav", "/media/pi/NIME2019/songs/2.wav", "/media/pi/NIME2019/songs/3.wav", "/media/pi/NIME2019/songs/4.wav"]
+		self.song_paths = ["/media/pi/C1C3-6806/songs/1.wav", "/media/pi/C1C3-6806/songs/2.wav", "/media/pi/C1C3-6806/songs/3.wav", "/media/pi/C1C3-6806/songs/4.wav"]
 		pygame.mixer.init()
 		# A variable to track when we need to unpause rather than simply play
 		self.currently_paused = False
