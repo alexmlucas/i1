@@ -1848,10 +1848,10 @@ SparkFun BigTime Watch Kit&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;
 <wire x1="7.39" y1="2.04" x2="7.39" y2="-2.04" width="0.3048" layer="21"/>
 <text x="-0.23" y="4.85" size="1.27" layer="25">&gt;NAME</text>
 <text x="0.27" y="-6.12" size="1.27" layer="25">&gt;VALUE</text>
-<pad name="G" x="0.5" y="0" drill="1" diameter="1.6764"/>
-<pad name="B" x="2.5" y="0" drill="1" diameter="1.6764"/>
-<pad name="GND" x="4.5" y="0" drill="1" diameter="1.6764"/>
-<pad name="R" x="6.5" y="0" drill="1" diameter="1.6764"/>
+<pad name="G" x="0" y="0" drill="0.6" diameter="1.9304"/>
+<pad name="B" x="2.2" y="0" drill="0.6" diameter="1.9304"/>
+<pad name="GND" x="4.4" y="0" drill="0.6" diameter="1.9304"/>
+<pad name="R" x="6.6" y="0" drill="0.6" diameter="1.9304"/>
 </package>
 <package name="ADA_1.3_MONO_OLED">
 <pad name="DATA" x="-8.9" y="0" drill="0.6" diameter="1.9304"/>
@@ -5794,13 +5794,6 @@ CONN_06
 <wire x1="76.2" y1="12.7" x2="78.74" y2="12.7" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$24" class="0">
-<segment>
-<pinref part="R19" gate="G$1" pin="2"/>
-<pinref part="RGB_LED3" gate="G$1" pin="G"/>
-<wire x1="134.62" y1="48.26" x2="137.16" y2="48.26" width="0.1524" layer="91"/>
-</segment>
-</net>
 <net name="N$25" class="0">
 <segment>
 <pinref part="R18" gate="G$1" pin="2"/>
@@ -6023,6 +6016,14 @@ CONN_06
 <wire x1="50.8" y1="96.52" x2="50.8" y2="99.06" width="0.1524" layer="91"/>
 <pinref part="U$1" gate="G$1" pin="6"/>
 <wire x1="73.66" y1="134.62" x2="55.88" y2="134.62" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$24" class="0">
+<segment>
+<pinref part="R19" gate="G$1" pin="2"/>
+<wire x1="134.62" y1="48.26" x2="134.62" y2="43.18" width="0.1524" layer="91"/>
+<pinref part="RGB_LED3" gate="G$1" pin="B"/>
+<wire x1="134.62" y1="43.18" x2="137.16" y2="43.18" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
