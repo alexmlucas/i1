@@ -62,6 +62,7 @@ int32_t bnoMotorCharId;
 */
 /**************************************************************************/
 const int motorPin = 5;
+const int ledPin = 9;
 int current_guitar_string = 0;
 int last_guitar_string = 0;
 
@@ -83,7 +84,9 @@ void setCharValue(int32_t charId, float value, int precision=2){
 void setup(void)
 {
   pinMode(motorPin, OUTPUT);
+  pinMode(ledPin, OUTPUT);
   digitalWrite(motorPin, LOW);
+  digitalWrite(ledPin, HIGH);
   
   // while (!Serial); // required for Flora & Micro
   delay(500);
