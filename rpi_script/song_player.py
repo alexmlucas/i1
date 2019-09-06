@@ -31,6 +31,9 @@ class Song_Player:
 		
 	def set_play_state(self, play_state):
 		if play_state == 0:
+			if self.currently_paused == True:
+				pygame.mixer.music.unpause()
+				self.currently_paused = False
 			pygame.mixer.music.stop()
 		elif play_state == 1:
 			if self.currently_paused == True:
