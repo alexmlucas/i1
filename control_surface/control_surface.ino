@@ -110,12 +110,12 @@ const char red_root[] PROGMEM = "Red Root";
 const char green_root[] PROGMEM = "Green Root";
 const char blue_root[] PROGMEM = "Blue Root";
 const static char connecting[] PROGMEM = "Connecting";
-const static char to_wristband[] PROGMEM = "to wristband";
+const static char to_wristband[] PROGMEM = "to wristband,";
 const static char please_wait[] PROGMEM = "please wait...";
 const char sorry[] PROGMEM = "Sorry, I could";
 const char not_connect[] PROGMEM = "not connect to";
 const char the_wristband[] PROGMEM = "the wristband.";
-const char not_load_song[] PROGMEM = "not load the song";
+const char not_load_song[] PROGMEM = "not load the song,";
 const char check_memory[] PROGMEM = "check memory stick.";
 
 
@@ -402,19 +402,19 @@ void setup() {
   display.clearDisplay();
   display.display();
 
+  ////// display splash here....
+
+  display.setTextSize(4);
+  display.setCursor(5,11);
+  display.println("i1");
+  display.setTextSize(1);
+  display.setCursor(6,47);
+  display.println("Virtual Guitar");
+  display.display();   
+
   Serial1.begin(9600);                         // Begin serial1
   Serial.begin(9600);                          // Serial for debugging.
   delay(500);                                  // Wait for the serial stream to get going.
-
-  Serial.print("Address of main menu is: ");
-  Serial.println((int)&main_menu); 
-
-  Serial.print("Address of wristband connection menu is: ");
-  Serial.println((int)&reconnect_menu); 
-
-  Serial.print("Address of wristband failure menu is: ");
-  Serial.println((int)&connection_fail_menu); 
-
 
   bool data_received_flag = false;
   
@@ -451,12 +451,9 @@ void setup() {
 void loop() {
   
   if(splash_page_loaded){
-    Serial.println("Splash page is loaded");
     current_time_ms = millis();
 
     if((current_time_ms - time_splash_loaded_ms) > SPLASH_DISPLAY_TIME){
-      Serial.print("Splash time exceeded, setting menu to: ");
-      Serial.println((int)p_wristband_return_page);
       // This method will also set the redraw display flag.
       menu_controller.set_currently_selected_menu(p_wristband_return_page);
       splash_page_loaded = false;
@@ -772,17 +769,11 @@ void serial_parser(){
   }
     else if(incoming_byte_1 == 112){
     // Attempting to connect to wristband
-    Serial.println("attempting connection");
     p_wristband_return_page = (Menu_Page*)menu_controller.get_currently_selected_menu();       // Store a reference to the currently displayed menu.
-    Serial.print("WB return menu address stored is: ");
-    Serial.println((int)p_wristband_return_page); 
     menu_controller.set_currently_selected_menu(&reconnect_menu);                           // Switch to splash menu.
      
   } else if(incoming_byte_1 == 113){
     // Successfully connected to wristband.
-    Serial.println("connection successful");
-    Serial.print("WB return menu address recalled is: ");
-    Serial.println((int)p_wristband_return_page);
     menu_controller.set_currently_selected_menu(p_wristband_return_page);
     wristband_leds.set_flashing(false);
     wristband_leds.set_colour(RG_GREEN);
@@ -804,38 +795,13 @@ void serial_parser(){
     }
      
   } else if(incoming_byte_1 == 121){
-    Serial.println("transmitting usb midi note on message");
     // Convert ascii characters to int note value.
     int note_number = (int)((incoming_byte_2 - 48) * 10) + (int)(incoming_byte_3 - 48);
     usbMIDI.sendNoteOn(note_number, NOTE_VELOCITY, 0);
     
   }  else if(incoming_byte_1 == 122){
-    Serial.println("transmitting usb midi note off message");
     // Convert ascii characters to int note value.
     int note_number = (int)((incoming_byte_2 - 48) * 10) + (int)(incoming_byte_3 - 48);
     usbMIDI.sendNoteOff(note_number, NOTE_VELOCITY, 0);
-  }
-
-  /*switch(incoming_byte){
-      case 54:
-        // Attempting to connect to wristband
-        p_previous_menu_page = (Menu_Page*)menu_controller.get_currently_selected_menu();       // Store a reference to the currently displayed menu.
-        menu_controller.set_currently_selected_menu(&reconnect_menu);                           // Switch to splash menu.
-        //zone_leds.set_colour(BLUE);
-        break; 
-      case 55:
-        // Successfully connected to wristband.
-        menu_controller.set_currently_selected_menu(p_previous_menu_page);
-        wristband_leds.set_flashing(false);
-        wristband_leds.set_colour(RG_GREEN);
-        break;
-      case 56:
-        // Connection to wristband unsuccessful.
-        menu_controller.set_currently_selected_menu(&connection_fail_menu);
-        splash_page_loaded = true;
-        time_splash_loaded_ms = millis();
-        break;
-    }*/
-
-    
+  } 
 }
