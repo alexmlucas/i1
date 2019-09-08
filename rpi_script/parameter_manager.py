@@ -1,5 +1,6 @@
 import serial
 import csv
+from subprocess import call
 
 class Parameter_Manager:
 
@@ -246,6 +247,7 @@ class Parameter_Manager:
 				
 	def shutdown_device(self, incoming_serial):
 		print('Shutting down')
+		#call("sudo shutdown -h now", shell=True)
 		
 	def write_song_parameter(self, incoming_serial):
 		# Indicates whether or not a parameter has been found in the list.
