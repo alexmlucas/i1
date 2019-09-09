@@ -60,11 +60,11 @@ class Parameter_Manager:
 		
 		#### Set transpositions ####
 		# Red transposition
-		self.guitar.set_transposition(0, self.get_song_parameter('f'))
+		self.guitar.set_transposition(0, self.get_song_parameter('i'))
 		# Green transposition
-		self.guitar.set_transposition(1, self.get_song_parameter('g'))
+		self.guitar.set_transposition(1, self.get_song_parameter('j'))
 		# Blue transposition
-		self.guitar.set_transposition(2, self.get_song_parameter('h'))
+		self.guitar.set_transposition(2, self.get_song_parameter('k'))
 	
 	def check_incoming(self):
 		# Read data from the serial port
@@ -113,9 +113,9 @@ class Parameter_Manager:
 				self.guitar.set_zone_notes(0, self.get_song_parameter('f'))
 				self.guitar.set_zone_notes(1, self.get_song_parameter('g'))
 				self.guitar.set_zone_notes(2, self.get_song_parameter('h'))
-				self.guitar.set_transposition(0, self.get_song_parameter('f'))
-				self.guitar.set_transposition(1, self.get_song_parameter('g'))
-				self.guitar.set_transposition(2, self.get_song_parameter('h'))
+				self.guitar.set_transposition(0, self.get_song_parameter('i'))
+				self.guitar.set_transposition(1, self.get_song_parameter('j'))
+				self.guitar.set_transposition(2, self.get_song_parameter('k'))
 				
 				# Transmit the song data
 				self.song_data_requested()

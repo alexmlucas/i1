@@ -9,9 +9,8 @@ class Guitar:
 	def __init__(self, guitar_tone_index, velocity, note_length):
 		# intialise scales and chords
 		major_pentatonic_scale = [0, 2, 4, 7, 9, 12]
-		minor_pentatonic_scale = [0, 2, 3, 7, 9, 12]
+		minor_pentatonic_scale = [0, 3, 5, 7, 10, 12]
 		blues_scale = [0, 3, 5, 6, 7, 10]
-		
 		major_chord = [0, 7, 12, 16, 19, 24]
 		minor_chord = [0, 7, 12, 15, 19, 24]
 		
@@ -76,7 +75,7 @@ class Guitar:
 		
 		# get the note to play
 		note_to_play = self.zone_note_container[zone_index][string_index] + self.transposition_offset + self.transposition[zone_index]
-		
+
 		# track the note value
 		self.note_on_tracker.append(note_to_play)
 		
