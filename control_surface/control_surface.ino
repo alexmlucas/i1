@@ -112,11 +112,11 @@ const char blue_root[] PROGMEM = "Blue Root";
 const static char connecting[] PROGMEM = "Connecting";
 const static char to_wristband[] PROGMEM = "to wristband,";
 const static char please_wait[] PROGMEM = "please wait...";
-const char sorry[] PROGMEM = "Sorry, I could";
-const char not_connect[] PROGMEM = "not connect to";
+const char sorry[] PROGMEM = "Sorry, I couldn't";
+const char not_connect[] PROGMEM = "connect to";
 const char the_wristband[] PROGMEM = "the wristband.";
-const char not_load_song[] PROGMEM = "not load the song,";
-const char check_memory[] PROGMEM = "check memory stick.";
+const char not_load_song[] PROGMEM = "load song. Connect";
+const char check_memory[] PROGMEM = "USB stick & reboot.";
 
 
 //const char scale_param[] PROGMEM = "Major, Minor, Blues, Pent. Major, Pent. Minor, Major Chord, Minor Chord";
@@ -352,10 +352,10 @@ void setup() {
   master_level_menu.set_previous_menu(&mix_levels_menu);
   red_scale_menu.set_previous_menu(&red_zone_menu);
   red_root_menu.set_previous_menu(&red_zone_menu);
-  green_scale_menu.set_previous_menu(&red_zone_menu);
-  green_root_menu.set_previous_menu(&red_zone_menu);
-  blue_scale_menu.set_previous_menu(&red_zone_menu);
-  blue_root_menu.set_previous_menu(&red_zone_menu);
+  green_scale_menu.set_previous_menu(&green_zone_menu);
+  green_root_menu.set_previous_menu(&green_zone_menu);
+  blue_scale_menu.set_previous_menu(&blue_zone_menu);
+  blue_root_menu.set_previous_menu(&blue_zone_menu);
   
   // *** Configure the LEDs ***
   play_led.set_pinout(PL_LED_G);
