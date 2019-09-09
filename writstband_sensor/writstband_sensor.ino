@@ -65,6 +65,10 @@ const int motorPin = 5;
 const int ledPin = 9;
 int current_guitar_string = 0;
 int last_guitar_string = 0;
+int led_flash_time = 2000;
+int last_led_flash_time;
+int led_on_time = 20;
+bool switch_off_led = false;
 
 void setCharValue(int32_t charId, float value, int precision=2){
   // Set the specified characteristic to a floating point value.
@@ -86,7 +90,7 @@ void setup(void)
   pinMode(motorPin, OUTPUT);
   pinMode(ledPin, OUTPUT);
   digitalWrite(motorPin, LOW);
-  digitalWrite(ledPin, HIGH);
+  analogWrite(ledPin, 5);
   
   // while (!Serial); // required for Flora & Micro
   delay(500);
@@ -172,10 +176,31 @@ void setup(void)
   
   bno.setExtCrystalUse(true);
   setCharValue(bnoMotorCharId, current_guitar_string);
+
+  last_led_flash_time = millis();
 }
 
 void loop(void) 
 {
+  /*int current_time = millis();
+
+  // flash the led
+  if(current_time - last_led_flash_time > led_flash_time){
+    analogWrite(ledPin, 64);
+    last_led_flash_time = current_time;
+    switch_off_led = true;
+  }
+
+  if(switch_off_led == true){
+    if(current_time - last_led_flash_time > led_on_time){
+      Serial.println("setting low");
+      analogWrite(ledPin, 0);
+      switch_off_led = false;
+    }
+  }*/
+
+
+  
   /* Get a new sensor event */ 
   sensors_event_t event; 
   bno.getEvent(&event);
