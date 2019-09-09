@@ -147,10 +147,6 @@ def main():
         # Final initialisations before main loop
         parameter_manager.set_song_player(song_player)
         parameter_manager.set_guitar(guitar)
-        guitar.set_zone_notes(0, 0)
-        guitar.set_zone_notes(0, 1)
-        guitar.set_zone_notes(0, 2)
-        guitar.set_zone_notes(0, 3)
             
         while run_main_loop_flag == True:
             # This is the main loop
